@@ -1,55 +1,65 @@
-Table Keilaaja {
-    keilaaja_id SERIAL [primary key]
-    etunimi VARCHAR(50)
-    sukunimi VARCHAR(50)
-    syntymapaiva DATE
-    aktiivijasen BOOLEAN
-    admin BOOLEAN
+Table keilaaja {
+  keilaaja_id SERIAL [pk]
+  etunimi VARCHAR(50)
+  sukunimi VARCHAR(50)
+  syntymapaiva DATE
+  aktiivijasen BOOLEAN
+  admin BOOLEAN
+  salasanaHash VARCHAR(60)
 }
 
-Table Keilahalli {
-    keilahalli_id SERIAL [primary key]
-    nimi VARCHAR(100)
-    kaupunki VARCHAR(50)
-    valtio VARCHAR(50)
+Table keilahalli {
+  keilahalli_id SERIAL [pk]
+  nimi VARCHAR(100)
+  kaupunki VARCHAR(50)
+  valtio VARCHAR(50)
 }
 
-Table Kausi {
-    kausi_id SERIAL [primary key]
-    nimi VARCHAR(20)
-    gp_maara INT
-    suunniteltu_gp_maara INT
-    osallistujamaara INT
+Table kausi {
+  kausi_id SERIAL [pk]
+  nimi VARCHAR(20)
+  gpMaara INT
+  suunniteltuGpMaara INT
+  osallistujamaara INT
 }
 
-Table GP {
-    gp_id SERIAL [primary key]
-    kausi_id INT [ref: > Kausi.kausi_id]
-    keilahalli_id INT [ref: > Keilahalli.keilahalli_id]
-    pvm DATE
-    jarjestysnumero INT
+Table gp {
+  gp_id SERIAL [pk]
+  kausi_id INT [ref: > kausi.kausi_id]
+  keilahalli_id INT [ref: > keilahalli.keilahalli_id]
+  pvm DATE
+  jarjestysnumero INT
 }
 
-Table Tulos {
-    tulos_id SERIAL [primary key]
-    gp_id INT [ref: > GP.gp_id]
-    keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
-    sarja1 INT
-    sarja2 INT
-    osallistui BOOLEAN
+Table tulos {
+  tulos_id SERIAL [pk]
+  gp_id INT [ref: > gp.gp_id]
+  keilaaja_id INT [ref: > keilaaja.keilaaja_id]
+  sarja1 INT
+  sarja2 INT
+  osallistui BOOLEAN
 }
 
-Table KultainenGP {
-    kultainen_gp_id SERIAL [primary key]
-    gp_id INT [ref: > GP.gp_id]
-    keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
-    lisapisteet INT // +2, +1, 0, -1 tai -2
+Table kultainengp {
+  kultainengp_id SERIAL [pk]
+  gp_id INT [ref: > gp.gp_id]
+  keilaaja_id INT [ref: > keilaaja.keilaaja_id]
 }
 
-Table Kuppiksen_Kunkku {
-    kuppiksen_kunkku_id SERIAL [primary key]
-    gp_id INT [ref: - GP.gp_id]  // Viittaa GP-tauluun
-    voittaja_keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
-    haastaja_keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
-    lisapisteet INT
+Table kuppiksenkunkku {
+  kuppiksenkunkku_id SERIAL [pk]
+  gp_id INT [ref: > gp.gp_id, unique]
+  voittaja_id INT [ref: > keilaaja.keilaaja_id]
+  haastaja_id INT [ref: > keilaaja.keilaaja_id]
+}
+
+Table keilaaja_kausi {
+  id SERIAL [pk]
+  keilaaja_id INT [ref: > keilaaja.keilaaja_id]
+  kausi_id INT [ref: > kausi.kausi_id]
+  parasSarja INT
+  huonoinSarja INT
+  kaudenPisteet INT
+  voittoja INT
+  osallistumisia INT
 }

@@ -40,6 +40,9 @@ public class Kausi {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "kausi")
     private List<GP> gpLista;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "kausi")
+    private List<KeilaajaKausi> keilaajaTilastot;
+
     public Kausi() {
     }
 
@@ -97,6 +100,14 @@ public class Kausi {
 
     public void setGpLista(List<GP> gpLista) {
         this.gpLista = gpLista;
+    }
+
+    public List<KeilaajaKausi> getKeilaajaTilastot() {
+        return keilaajaTilastot;
+    }
+
+    public void setKeilaajaTilastot(List<KeilaajaKausi> keilaajaTilastot) {
+        this.keilaajaTilastot = keilaajaTilastot;
     }
 
     @Override

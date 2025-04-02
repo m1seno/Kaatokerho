@@ -59,6 +59,9 @@ public class Keilaaja {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "haastaja")
     private List<KuppiksenKunkku> haastajat;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
+    private List<KeilaajaKausi> kausiTilastot;
+
     public Keilaaja() {
     }
 
@@ -160,6 +163,14 @@ public class Keilaaja {
 
     public void setHaastajat(List<KuppiksenKunkku> haastajat) {
         this.haastajat = haastajat;
+    }
+
+    public List<KeilaajaKausi> getKausiTilastot() {
+        return kausiTilastot;
+    }
+
+    public void setKausiTilastot(List<KeilaajaKausi> kausiTilastot) {
+        this.kausiTilastot = kausiTilastot;
     }
 
     @Override
