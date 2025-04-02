@@ -1,0 +1,55 @@
+Table Keilaaja {
+    keilaaja_id SERIAL [primary key]
+    etunimi VARCHAR(50)
+    sukunimi VARCHAR(50)
+    syntymapaiva DATE
+    aktiivijasen BOOLEAN
+    admin BOOLEAN
+}
+
+Table Keilahalli {
+    keilahalli_id SERIAL [primary key]
+    nimi VARCHAR(100)
+    kaupunki VARCHAR(50)
+    valtio VARCHAR(50)
+}
+
+Table Kausi {
+    kausi_id SERIAL [primary key]
+    nimi VARCHAR(20)
+    gp_maara INT
+    suunniteltu_gp_maara INT
+    osallistujamaara INT
+}
+
+Table GP {
+    gp_id SERIAL [primary key]
+    kausi_id INT [ref: > Kausi.kausi_id]
+    keilahalli_id INT [ref: > Keilahalli.keilahalli_id]
+    pvm DATE
+    jarjestysnumero INT
+}
+
+Table Tulos {
+    tulos_id SERIAL [primary key]
+    gp_id INT [ref: > GP.gp_id]
+    keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
+    sarja1 INT
+    sarja2 INT
+    osallistui BOOLEAN
+}
+
+Table KultainenGP {
+    kultainen_gp_id SERIAL [primary key]
+    gp_id INT [ref: > GP.gp_id]
+    keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
+    lisapisteet INT // +2, +1, 0, -1 tai -2
+}
+
+Table Kuppiksen_Kunkku {
+    kuppiksen_kunkku_id SERIAL [primary key]
+    gp_id INT [ref: - GP.gp_id]  // Viittaa GP-tauluun
+    voittaja_keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
+    haastaja_keilaaja_id INT [ref: > Keilaaja.keilaaja_id]
+    lisapisteet INT
+}
