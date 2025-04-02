@@ -44,6 +44,9 @@ public class Keilaaja {
     @Column(nullable = false)
     private Boolean admin;
 
+    @Column(length = 60)
+    private String salasanaHash;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
     private List<Tulos> tulokset;
 
@@ -59,12 +62,14 @@ public class Keilaaja {
     public Keilaaja() {
     }
 
-    public Keilaaja(Boolean admin, Boolean aktiivijasen, String etunimi, Long keilaajaId, String sukunimi,
+    public Keilaaja(Boolean admin, Boolean aktiivijasen, String etunimi, Long keilaajaId, String salasanaHash,
+            String sukunimi,
             Date syntymapaiva) {
         this.admin = admin;
         this.aktiivijasen = aktiivijasen;
         this.etunimi = etunimi;
         this.keilaajaId = keilaajaId;
+        this.salasanaHash = salasanaHash;
         this.sukunimi = sukunimi;
         this.syntymapaiva = syntymapaiva;
     }
@@ -117,6 +122,14 @@ public class Keilaaja {
         this.admin = admin;
     }
 
+    public String getSalasanaHash() {
+        return salasanaHash;
+    }
+
+    public void setSalasanaHash(String salasanaHash) {
+        this.salasanaHash = salasanaHash;
+    }
+
     public List<Tulos> getTulokset() {
         return tulokset;
     }
@@ -152,6 +165,8 @@ public class Keilaaja {
     @Override
     public String toString() {
         return "Keilaaja [keilaajaId=" + keilaajaId + ", etunimi=" + etunimi + ", sukunimi=" + sukunimi
-                + ", syntymapaiva=" + syntymapaiva + ", aktiivijasen=" + aktiivijasen + ", admin=" + admin + "]";
+                + ", syntymapaiva=" + syntymapaiva + ", aktiivijasen=" + aktiivijasen + ", admin=" + admin
+                + ", salasanaHash=" + salasanaHash + "]";
     }
+
 }
