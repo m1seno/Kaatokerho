@@ -44,6 +44,7 @@ Table kultainengp {
   kultainengp_id SERIAL [pk]
   gp_id INT [ref: > gp.gp_id]
   keilaaja_id INT [ref: > keilaaja.keilaaja_id]
+  lisapisteet INT
 }
 
 Table kuppiksenkunkku {
@@ -51,6 +52,7 @@ Table kuppiksenkunkku {
   gp_id INT [ref: > gp.gp_id, unique]
   voittaja_id INT [ref: > keilaaja.keilaaja_id]
   haastaja_id INT [ref: > keilaaja.keilaaja_id]
+  lisapisteet INT
 }
 
 Table keilaaja_kausi {
