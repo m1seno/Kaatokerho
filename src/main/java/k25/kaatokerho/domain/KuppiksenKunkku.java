@@ -33,7 +33,7 @@ public class KuppiksenKunkku {
 
     @NotNull(message = "Lisäpisteet ei voi olla null")
     @Column(nullable = false)
-    private int lisapisteet;
+    private Integer lisapisteet;
 
     public KuppiksenKunkku() {
     }

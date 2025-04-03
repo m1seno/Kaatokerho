@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -44,6 +45,12 @@ public class GP {
 
     @OneToOne(mappedBy = "gp", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<KuppiksenKunkku> kuppiksenKunkut;
+
+    @OneToMany(mappedBy = "gp", cascade = CascadeType.ALL)
+    private List<Tulos> tulokset;
+
+    @OneToMany(mappedBy = "gp", cascade = CascadeType.ALL)
+    private List<KultainenGp> kultaisetGp;
 
     public GP() {
     }
@@ -102,6 +109,22 @@ public class GP {
 
     public void setKuppiksenKunkut(List<KuppiksenKunkku> kuppiksenKunkut) {
         this.kuppiksenKunkut = kuppiksenKunkut;
+    }
+
+    public List<Tulos> getTulokset() {
+        return tulokset;
+    }
+
+    public void setTulokset(List<Tulos> tulokset) {
+        this.tulokset = tulokset;
+    }
+
+    public List<KultainenGp> getKultaisetGp() {
+        return kultaisetGp;
+    }
+
+    public void setKultaisetGp(List<KultainenGp> kultaisetGp) {
+        this.kultaisetGp = kultaisetGp;
     }
 
     @Override
