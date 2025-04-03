@@ -18,7 +18,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "GP")
+@Table(name = "gp")
 public class GP {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

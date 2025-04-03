@@ -12,11 +12,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "Kuppiksen_Kunkku")
+@Table(name = "kuppiksenkunkku")
 public class KuppiksenKunkku {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "kuppiksen_kunkku_id")
+    @Column(name = "kuppiksenkunkku_id")
     private Long kuppiksenKunkkuId;
 
     @OneToOne
@@ -24,11 +24,11 @@ public class KuppiksenKunkku {
     private GP gp;
 
     @ManyToOne
-    @JoinColumn(name = "voittaja_keilaaja_id", nullable = false)
+    @JoinColumn(name = "voittaja_id", nullable = false)
     private Keilaaja voittaja;
 
     @ManyToOne
-    @JoinColumn(name = "haastaja_keilaaja_id", nullable = false)
+    @JoinColumn(name = "haastaja_id", nullable = false)
     private Keilaaja haastaja;
 
     @NotNull(message = "Lisäpisteet ei voi olla null")

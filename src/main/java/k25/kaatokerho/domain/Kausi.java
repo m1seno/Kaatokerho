@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "Kausi")
+@Table(name = "kausi")
 public class Kausi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,11 +26,11 @@ public class Kausi {
     private String nimi;
 
     @NotNull(message = "Kauden GP määrä ei voi olla null")
-    @Column(name = "gp_maara", nullable = false)
+    @Column(nullable = false)
     private Integer gpMaara;
 
     @NotNull(message = "Kauden suunniteltu GP määrä ei voi olla null")
-    @Column(name = "suunniteltu_gp_maara", nullable = false)
+    @Column(nullable = false)
     private Integer suunniteltuGpMaara;
 
     @NotNull(message = "Kauden osallistujamäärä ei voi olla null")

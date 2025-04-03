@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 
 @Entity
-@Table(name = "Keilahalli")
+@Table(name = "keilahalli")
 public class Keilahalli {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,11 +11,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "KultainenGp")
+@Table(name = "kultainengp")
 public class KultainenGp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "kultainen_gp_id")
+    @Column(name = "kultainengp_id")
     private Long kultainenGpId;
 
     @ManyToOne
