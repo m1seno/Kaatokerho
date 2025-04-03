@@ -1,6 +1,6 @@
 package k25.kaatokerho.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -36,7 +36,7 @@ public class GP {
     @NotNull(message = "Päivämäärä ei voi olla null")
     @Temporal(TemporalType.DATE)
     @Column(nullable = false)
-    private Date pvm;
+    private LocalDate pvm;
 
     @NotNull(message = "Järjestysnumero ei voi olla null")
     @Column(nullable = false)
@@ -48,18 +48,12 @@ public class GP {
     public GP() {
     }
 
-    public GP(Long gpId, Integer jarjestysnumero, Kausi kausi, Keilahalli keilahalli, Date pvm) {
+    public GP(Long gpId, Integer jarjestysnumero, Kausi kausi, Keilahalli keilahalli, LocalDate pvm) {
         this.gpId = gpId;
         this.jarjestysnumero = jarjestysnumero;
         this.kausi = kausi;
         this.keilahalli = keilahalli;
         this.pvm = pvm;
-    }
-
-    @Override
-    public String toString() {
-        return "Gp [gpId=" + gpId + ", kausi=" + kausi + ", keilahalli=" + keilahalli + ", pvm=" + pvm
-                + ", jarjestysnumero=" + jarjestysnumero + "]";
     }
 
     public Long getGpId() {
@@ -86,11 +80,11 @@ public class GP {
         this.keilahalli = keilahalli;
     }
 
-    public Date getPvm() {
+    public LocalDate getPvm() {
         return pvm;
     }
 
-    public void setPvm(Date pvm) {
+    public void setPvm(LocalDate pvm) {
         this.pvm = pvm;
     }
 
@@ -108,6 +102,12 @@ public class GP {
 
     public void setKuppiksenKunkut(List<KuppiksenKunkku> kuppiksenKunkut) {
         this.kuppiksenKunkut = kuppiksenKunkut;
+    }
+
+    @Override
+    public String toString() {
+        return "Gp [gpId=" + gpId + ", kausi=" + kausi + ", keilahalli=" + keilahalli + ", pvm=" + pvm
+                + ", jarjestysnumero=" + jarjestysnumero + "]";
     }
 
 }

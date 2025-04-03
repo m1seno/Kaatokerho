@@ -1,6 +1,6 @@
 package k25.kaatokerho.domain;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -34,7 +34,7 @@ public class Keilaaja {
 
     @NotNull(message = "Syntymäpäivä ei voi olla null")
     @Temporal(TemporalType.DATE)
-    private Date syntymapaiva;
+    private LocalDate syntymapaiva;
 
     @NotNull
     @Column(nullable = false)
@@ -67,7 +67,7 @@ public class Keilaaja {
 
     public Keilaaja(Boolean admin, Boolean aktiivijasen, String etunimi, Long keilaajaId, String salasanaHash,
             String sukunimi,
-            Date syntymapaiva) {
+            LocalDate syntymapaiva) {
         this.admin = admin;
         this.aktiivijasen = aktiivijasen;
         this.etunimi = etunimi;
@@ -101,11 +101,11 @@ public class Keilaaja {
         this.sukunimi = sukunimi;
     }
 
-    public Date getSyntymapaiva() {
+    public LocalDate getSyntymapaiva() {
         return syntymapaiva;
     }
 
-    public void setSyntymapaiva(Date syntymapaiva) {
+    public void setSyntymapaiva(LocalDate syntymapaiva) {
         this.syntymapaiva = syntymapaiva;
     }
 
