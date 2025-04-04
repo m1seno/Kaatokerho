@@ -27,9 +27,12 @@ public class KultainenGpService {
         this.keilaajaKausiRepository = keilaajaKausiRepository;
     }
 
-    public void kultainenPistelasku(boolean onKultainenGp, int sarja1, int sarja2, Keilaaja keilaaja, Kausi kausi, GP gp) {
-        if (!onKultainenGp)
-            return;
+    public void kultainenPistelasku(boolean onKultainenGp, Integer sarja1, Integer sarja2, Keilaaja keilaaja, Kausi kausi,
+            GP gp) {
+        if (!onKultainenGp) return;
+
+        // Jos sarjat ovat null, keilaaja ei osallistunut → ei pistelaskentaa
+        if (sarja1 == null || sarja2 == null) return;
 
         int paras = Math.max(sarja1, sarja2);
         int huonoin = Math.min(sarja1, sarja2);
