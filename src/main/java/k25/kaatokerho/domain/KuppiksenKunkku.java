@@ -33,12 +33,12 @@ public class KuppiksenKunkku {
 
     @NotNull(message = "Lisäpisteet ei voi olla null")
     @Column(nullable = false)
-    private Integer lisapisteet;
+    private Double lisapisteet;
 
     public KuppiksenKunkku() {
     }
 
-    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja voittaja, Keilaaja haastaja, int lisapisteet) {
+    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja voittaja, Keilaaja haastaja, Double lisapisteet) {
         this.kuppiksenKunkkuId = kuppiksenKunkkuId;
         this.gp = gp;
         this.voittaja = voittaja;
@@ -78,11 +78,11 @@ public class KuppiksenKunkku {
         this.haastaja = haastaja;
     }
 
-    public int getLisapisteet() {
+    public Double getLisapisteet() {
         return lisapisteet;
     }
 
-    public void setLisapisteet(int lisapisteet) {
+    public void setLisapisteet(Double lisapisteet) {
         this.lisapisteet = lisapisteet;
     }
 

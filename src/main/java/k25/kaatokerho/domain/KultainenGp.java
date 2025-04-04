@@ -28,12 +28,12 @@ public class KultainenGp {
 
     @NotNull(message = "Lisäpisteet ei voi olla null")
     @Column(nullable = false)
-    private Integer lisapisteet;
+    private Double lisapisteet;
 
     public KultainenGp() {
     }
 
-    public KultainenGp(GP gp, Keilaaja keilaaja, Long kultainenGpId, Integer lisapisteet) {
+    public KultainenGp(GP gp, Keilaaja keilaaja, Long kultainenGpId, Double lisapisteet) {
         this.gp = gp;
         this.keilaaja = keilaaja;
         this.kultainenGpId = kultainenGpId;
@@ -64,11 +64,11 @@ public class KultainenGp {
         this.keilaaja = keilaaja;
     }
 
-    public Integer getLisapisteet() {
+    public Double getLisapisteet() {
         return lisapisteet;
     }
 
-    public void setLisapisteet(Integer lisapisteet) {
+    public void setLisapisteet(Double lisapisteet) {
         this.lisapisteet = lisapisteet;
     }
 

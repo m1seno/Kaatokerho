@@ -27,17 +27,13 @@ public class KeilaajaKausi {
     @JoinColumn(name = "kausi_id", nullable = false)
     private Kausi kausi;
 
-    @NotNull(message = "parasSarja ei voi olla null")
-    @Column(nullable = false)
     private Integer parasSarja;
 
-    @NotNull(message = "huonoinSarja ei voi olla null")
-    @Column(nullable = false)
     private Integer huonoinSarja;
 
     @NotNull(message = "kaudenPisteet ei voi olla null")
     @Column(nullable = false)
-    private Integer kaudenPisteet;
+    private Double kaudenPisteet;
 
     @NotNull(message = "Voitot ei voi olla null")
     @Column(nullable = false)
@@ -51,7 +47,7 @@ public class KeilaajaKausi {
     }
 
     public KeilaajaKausi(Long keilaajaKausiId, Keilaaja keilaaja, Kausi kausi, Integer parasSarja, Integer huonoinSarja,
-            Integer kaudenPisteet, Integer voittoja, Integer osallistumisia) {
+            Double kaudenPisteet, Integer voittoja, Integer osallistumisia) {
         this.keilaajaKausiId = keilaajaKausiId;
         this.keilaaja = keilaaja;
         this.kausi = kausi;
@@ -102,11 +98,11 @@ public class KeilaajaKausi {
         this.huonoinSarja = huonoinSarja;
     }
 
-    public Integer getKaudenPisteet() {
+    public Double getKaudenPisteet() {
         return kaudenPisteet;
     }
 
-    public void setKaudenPisteet(Integer kaudenPisteet) {
+    public void setKaudenPisteet(Double kaudenPisteet) {
         this.kaudenPisteet = kaudenPisteet;
     }
 
