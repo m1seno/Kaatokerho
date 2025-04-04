@@ -24,8 +24,8 @@ public class KuppiksenKunkku {
     private GP gp;
 
     @ManyToOne
-    @JoinColumn(name = "voittaja_id", nullable = false)
-    private Keilaaja voittaja;
+    @JoinColumn(name = "hallitseva_id", nullable = false)
+    private Keilaaja hallitseva;
 
     @ManyToOne
     @JoinColumn(name = "haastaja_id", nullable = false)
@@ -38,10 +38,10 @@ public class KuppiksenKunkku {
     public KuppiksenKunkku() {
     }
 
-    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja voittaja, Keilaaja haastaja, Double lisapisteet) {
+    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja hallitseva, Keilaaja haastaja, Double lisapisteet) {
         this.kuppiksenKunkkuId = kuppiksenKunkkuId;
         this.gp = gp;
-        this.voittaja = voittaja;
+        this.hallitseva = hallitseva;
         this.haastaja = haastaja;
         this.lisapisteet = lisapisteet;
     }
@@ -62,12 +62,12 @@ public class KuppiksenKunkku {
         this.gp = gp;
     }
 
-    public Keilaaja getVoittaja() {
-        return voittaja;
+    public Keilaaja getHallitseva() {
+        return hallitseva;
     }
 
-    public void setVoittaja(Keilaaja voittaja) {
-        this.voittaja = voittaja;
+    public void setHallitseva(Keilaaja hallitseva) {
+        this.hallitseva = hallitseva;
     }
 
     public Keilaaja getHaastaja() {
@@ -88,7 +88,7 @@ public class KuppiksenKunkku {
 
     @Override
     public String toString() {
-        return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", voittaja=" + voittaja
+        return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", hallitseva=" + hallitseva
                 + ", haastaja=" + haastaja + ", lisapisteet=" + lisapisteet + "]";
     }
 }

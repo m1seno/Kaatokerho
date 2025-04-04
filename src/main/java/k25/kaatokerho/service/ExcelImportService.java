@@ -22,6 +22,7 @@ import k25.kaatokerho.domain.Keilahalli;
 import k25.kaatokerho.domain.KeilahalliRepository;
 import k25.kaatokerho.domain.KultainenGp;
 import k25.kaatokerho.domain.KuppiksenKunkku;
+import k25.kaatokerho.domain.KuppiksenKunkkuRepository;
 import k25.kaatokerho.domain.Tulos;
 import k25.kaatokerho.domain.TulosRepository;
 
@@ -55,6 +56,12 @@ public class ExcelImportService {
 
     @Autowired
     private KultainenGpService kultainenGpService;
+
+    @Autowired
+    private KuppiksenKunkkuService kuppiksenKunkkuService;
+
+    @Autowired
+    private KuppiksenKunkkuRepository kuppiksenKunkkuRepository;
 
     // Luetaan tiedot excelistä vain, jos tietokanta on tyhjä
     public boolean isImportNeeded() {
@@ -139,10 +146,14 @@ public class ExcelImportService {
                 if (kultainenString == 1) {
                     onKultainenGp = true;
                 }
-                kultainenGpService.kultainenPistelasku(onKultainenGp, sarja1, sarja2, keilaajaOptional.get(), kausiOptional.get(), gp);
+                kultainenGpService.kultainenPistelasku(onKultainenGp, sarja1, sarja2, keilaajaOptional.get(),
+                        kausiOptional.get(), gp);
 
                 // KuppiksenKunkun tiedot
+                int edellinenJarjestys = gp.getJarjestysnumero() - 1;
+                Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository.findByGp_Jarjestysnumero(edellinenJarjestys);
 
+                kuppiksenKunkkuService.kasitteleKuppiksenKunkku(gp, edellinenOpt.orElse(null));
             }
 
         } catch (Exception e) {

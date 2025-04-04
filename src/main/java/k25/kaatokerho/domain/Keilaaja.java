@@ -53,8 +53,8 @@ public class Keilaaja {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
     private List<KultainenGp> kultaisetGp;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "voittaja")
-    private List<KuppiksenKunkku> voittajat;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hallitseva")
+    private List<KuppiksenKunkku> hallitsevat;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "haastaja")
     private List<KuppiksenKunkku> haastajat;
@@ -149,12 +149,12 @@ public class Keilaaja {
         this.kultaisetGp = kultaisetGp;
     }
 
-    public List<KuppiksenKunkku> getVoittajat() {
-        return voittajat;
+    public List<KuppiksenKunkku> getHallitsevat() {
+        return hallitsevat;
     }
 
-    public void setVoittajat(List<KuppiksenKunkku> voittajat) {
-        this.voittajat = voittajat;
+    public void setHallitsevat(List<KuppiksenKunkku> hallitsevat) {
+        this.hallitsevat = hallitsevat;
     }
 
     public List<KuppiksenKunkku> getHaastajat() {

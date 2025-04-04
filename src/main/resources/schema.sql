@@ -44,15 +44,14 @@ CREATE TABLE kultainengp (
     kultainengp_id SERIAL PRIMARY KEY,
     gp_id INT NOT NULL REFERENCES gp(gp_id),
     keilaaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    lisapisteet INT NOT NULL
+    lisapisteet DOUBLE PRECISION NOT NULL
 );
 
 CREATE TABLE kuppiksenkunkku (
     kuppiksenkunkku_id SERIAL PRIMARY KEY,
     gp_id INT NOT NULL UNIQUE REFERENCES gp(gp_id),
-    voittaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    haastaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    lisapisteet INT NOT NULL
+    hallitseva_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
+    haastaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id)
 );
 
 CREATE TABLE keilaaja_kausi (
@@ -61,7 +60,7 @@ CREATE TABLE keilaaja_kausi (
     kausi_id INT NOT NULL REFERENCES kausi(kausi_id),
     parasSarja INT,
     huonoinSarja INT,
-    kaudenPisteet INT,
+    kaudenPisteet DOUBLE PRECISION,
     voittoja INT,
     osallistumisia INT
 );
