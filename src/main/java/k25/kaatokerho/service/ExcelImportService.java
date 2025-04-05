@@ -98,10 +98,10 @@ public class ExcelImportService {
                 if (edellinenPvm != null && !pvm.equals(edellinenPvm)) {
                     // Käsitellään KuppiksenKunkku ja KeilaajaKausi
                     Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
-                            .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
+                            .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero());
                     nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
                     kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));
-                    keilaajaKausiService.kasitteleKeilaajaKausi(nykyinenGp);
+                    keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
 
                     // Nollataan tilapäinen tuloslista
                     nykyisetTulokset.clear();
@@ -161,7 +161,7 @@ public class ExcelImportService {
                 Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                         .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
                 kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));
-                keilaajaKausiService.kasitteleKeilaajaKausi(nykyinenGp);
+                keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);;
             }
 
         } catch (Exception e) {
