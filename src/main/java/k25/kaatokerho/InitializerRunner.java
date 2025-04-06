@@ -36,6 +36,7 @@ public class InitializerRunner implements CommandLineRunner {
             }
 
             ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
+                    new ClassPathResource("drop-all.sql"),
                     new ClassPathResource("schema.sql"),
                     new ClassPathResource("data.sql")
             );
