@@ -1,5 +1,5 @@
 -- KEILAAJAT
-INSERT INTO keilaaja (etunimi, sukunimi, syntymapaiva, aktiivijasen, admin, salasanaHash) VALUES
+INSERT INTO keilaaja (etunimi, sukunimi, syntymapaiva, aktiivijasen, admin, salasana_hash) VALUES
 ('Jami', 'Kallio', '1992-04-23', true, false, null),
 ('Miika', 'Nordblad', '1991-05-27', true, true, '$2a$12$7yGZ64HFqJ7Hi5I.INkOpeLhYuQklnmUnf5gOHLHlS2FZx1f1Ldye'),
 ('Henri', 'Verho', '1988-07-16', true, true, '$2a$12$qt2A5YMC4csifjmykEMBR.xxMS9AZKoTOajCrJQkVR1Tu8zy6DwYa'),
@@ -27,5 +27,5 @@ INSERT INTO keilahalli (nimi, kaupunki, valtio) VALUES
 ('Aninkaisten Keilahalli', 'Turku', 'Suomi');
 
 -- KAUSI
-INSERT INTO kausi (nimi, gpMaara, suunniteltuGpMaara, osallistujamaara) VALUES
+INSERT INTO kausi (nimi, gp_maara, suunniteltu_gp_maara, osallistujamaara) VALUES
 ('2024-2025', 10, 13, 18);
