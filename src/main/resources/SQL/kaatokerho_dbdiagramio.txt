@@ -5,7 +5,7 @@ Table keilaaja {
   syntymapaiva DATE
   aktiivijasen BOOLEAN
   admin BOOLEAN
-  salasanaHash VARCHAR(60)
+  salasana_hash VARCHAR(60)
 }
 
 Table keilahalli {
@@ -18,8 +18,8 @@ Table keilahalli {
 Table kausi {
   kausi_id SERIAL [pk]
   nimi VARCHAR(20)
-  gpMaara INT
-  suunniteltuGpMaara INT
+  gp_maara INT
+  suunniteltu_gp_maara INT
   osallistujamaara INT
 }
 
@@ -58,9 +58,9 @@ Table keilaaja_kausi {
   id SERIAL [pk]
   keilaaja_id INT [ref: > keilaaja.keilaaja_id]
   kausi_id INT [ref: > kausi.kausi_id]
-  parasSarja INT
-  huonoinSarja INT
-  kaudenPisteet Double
+  paras_sarja INT
+  huonoin_sarja INT
+  kauden_pisteet Double
   voittoja INT
   osallistumisia INT
 }
