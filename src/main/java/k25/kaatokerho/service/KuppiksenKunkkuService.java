@@ -25,7 +25,7 @@ public class KuppiksenKunkkuService {
 
     // Tämän metodin logiikka meni lopulta niin monimutkaiseksi, että tehty lähes
     // kokonaan yhteistyössä chatGPT:n kanssa
-    public void kasitteleKuppiksenKunkku(GP gp, KuppiksenKunkku edellinen) {
+    public void kasitteleKuppiksenKunkku(GP gp, KuppiksenKunkku edellinen, boolean vyoUnohtui) {
         // Haetaan vain GP:hen osallistuneet tulokset
         List<Tulos> tulokset = gp.getTulokset().stream()
                 .filter(Tulos::getOsallistui)
@@ -40,14 +40,12 @@ public class KuppiksenKunkkuService {
 
             // Ensimmäisessä kisassa kaikki oletetaan paikalla ja vyö mukana
             lisaaKaksintaistelu(gp, v.voittaja(), v.haastaja(),
-                    false, true, true);
+                    false);
             return;
         }
 
         // Aiempi hallitseva keilaaja
         Keilaaja edellinenVoittaja = edellinen.getHallitseva();
-        // Tieto unohtuiko vyö kotiin
-        boolean vyoUnohtui = edellinen.getVyoUnohtui();
 
         // Muodostetaan haastajalista (paras–huonoin sarjat)
         List<Keilaaja> haastajat = muodostaHaastajalista(tulokset, edellinenVoittaja);
@@ -100,7 +98,7 @@ public class KuppiksenKunkkuService {
 
         // Tallennetaan kaksintaistelun tiedot tietokantaan
         lisaaKaksintaistelu(gp, uusiVoittaja, lopullinenHaastaja[0],
-                vyoUnohtui, hallitsevaPaikalla, haastajaPaikalla);
+                vyoUnohtui);
     }
 
     public Voittajat haeVoittajaJaHaastaja(List<Tulos> tulokset) {
@@ -131,14 +129,12 @@ public class KuppiksenKunkkuService {
 
     // Tallennetaan kaksintaistelu tietokantaan ja lisätään se listaan
     private void lisaaKaksintaistelu(GP gp, Keilaaja voittaja, Keilaaja haastaja,
-            boolean vyoUnohtui, boolean hallitsevaPaikalla, boolean haastajaPaikalla) {
+            boolean vyoUnohtui) {
         KuppiksenKunkku kk = new KuppiksenKunkku();
         kk.setGp(gp);
         kk.setHallitseva(voittaja);
         kk.setHaastaja(haastaja);
         kk.setVyoUnohtui(vyoUnohtui);
-        kk.setHallitsevaPaikalla(hallitsevaPaikalla);
-        kk.setHaasajaPaikalla(haastajaPaikalla);
         kuppiksenKunkkuRepository.save(kk);
         kaudenKaksintaistelut.add(kk);
     }

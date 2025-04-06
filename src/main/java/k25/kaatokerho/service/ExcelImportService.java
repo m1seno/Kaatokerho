@@ -2,7 +2,6 @@ package k25.kaatokerho.service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -78,6 +77,7 @@ public class ExcelImportService {
             LocalDate edellinenPvm = null;
             List<Tulos> nykyisetTulokset = new ArrayList<>();
             Optional<Kausi> kausiOptional = kausiRepository.findByNimi("2024-2025");
+            Row viimeisinRivi = null;
             if (kausiOptional.isEmpty())
                 throw new IllegalArgumentException("Kautta 2024-2025 ei löytynyt");
 
@@ -95,7 +95,7 @@ public class ExcelImportService {
                     break;
                 }
 
-                //ChatGPT:n tekemää debuggausta
+                // ChatGPT:n tekemää debuggausta
                 // Tarkistetaan päivämäärä
                 Cell cell = row.getCell(2);
                 LocalDate pvm;
@@ -172,10 +172,17 @@ public class ExcelImportService {
                         }
                     }
 
+                    // Haetaan tieto onko vyö unohtunut (1 = kyllä, 0 = ei)
+                    boolean vyoUnohtui = false;
+                    Cell vyoCell = row.getCell(67);
+                    if (vyoCell != null && vyoCell.getCellType() == CellType.NUMERIC) {
+                        vyoUnohtui = (int) vyoCell.getNumericCellValue() == 1;
+                    }
+
                     // Käsitellään KuppiksenKunkku ja KeilaajaKausi
                     Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                             .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero());
-                    kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));
+                    kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                     keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
 
                     // Nollataan tilapäinen tuloslista
@@ -185,7 +192,7 @@ public class ExcelImportService {
                 // GP haetaan tai luodaan
                 if (nykyinenGp == null || !pvm.equals(edellinenPvm)) {
                     edellinenPvm = pvm;
-                    
+
                     GP uusiGp = new GP();
                     uusiGp.setPvm(pvm);
                     uusiGp.setJarjestysnumero((int) row.getCell(1).getNumericCellValue());
@@ -225,6 +232,8 @@ public class ExcelImportService {
 
                 nykyisetTulokset.add(tulos);
 
+                viimeisinRivi = row;
+
             }
 
             // Viimeisen GP:n käsittely
@@ -243,9 +252,17 @@ public class ExcelImportService {
                     }
                 }
 
+                boolean vyoUnohtui = false;
+                if (viimeisinRivi != null) {
+                    Cell vyoCell = viimeisinRivi.getCell(67);
+                    if (vyoCell != null && vyoCell.getCellType() == CellType.NUMERIC) {
+                        vyoUnohtui = (int) vyoCell.getNumericCellValue() == 1;
+                    }
+                }
+
                 Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                         .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
-                kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));
+                kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                 keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
                 ;
             }
