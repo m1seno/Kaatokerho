@@ -53,6 +53,9 @@ Table kuppiksenkunkku {
   gp_id INT [ref: > gp.gp_id, unique]
   voittaja_id INT [ref: > keilaaja.keilaaja_id]
   haastaja_id INT [ref: > keilaaja.keilaaja_id]
+  vyo_unohtui BOOLEAN,
+  hallitseva_paikalla BOOLEAN,
+  haastava_paikalla BOOLEAN
 }
 
 Table keilaaja_kausi {

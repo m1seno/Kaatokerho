@@ -52,7 +52,10 @@ CREATE TABLE kuppiksenkunkku (
     kuppiksenkunkku_id SERIAL PRIMARY KEY,
     gp_id INT NOT NULL UNIQUE REFERENCES gp(gp_id),
     hallitseva_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    haastaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id)
+    haastaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
+    vyo_unohtui BOOLEAN NOT NULL,
+    hallitseva_paikalla BOOLEAN NOT NULL,
+    haastaja_paikalla BOOLEAN NOT NULL
 );
 
 CREATE TABLE keilaaja_kausi (

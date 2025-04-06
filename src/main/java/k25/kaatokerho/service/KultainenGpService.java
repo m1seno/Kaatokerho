@@ -1,6 +1,7 @@
 package k25.kaatokerho.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -27,12 +28,15 @@ public class KultainenGpService {
         this.keilaajaKausiRepository = keilaajaKausiRepository;
     }
 
-    public void kultainenPistelasku(boolean onKultainenGp, Integer sarja1, Integer sarja2, Keilaaja keilaaja, Kausi kausi,
+    public void kultainenPistelasku(boolean onKultainenGp, Integer sarja1, Integer sarja2, Keilaaja keilaaja,
+            Kausi kausi,
             GP gp) {
-        if (!onKultainenGp) return;
+        if (!onKultainenGp)
+            return;
 
         // Jos sarjat ovat null, keilaaja ei osallistunut → ei pistelaskentaa
-        if (sarja1 == null || sarja2 == null) return;
+        if (sarja1 == null || sarja2 == null)
+            return;
 
         int paras = Math.max(sarja1, sarja2);
         int huonoin = Math.min(sarja1, sarja2);
@@ -79,22 +83,26 @@ public class KultainenGpService {
         // Haetaan muiden paras ja huonoin sarjat
         int parasKaikista = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
+                .filter(Objects::nonNull)
                 .max(Integer::compareTo)
-                .orElseThrow(() -> new IllegalStateException("GP:llä ei ole vertailutuloksia"));
+                .orElseThrow(() -> new IllegalStateException("GP:llä ei ole vertailukelpoisia tuloksia"));
 
         int huonoinKaikista = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
+                .filter(Objects::nonNull)
                 .min(Integer::compareTo)
-                .orElseThrow(() -> new IllegalStateException("GP:llä ei ole vertailutuloksia"));
+                .orElseThrow(() -> new IllegalStateException("GP:llä ei ole vertailukelpoisia tuloksia"));
 
         // Kuinka moni keilaaja heitti parhaan/huonoimman sarjan?
         long parhaat = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
+                .filter(Objects::nonNull)
                 .filter(s -> s == parasKaikista)
                 .count();
 
         long huonoimmat = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
+                .filter(Objects::nonNull)
                 .filter(s -> s == huonoinKaikista)
                 .count();
 
