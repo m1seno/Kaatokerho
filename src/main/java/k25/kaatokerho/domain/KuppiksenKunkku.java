@@ -35,25 +35,15 @@ public class KuppiksenKunkku {
     @Column(name = "vyo_unohtui")
     private boolean vyoUnohtui;
 
-    @NotNull(message = "Hallitsevan läsnäolo tulee merkata")
-    @Column(name = "hallitseva_paikalla")
-    private boolean hallitsevaPaikalla;
-
-    @NotNull(message = "Haastajan läsnäolo tulee merkata")
-    @Column(name = "haasaja_paikalla")
-    private boolean haasajaPaikalla;
-
     public KuppiksenKunkku() {
     }
 
-    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja hallitseva, Keilaaja haastaja, boolean vyoUnohtui, boolean hallitsevaPaikalla, boolean haasajaPaikalla) {
+    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja hallitseva, Keilaaja haastaja, boolean vyoUnohtui) {
         this.kuppiksenKunkkuId = kuppiksenKunkkuId;
         this.gp = gp;
         this.hallitseva = hallitseva;
         this.haastaja = haastaja;
         this.vyoUnohtui = vyoUnohtui;
-        this.hallitsevaPaikalla = hallitsevaPaikalla;
-        this.haasajaPaikalla = haasajaPaikalla;
     }
 
     public Long getKuppiksenKunkkuId() {
@@ -88,7 +78,7 @@ public class KuppiksenKunkku {
         this.haastaja = haastaja;
     }
 
-    public boolean isVyoUnohtui() {
+    public boolean getVyoUnohtui() {
         return vyoUnohtui;
     }
 
@@ -96,27 +86,10 @@ public class KuppiksenKunkku {
         this.vyoUnohtui = vyoUnohtui;
     }
 
-    public boolean isHallitsevaPaikalla() {
-        return hallitsevaPaikalla;
-    }
-
-    public void setHallitsevaPaikalla(boolean hallitsevaPaikalla) {
-        this.hallitsevaPaikalla = hallitsevaPaikalla;
-    }
-
-    public boolean isHaasajaPaikalla() {
-        return haasajaPaikalla;
-    }
-
-    public void setHaasajaPaikalla(boolean haasajaPaikalla) {
-        this.haasajaPaikalla = haasajaPaikalla;
-    }
-
     @Override
     public String toString() {
         return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", hallitseva=" + hallitseva
-                + ", haastaja=" + haastaja + ", vyoUnohtui=" + vyoUnohtui + ", hallitsevaPaikalla=" + hallitsevaPaikalla
-                + ", haasajaPaikalla=" + haasajaPaikalla + "]";
+                + ", haastaja=" + haastaja + ", vyoUnohtui=" + vyoUnohtui + "]";
     }
 
 }
