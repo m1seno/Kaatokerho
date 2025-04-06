@@ -44,7 +44,7 @@ public class GP {
     private Integer jarjestysnumero;
 
     @OneToOne(mappedBy = "gp", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<KuppiksenKunkku> kuppiksenKunkut;
+    private KuppiksenKunkku kuppiksenKunkku;
 
     @OneToMany(mappedBy = "gp", cascade = CascadeType.ALL)
     private List<Tulos> tulokset;
@@ -103,12 +103,12 @@ public class GP {
         this.jarjestysnumero = jarjestysnumero;
     }
 
-    public List<KuppiksenKunkku> getKuppiksenKunkut() {
-        return kuppiksenKunkut;
+    public KuppiksenKunkku getKuppiksenKunkku() {
+        return kuppiksenKunkku;
     }
 
-    public void setKuppiksenKunkut(List<KuppiksenKunkku> kuppiksenKunkut) {
-        this.kuppiksenKunkut = kuppiksenKunkut;
+    public void setKuppiksenKunkut(KuppiksenKunkku kuppiksenKunkku) {
+        this.kuppiksenKunkku = kuppiksenKunkku;
     }
 
     public List<Tulos> getTulokset() {
