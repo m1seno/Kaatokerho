@@ -1,4 +1,4 @@
-//Tietokanta tyhjennetään (kehitystä ja testausta varten)
+--Tietokanta tyhjennetään (kehitystä ja testausta varten)
 
 DROP TABLE IF EXISTS tulos;
 DROP TABLE IF EXISTS kuppiksen_kunkku;

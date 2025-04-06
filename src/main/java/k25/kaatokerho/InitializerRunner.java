@@ -26,8 +26,8 @@ public class InitializerRunner implements CommandLineRunner {
         // Tarkistetaan onko keilaaja-taulu tyhjä
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM keilaaja", Integer.class);
 
-        if (count != null && count == 0) {
-            System.out.println("Tietokanta tyhjä – ajetaan schema.sql ja data.sql");
+        if (count == null || count == 0) {
+            System.out.println("Tietokanta tyhjä. Ajetaan schema.sql ja data.sql");
 
             // Suoritetaan SQL-skriptit
             DataSource ds = jdbcTemplate.getDataSource();
@@ -43,7 +43,7 @@ public class InitializerRunner implements CommandLineRunner {
             populator.execute(ds);
 
             // Varmistetaan, että SQL-populointi onnistui (esim. keilaajia löytyi)
-            Integer uusiCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM keilaaja", Integer.class);
+            Integer uusiCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tulos", Integer.class);
             if (uusiCount == null || uusiCount == 0) {
                 throw new IllegalStateException("Tietokanta jäi edelleen tyhjäksi schema.sql ja data.sql ajon jälkeen!");
             }
@@ -52,7 +52,7 @@ public class InitializerRunner implements CommandLineRunner {
             excelImportService.importExcel("src/main/resources/data.xlsx");
 
         } else {
-            System.out.println("Tietokanta ei ole tyhjä – ei ajeta SQL-skriptejä eikä Excel-importtia");
+            System.out.println("Tietokanta ei ole tyhjä. Ei ajeta SQL-skriptejä eikä Excel-importtia");
         }
     }
 }
