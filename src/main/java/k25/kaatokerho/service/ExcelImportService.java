@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -81,37 +82,82 @@ public class ExcelImportService {
                 throw new IllegalArgumentException("Kautta 2024-2025 ei löytynyt");
 
             for (Row row : sheet) {
+
+                // Debug-printti rivistä
+                System.out.println("Käsitellään rivi: " + (row.getRowNum() + 1));
+
                 // Skipataan otsikkorivi
                 if (row.getRowNum() == 0) {
                     continue;
                 }
-                // Jos solu on tyhjä, lopetetaan silmukka
-                if (row.getCell(1) == null) {
+                if (row.getCell(0).getNumericCellValue() == 181) {
+                    System.out.println("Lopetetaan excelin rivillä 181");
                     break;
                 }
 
+                //ChatGPT:n tekemää debuggausta
                 // Tarkistetaan päivämäärä
                 Cell cell = row.getCell(2);
                 LocalDate pvm;
 
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    // Suoraan LocalDateksi
-                    pvm = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                } else {
-                    // Jos ei ole päivämäärämuoto, parsitaan itse merkkijonosta
-                    String[] pvmString = cell.getStringCellValue().split("/");
-                    pvm = LocalDate.of(
-                            Integer.parseInt(pvmString[2]), // Vuosi
-                            Integer.parseInt(pvmString[1]), // Kuukausi
-                            Integer.parseInt(pvmString[0]) // Päivä
-                    );
+                if (cell == null || cell.getCellType() == CellType.BLANK) {
+                    throw new IllegalArgumentException("Päivämäärän solu puuttuu riviltä " + (row.getRowNum() + 1));
+                }
+
+                switch (cell.getCellType()) {
+                    case NUMERIC -> {
+                        if (DateUtil.isCellDateFormatted(cell)) {
+                            pvm = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "NUMERIC-muotoinen solu ei ole päivämäärä rivillä " + (row.getRowNum() + 1));
+                        }
+                    }
+
+                    case STRING -> {
+                        try {
+                            String[] pvmString = cell.getStringCellValue().split("/");
+                            pvm = LocalDate.of(
+                                    Integer.parseInt(pvmString[2]),
+                                    Integer.parseInt(pvmString[1]),
+                                    Integer.parseInt(pvmString[0]));
+                        } catch (Exception e) {
+                            throw new IllegalArgumentException(
+                                    "Päivämäärän tekstimuoto on virheellinen rivillä " + (row.getRowNum() + 1));
+                        }
+                    }
+
+                    case FORMULA -> {
+                        CellType resultType = cell.getCachedFormulaResultType();
+                        if (resultType == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                            pvm = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        } else if (resultType == CellType.STRING) {
+                            try {
+                                String[] pvmString = cell.getStringCellValue().split("/");
+                                pvm = LocalDate.of(
+                                        Integer.parseInt(pvmString[2]),
+                                        Integer.parseInt(pvmString[1]),
+                                        Integer.parseInt(pvmString[0]));
+                            } catch (Exception e) {
+                                throw new IllegalArgumentException(
+                                        "Kaavan palauttama päivämäärä (STRING) on virheellinen rivillä "
+                                                + (row.getRowNum() + 1));
+                            }
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Kaavan palauttama arvo ei ole tuettu rivillä " + (row.getRowNum() + 1));
+                        }
+                    }
+
+                    default -> throw new IllegalArgumentException(
+                            "Päivämäärän solun tyyppi ei ole tuettu rivillä " + (row.getRowNum() + 1) +
+                                    ". Tyyppi: " + cell.getCellType());
                 }
 
                 // Jos pvm vaihtuu JA ei olla ensimmäisellä kierroksella
                 if (edellinenPvm != null && !pvm.equals(edellinenPvm)) {
 
                     nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
-
 
                     // Kultaiset GP-pisteet vasta nyt
                     for (Tulos t : nykyisetTulokset) {
@@ -161,7 +207,7 @@ public class ExcelImportService {
                 Optional<Keilaaja> keilaajaOptional = keilaajaRepository.findByEtunimiAndSukunimi(nimi[0], nimi[1]);
 
                 // Luodaan tulos
-                boolean osallistui = (int) row.getCell(12).getNumericCellValue() == 1;
+                boolean osallistui = ((int) row.getCell(12).getNumericCellValue()) == 1;
                 Integer sarja1 = osallistui && row.getCell(9) != null ? (int) row.getCell(9).getNumericCellValue()
                         : null;
                 Integer sarja2 = osallistui && row.getCell(10) != null ? (int) row.getCell(10).getNumericCellValue()
@@ -186,13 +232,12 @@ public class ExcelImportService {
                 for (Tulos t : nykyisetTulokset) {
                     if (t.getOsallistui()) {
                         kultainenGpService.kultainenPistelasku(
-                            nykyinenGp.isOnKultainenGp(),
-                            t.getSarja1(),
-                            t.getSarja2(),
-                            t.getKeilaaja(),
-                            kausiOptional.get(),
-                            nykyinenGp
-                        );
+                                nykyinenGp.isOnKultainenGp(),
+                                t.getSarja1(),
+                                t.getSarja2(),
+                                t.getKeilaaja(),
+                                kausiOptional.get(),
+                                nykyinenGp);
                     }
                 }
 
