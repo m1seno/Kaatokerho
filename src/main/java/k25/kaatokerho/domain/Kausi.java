@@ -26,11 +26,11 @@ public class Kausi {
     private String nimi;
 
     @NotNull(message = "Kauden GP määrä ei voi olla null")
-    @Column(nullable = false)
+    @Column(name = "gpMaara", nullable = false)
     private Integer gpMaara;
 
     @NotNull(message = "Kauden suunniteltu GP määrä ei voi olla null")
-    @Column(nullable = false)
+    @Column(name = "suunniteltuGpMaara", nullable = false)
     private Integer suunniteltuGpMaara;
 
     @NotNull(message = "Kauden osallistujamäärä ei voi olla null")

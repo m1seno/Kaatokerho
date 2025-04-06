@@ -27,12 +27,14 @@ public class KeilaajaKausi {
     @JoinColumn(name = "kausi_id", nullable = false)
     private Kausi kausi;
 
+    @Column(name = "parasSarja")
     private Integer parasSarja;
 
+    @Column(name = "huonoinSarja")
     private Integer huonoinSarja;
 
     @NotNull(message = "kaudenPisteet ei voi olla null")
-    @Column(nullable = false)
+    @Column(name = "kaudenPisteet", nullable = false)
     private Double kaudenPisteet;
 
     @NotNull(message = "Voitot ei voi olla null")

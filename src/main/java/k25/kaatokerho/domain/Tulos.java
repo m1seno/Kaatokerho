@@ -26,8 +26,10 @@ public class Tulos {
     @JoinColumn(name = "keilaaja_id", nullable = false)
     private Keilaaja keilaaja;
 
+    @Column(name = "sarja1")
     private Integer sarja1;
 
+    @Column(name = "sarja2")
     private Integer sarja2;
 
     @NotNull(message = "Osallistuminen tulee merkata")

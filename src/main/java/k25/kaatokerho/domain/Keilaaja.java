@@ -44,7 +44,7 @@ public class Keilaaja {
     @Column(nullable = false)
     private Boolean admin;
 
-    @Column(length = 60)
+    @Column(name = "salasanaHash", length = 60)
     private String salasanaHash;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
