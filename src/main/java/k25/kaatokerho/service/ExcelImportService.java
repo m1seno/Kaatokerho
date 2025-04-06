@@ -2,11 +2,15 @@ package k25.kaatokerho.service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -87,12 +91,21 @@ public class ExcelImportService {
                 }
 
                 // Tarkistetaan päivämäärä
-                String[] pvmString = row.getCell(2).getStringCellValue().split("/");
-                LocalDate pvm = LocalDate.of(
-                        Integer.parseInt(pvmString[2]), // Vuosi
-                        Integer.parseInt(pvmString[1]), // Kuukausi
-                        Integer.parseInt(pvmString[0]) // Päivä
-                );
+                Cell cell = row.getCell(2);
+                LocalDate pvm;
+
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    // Suoraan LocalDateksi
+                    pvm = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                } else {
+                    // Jos ei ole päivämäärämuoto, parsitaan itse merkkijonosta
+                    String[] pvmString = cell.getStringCellValue().split("/");
+                    pvm = LocalDate.of(
+                            Integer.parseInt(pvmString[2]), // Vuosi
+                            Integer.parseInt(pvmString[1]), // Kuukausi
+                            Integer.parseInt(pvmString[0]) // Päivä
+                    );
+                }
 
                 // Jos pvm vaihtuu JA ei olla ensimmäisellä kierroksella
                 if (edellinenPvm != null && !pvm.equals(edellinenPvm)) {
@@ -161,7 +174,8 @@ public class ExcelImportService {
                 Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                         .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
                 kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));
-                keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);;
+                keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
+                ;
             }
 
         } catch (Exception e) {

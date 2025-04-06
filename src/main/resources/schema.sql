@@ -35,8 +35,8 @@ CREATE TABLE tulos (
     tulos_id SERIAL PRIMARY KEY,
     gp_id INT NOT NULL REFERENCES gp(gp_id),
     keilaaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    sarja1 INT NOT NULL,
-    sarja2 INT NOT NULL,
+    sarja1 INT,
+    sarja2 INT,
     osallistui BOOLEAN NOT NULL
 );
 
