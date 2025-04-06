@@ -29,6 +29,7 @@ Table gp {
   keilahalli_id INT [ref: > keilahalli.keilahalli_id]
   pvm DATE
   jarjestysnumero INT
+  on_kultainen_gp BOOLEAN
 }
 
 Table tulos {

@@ -43,6 +43,10 @@ public class GP {
     @Column(name = "jarjestysnumero", nullable = false)
     private Integer jarjestysnumero;
 
+    @NotNull(message = "Onko kultainen GP ei voi olla null")
+    @Column(name = "on_kultainen_gp", nullable = false)
+    private boolean onKultainenGp;
+
     @OneToOne(mappedBy = "gp", cascade = CascadeType.ALL, orphanRemoval = true)
     private KuppiksenKunkku kuppiksenKunkku;
 
@@ -55,12 +59,13 @@ public class GP {
     public GP() {
     }
 
-    public GP(Long gpId, Integer jarjestysnumero, Kausi kausi, Keilahalli keilahalli, LocalDate pvm) {
+    public GP(Long gpId, Integer jarjestysnumero, Kausi kausi, Keilahalli keilahalli, LocalDate pvm, boolean onKultainenGp) {
         this.gpId = gpId;
         this.jarjestysnumero = jarjestysnumero;
         this.kausi = kausi;
         this.keilahalli = keilahalli;
         this.pvm = pvm;
+        this.onKultainenGp = onKultainenGp;
     }
 
     public Long getGpId() {
@@ -97,6 +102,14 @@ public class GP {
 
     public Integer getJarjestysnumero() {
         return jarjestysnumero;
+    }
+
+    public boolean isOnKultainenGp() {
+        return onKultainenGp;
+    }
+
+    public void setOnKultainenGp(boolean onKultainenGp) {
+        this.onKultainenGp = onKultainenGp;
     }
 
     public void setJarjestysnumero(Integer jarjestysnumero) {

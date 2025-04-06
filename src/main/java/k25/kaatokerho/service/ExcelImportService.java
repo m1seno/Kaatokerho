@@ -109,10 +109,26 @@ public class ExcelImportService {
 
                 // Jos pvm vaihtuu JA ei olla ensimmäisellä kierroksella
                 if (edellinenPvm != null && !pvm.equals(edellinenPvm)) {
+
+                    nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
+
+
+                    // Kultaiset GP-pisteet vasta nyt
+                    for (Tulos t : nykyisetTulokset) {
+                        if (t.getOsallistui()) {
+                            kultainenGpService.kultainenPistelasku(
+                                    nykyinenGp.isOnKultainenGp(),
+                                    t.getSarja1(),
+                                    t.getSarja2(),
+                                    t.getKeilaaja(),
+                                    kausiOptional.get(),
+                                    nykyinenGp);
+                        }
+                    }
+
                     // Käsitellään KuppiksenKunkku ja KeilaajaKausi
                     Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                             .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero());
-                    nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
                     kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));
                     keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
 
@@ -126,6 +142,8 @@ public class ExcelImportService {
                     uusiGp.setPvm(pvm);
                     uusiGp.setJarjestysnumero((int) row.getCell(1).getNumericCellValue());
                     uusiGp.setKausi(kausiOptional.get());
+                    boolean onKultainenGp = ((int) row.getCell(23).getNumericCellValue()) == 1;
+                    uusiGp.setOnKultainenGp(onKultainenGp);
 
                     String[] keilahalli = row.getCell(3).getStringCellValue().split(" ");
                     String hakusana = keilahalli[0];
@@ -159,18 +177,25 @@ public class ExcelImportService {
 
                 nykyisetTulokset.add(tulos);
 
-                // KultainenGP
-                boolean onKultainenGp = ((int) row.getCell(23).getNumericCellValue()) == 1;
-                kultainenGpService.kultainenPistelasku(onKultainenGp, sarja1, sarja2, keilaajaOptional.get(),
-                        kausiOptional.get(), nykyinenGp);
-
-                edellinenPvm = pvm;
-
             }
 
             // Viimeisen GP:n käsittely
             if (nykyinenGp != null && !nykyisetTulokset.isEmpty()) {
                 nykyinenGp.setTulokset(nykyisetTulokset);
+
+                for (Tulos t : nykyisetTulokset) {
+                    if (t.getOsallistui()) {
+                        kultainenGpService.kultainenPistelasku(
+                            nykyinenGp.isOnKultainenGp(),
+                            t.getSarja1(),
+                            t.getSarja2(),
+                            t.getKeilaaja(),
+                            kausiOptional.get(),
+                            nykyinenGp
+                        );
+                    }
+                }
+
                 Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                         .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
                 kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null));

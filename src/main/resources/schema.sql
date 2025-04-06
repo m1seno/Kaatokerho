@@ -28,7 +28,8 @@ CREATE TABLE gp (
     kausi_id INT NOT NULL REFERENCES kausi(kausi_id),
     keilahalli_id INT NOT NULL REFERENCES keilahalli(keilahalli_id),
     pvm DATE NOT NULL,
-    jarjestysnumero INT NOT NULL
+    jarjestysnumero INT NOT NULL,
+    on_kultainen_gp BOOLEAN NOT NULL
 );
 
 CREATE TABLE tulos (
