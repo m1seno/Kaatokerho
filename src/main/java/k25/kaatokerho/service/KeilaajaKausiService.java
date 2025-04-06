@@ -26,7 +26,6 @@ public class KeilaajaKausiService {
         Map<Long, Double> tuloslista = pistelaskuService.laskeSijoitus(gp);
 
         Kausi kausi = gp.getKausi();
-        Long kausiId = kausi.getKausiId();
 
         // Selvitetään GP:n voittajat
         double parasPiste = tuloslista.values().stream().mapToDouble(Double::doubleValue).max().orElse(0);
@@ -48,7 +47,7 @@ public class KeilaajaKausiService {
 
             // Tarkista, onko keilaaja jo olemassa kaudella
             Optional<KeilaajaKausi> keilaajaKausiOpt = keilaajaKausiRepository
-                    .findByKeilaajaAndKausi(keilaajaId, kausiId);
+                    .findByKeilaajaAndKausi(keilaaja, kausi);
             if (keilaajaKausiOpt.isPresent()) {
                 // Haetaan vanhat tiedot
                 KeilaajaKausi keilaajaKausi = keilaajaKausiOpt.get();

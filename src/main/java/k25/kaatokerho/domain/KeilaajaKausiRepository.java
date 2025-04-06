@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface KeilaajaKausiRepository extends CrudRepository<KeilaajaKausi, Long> {
 
-    Optional<KeilaajaKausi> findByKeilaajaAndKausi(Long keilaajaId, Long kausiId);
+    Optional<KeilaajaKausi> findByKeilaajaAndKausi(Keilaaja keilaaja, Kausi kausi);
     
 }

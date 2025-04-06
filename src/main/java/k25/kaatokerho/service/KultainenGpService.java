@@ -38,8 +38,8 @@ public class KultainenGpService {
         int huonoin = Math.min(sarja1, sarja2);
 
         // Hae keilaajan tilastot kyseiseltä kaudelta
-        Optional<KeilaajaKausi> keilaajaKausi = keilaajaKausiRepository.findByKeilaajaAndKausi(keilaaja.getKeilaajaId(),
-                kausi.getKausiId());
+        Optional<KeilaajaKausi> keilaajaKausi = keilaajaKausiRepository.findByKeilaajaAndKausi(keilaaja,
+                kausi);
         if (keilaajaKausi.isEmpty()) {
             throw new IllegalArgumentException("KeilaajaKausi not found for keilaajaId: " + keilaaja.getKeilaajaId()
                     + " and kausiId: " + kausi.getKausiId());
