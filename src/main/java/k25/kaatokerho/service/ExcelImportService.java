@@ -90,7 +90,7 @@ public class ExcelImportService {
                 if (row.getRowNum() == 0) {
                     continue;
                 }
-                if (row.getCell(0).getNumericCellValue() == 181) {
+                if (row.getRowNum() == 181) {
                     System.out.println("Lopetetaan excelin rivillä 181");
                     break;
                 }
@@ -184,6 +184,8 @@ public class ExcelImportService {
 
                 // GP haetaan tai luodaan
                 if (nykyinenGp == null || !pvm.equals(edellinenPvm)) {
+                    edellinenPvm = pvm;
+                    
                     GP uusiGp = new GP();
                     uusiGp.setPvm(pvm);
                     uusiGp.setJarjestysnumero((int) row.getCell(1).getNumericCellValue());
