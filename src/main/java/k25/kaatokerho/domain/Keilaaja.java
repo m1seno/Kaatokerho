@@ -25,26 +25,27 @@ public class Keilaaja {
     private Long keilaajaId;
 
     @NotEmpty(message = "Etunimi ei voi olla tyhjä")
-    @Column(nullable = false, length = 50)
+    @Column(name = "etunimi", nullable = false, length = 50)
     private String etunimi;
 
     @NotEmpty(message = "Sukunimi ei voi olla tyhjä")
-    @Column(nullable = false, length = 50)
+    @Column(name = "sukunimi", nullable = false, length = 50)
     private String sukunimi;
 
     @NotNull(message = "Syntymäpäivä ei voi olla null")
     @Temporal(TemporalType.DATE)
+    @Column(name = "syntymapaiva", nullable = false)
     private LocalDate syntymapaiva;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(name = "aktiivijasen", nullable = false)
     private Boolean aktiivijasen;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(name = "admin", nullable = false)
     private Boolean admin;
 
-    @Column(name = "salasanaHash", length = 60)
+    @Column(name = "salasana_hash", length = 60)
     private String salasanaHash;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")

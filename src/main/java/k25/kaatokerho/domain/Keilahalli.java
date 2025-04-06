@@ -21,15 +21,15 @@ public class Keilahalli {
     private Long keilahalliId;
 
     @NotEmpty(message = "Nimi ei voi olla tyhjä")
-    @Column(nullable = false, length = 100)
+    @Column(name = "nimi", nullable = false, length = 100)
     private String nimi;
 
     @NotEmpty(message = "Kaupunki ei voi olla tyhjä")
-    @Column(nullable = false, length = 50)
+    @Column(name = "kaupunki", nullable = false, length = 50)
     private String kaupunki;
 
     @NotEmpty(message = "Valtio ei voi olla tyhjä")
-    @Column(nullable = false, length = 50)
+    @Column(name = "valtio", nullable = false, length = 50)
     private String valtio;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilahalli")

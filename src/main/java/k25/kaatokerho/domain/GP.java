@@ -36,11 +36,11 @@ public class GP {
 
     @NotNull(message = "Päivämäärä ei voi olla null")
     @Temporal(TemporalType.DATE)
-    @Column(nullable = false)
+    @Column(name = "pvm", nullable = false)
     private LocalDate pvm;
 
     @NotNull(message = "Järjestysnumero ei voi olla null")
-    @Column(nullable = false)
+    @Column(name = "jarjestysnumero", nullable = false)
     private Integer jarjestysnumero;
 
     @OneToOne(mappedBy = "gp", cascade = CascadeType.ALL, orphanRemoval = true)

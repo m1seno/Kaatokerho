@@ -27,7 +27,7 @@ public class KultainenGp {
     private Keilaaja keilaaja;
 
     @NotNull(message = "Lisäpisteet ei voi olla null")
-    @Column(nullable = false)
+    @Column(name = "lisapisteet", nullable = false)
     private Double lisapisteet;
 
     public KultainenGp() {

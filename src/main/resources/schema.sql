@@ -5,7 +5,7 @@ CREATE TABLE keilaaja (
     syntymapaiva DATE NOT NULL,
     aktiivijasen BOOLEAN NOT NULL,
     admin BOOLEAN NOT NULL,
-    salasanaHash VARCHAR(60)
+    salasana_hash VARCHAR(60)
 );
 
 CREATE TABLE keilahalli (
@@ -18,8 +18,8 @@ CREATE TABLE keilahalli (
 CREATE TABLE kausi (
     kausi_id SERIAL PRIMARY KEY,
     nimi VARCHAR(20) NOT NULL,
-    gpMaara INT NOT NULL,
-    suunniteltuGpMaara INT NOT NULL,
+    gp_maara INT NOT NULL,
+    suunniteltu_gp_maara INT NOT NULL,
     osallistujamaara INT NOT NULL
 );
 
@@ -58,9 +58,9 @@ CREATE TABLE keilaaja_kausi (
     keilaaja_kausi_id SERIAL PRIMARY KEY,
     keilaaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
     kausi_id INT NOT NULL REFERENCES kausi(kausi_id),
-    parasSarja INT,
-    huonoinSarja INT,
-    kaudenPisteet DOUBLE PRECISION,
+    paras_sarja INT,
+    huonoin_sarja INT,
+    kauden_pisteet DOUBLE PRECISION,
     voittoja INT,
     osallistumisia INT
 );

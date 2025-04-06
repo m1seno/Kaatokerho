@@ -31,19 +31,14 @@ public class KuppiksenKunkku {
     @JoinColumn(name = "haastaja_id", nullable = false)
     private Keilaaja haastaja;
 
-    @NotNull(message = "Lisäpisteet ei voi olla null")
-    @Column(nullable = false)
-    private Double lisapisteet;
-
     public KuppiksenKunkku() {
     }
 
-    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja hallitseva, Keilaaja haastaja, Double lisapisteet) {
+    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja hallitseva, Keilaaja haastaja) {
         this.kuppiksenKunkkuId = kuppiksenKunkkuId;
         this.gp = gp;
         this.hallitseva = hallitseva;
         this.haastaja = haastaja;
-        this.lisapisteet = lisapisteet;
     }
 
     public Long getKuppiksenKunkkuId() {
@@ -78,17 +73,9 @@ public class KuppiksenKunkku {
         this.haastaja = haastaja;
     }
 
-    public Double getLisapisteet() {
-        return lisapisteet;
-    }
-
-    public void setLisapisteet(Double lisapisteet) {
-        this.lisapisteet = lisapisteet;
-    }
-
     @Override
     public String toString() {
         return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", hallitseva=" + hallitseva
-                + ", haastaja=" + haastaja + ", lisapisteet=" + lisapisteet + "]";
+                + ", haastaja=" + haastaja + "]";
     }
 }

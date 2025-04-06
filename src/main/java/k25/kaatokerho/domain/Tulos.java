@@ -33,7 +33,7 @@ public class Tulos {
     private Integer sarja2;
 
     @NotNull(message = "Osallistuminen tulee merkata")
-    @Column(nullable = false)
+    @Column(name = "osallistui", nullable = false)
     private Boolean osallistui;
 
     public Tulos() {

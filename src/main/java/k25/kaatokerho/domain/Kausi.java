@@ -22,19 +22,19 @@ public class Kausi {
     private Long kausiId;
 
     @NotEmpty(message = "Kauden nimi ei voi olla tyhjä (käytä esim. 2024-2025)")
-    @Column(nullable = false, length = 20)
+    @Column(name = "nimi", nullable = false, length = 20)
     private String nimi;
 
     @NotNull(message = "Kauden GP määrä ei voi olla null")
-    @Column(name = "gpMaara", nullable = false)
+    @Column(name = "gp_maara", nullable = false)
     private Integer gpMaara;
 
     @NotNull(message = "Kauden suunniteltu GP määrä ei voi olla null")
-    @Column(name = "suunniteltuGpMaara", nullable = false)
+    @Column(name = "suunniteltu_gp_maara", nullable = false)
     private Integer suunniteltuGpMaara;
 
     @NotNull(message = "Kauden osallistujamäärä ei voi olla null")
-    @Column(nullable = false)
+    @Column(name = "osallistujamaara", nullable = false)
     private Integer osallistujamaara;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "kausi")
