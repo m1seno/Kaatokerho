@@ -4,7 +4,7 @@ Table keilaaja {
   sukunimi VARCHAR(50)
   syntymapaiva DATE
   aktiivijasen BOOLEAN
-  admin BOOLEAN
+  kayttajanimi VARCHAR(50)
   salasana_hash VARCHAR(60)
 }
 

@@ -13,7 +13,8 @@ CREATE TABLE keilaaja (
     sukunimi VARCHAR(50) NOT NULL,
     syntymapaiva DATE NOT NULL,
     aktiivijasen BOOLEAN NOT NULL,
-    admin BOOLEAN NOT NULL,
+    admin BOOLEAN DEFAULT FALSE NOT NULL,
+    kayttajanimi VARCHAR(50),
     salasana_hash VARCHAR(60)
 );
 

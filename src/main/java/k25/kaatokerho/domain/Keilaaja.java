@@ -45,6 +45,10 @@ public class Keilaaja {
     @Column(name = "admin", nullable = false)
     private Boolean admin;
 
+    @NotNull
+    @Column(name = "kayttajanimi", length = 50)
+    private String kayttajanimi;
+
     @Column(name = "salasana_hash", length = 60)
     private String salasanaHash;
 
@@ -66,12 +70,14 @@ public class Keilaaja {
     public Keilaaja() {
     }
 
-    public Keilaaja(Boolean admin, Boolean aktiivijasen, String etunimi, Long keilaajaId, String salasanaHash,
+    public Keilaaja(Boolean admin, Boolean aktiivijasen, String etunimi, String kayttajanimi, Long keilaajaId,
+            String salasanaHash,
             String sukunimi,
             LocalDate syntymapaiva) {
         this.admin = admin;
         this.aktiivijasen = aktiivijasen;
         this.etunimi = etunimi;
+        this.kayttajanimi = kayttajanimi;
         this.keilaajaId = keilaajaId;
         this.salasanaHash = salasanaHash;
         this.sukunimi = sukunimi;
@@ -126,6 +132,14 @@ public class Keilaaja {
         this.admin = admin;
     }
 
+    public String getKayttajanimi() {
+        return kayttajanimi;
+    }
+
+    public void setKayttajanimi(String kayttajanimi) {
+        this.kayttajanimi = kayttajanimi;
+    }
+
     public String getSalasanaHash() {
         return salasanaHash;
     }
@@ -178,6 +192,7 @@ public class Keilaaja {
     public String toString() {
         return "Keilaaja [keilaajaId=" + keilaajaId + ", etunimi=" + etunimi + ", sukunimi=" + sukunimi
                 + ", syntymapaiva=" + syntymapaiva + ", aktiivijasen=" + aktiivijasen + ", admin=" + admin
+                + ", kayttajanimi=" + kayttajanimi
                 + ", salasanaHash=" + salasanaHash + "]";
     }
 
