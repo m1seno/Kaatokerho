@@ -25,7 +25,7 @@ public class InitializerRunner implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // Tätä käytetään testaamiseen ja kehitykseen
-        System.out.println("Ajetaan drop-all.sql, schema.sql ja data.sql...");
+        System.out.println("Ajetaan schema.sql ja data.sql...");
 
         DataSource ds = jdbcTemplate.getDataSource();
         if (ds == null) {

@@ -91,7 +91,7 @@ public class ExcelImportService {
                     continue;
                 }
                 if (row.getRowNum() == 181) {
-                    System.out.println("Lopetetaan excelin rivillä 181");
+                    System.out.println("Lopetetaan excelin rivillä 182");
                     break;
                 }
 
