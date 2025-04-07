@@ -28,7 +28,7 @@ public class KuppiksenKunkku {
     private Keilaaja hallitseva;
 
     @ManyToOne
-    @JoinColumn(name = "haastaja_id", nullable = false)
+    @JoinColumn(name = "haastaja_id", nullable = true)
     private Keilaaja haastaja;
 
     @NotNull(message = "Unohtunut vyö tulee merkata")

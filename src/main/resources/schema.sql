@@ -1,3 +1,12 @@
+DROP TABLE IF EXISTS tulos CASCADE;
+DROP TABLE IF EXISTS gp CASCADE;
+DROP TABLE IF EXISTS kultainengp CASCADE;
+DROP TABLE IF EXISTS keilaaja_kausi CASCADE;
+DROP TABLE IF EXISTS keilahalli CASCADE;
+DROP TABLE IF EXISTS kuppiksenkunkku CASCADE;
+DROP TABLE IF EXISTS kausi CASCADE;
+DROP TABLE IF EXISTS keilaaja CASCADE;
+
 CREATE TABLE keilaaja (
     keilaaja_id SERIAL PRIMARY KEY,
     etunimi VARCHAR(50) NOT NULL,
@@ -52,10 +61,8 @@ CREATE TABLE kuppiksenkunkku (
     kuppiksenkunkku_id SERIAL PRIMARY KEY,
     gp_id INT NOT NULL UNIQUE REFERENCES gp(gp_id),
     hallitseva_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    haastaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
-    vyo_unohtui BOOLEAN NOT NULL,
-    hallitseva_paikalla BOOLEAN NOT NULL,
-    haastaja_paikalla BOOLEAN NOT NULL
+    haastaja_id INT REFERENCES keilaaja(keilaaja_id),
+    vyo_unohtui BOOLEAN NOT NULL
 );
 
 CREATE TABLE keilaaja_kausi (

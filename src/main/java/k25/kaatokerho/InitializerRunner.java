@@ -34,7 +34,6 @@ public class InitializerRunner implements CommandLineRunner {
 
         // Aja kaikki SQL-skriptit (drop, schema, data)
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
-                new ClassPathResource("drop-all.sql"),
                 new ClassPathResource("schema.sql"),
                 new ClassPathResource("data.sql"));
         populator.execute(ds);
@@ -50,7 +49,7 @@ public class InitializerRunner implements CommandLineRunner {
         }
 
         /*
-         * Tätät käytetään kun sovellus julkaistaan ja halutaan tuoda tiedot
+         * Tätät käytetään kun sovellus julkaistaan ja halutaan ajaa tiedot tyhjään tietokantaan
          * // Tarkistetaan onko keilaaja-taulu tyhjä
          * Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM keilaaja",
          * Integer.class);
