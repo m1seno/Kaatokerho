@@ -28,37 +28,56 @@
   <body>
     <div class="container">
       <div class="top-buttons">
-        <a th:if="${!loggedIn}" th:href="@{/login}" class="btn btn-outline-primary">Kirjaudu sisään</a>
-    
-        <form th:if="${loggedIn}" th:action="@{/logout}" method="post" style="display:inline;">
-            <button type="submit" class="btn btn-outline-danger">Kirjaudu ulos</button>
+        <a
+          th:if="${!loggedIn}"
+          th:href="@{/login}"
+          class="btn btn-outline-primary"
+          >Kirjaudu sisään</a
+        >
+
+        <form
+          th:if="${loggedIn}"
+          th:action="@{/logout}"
+          method="post"
+          style="display: inline"
+        >
+          <button type="submit" class="btn btn-outline-danger">
+            Kirjaudu ulos
+          </button>
         </form>
-        
       </div>
       <div th:if="${logoutMessage}" class="alert alert-info" role="alert">
         <p th:text="${logoutMessage}"></p>
-    </div>
+      </div>
 
-      <h1>Tervetuloa Internetin ytimeen - Kaatokerho Online</h1>
-      <p>
-        Kaatokerho on turkulainen, vuonna 2006 perustettu varhaiskeski-ikäisten
-        miesten keilailusarja, jossa leikkimielisyys, huumori ja kilpailullisuus
-        kättelevät sopusuhtaisesti. Keilauskausi koostuu kolmestatoista
-        kilpailusta, eli GP:stä, ja kauden päätteeksi eniten GP-sijoituksesta
-        pisteitä kerännyt kerholainen palkiaan mestaruuspokaali Kollilla.
-        Keilailun lisäksi Kaatokerho on ollut mukana turkulaisessa
-        harrastejalkapallossa meineikkaana Kuntoliiga- ja Viking Line
-        Hotsal-joukkueena. Tämän lisäksi "Kerho" ottaa suunnilleen vuosittain
-        mittaa tamperelaisesta Kauniiden uintiryhmästä spektaakkelinomaisessa
-        sekauintiviestissä. Kaatokerho muistetaan myös jo nyt historiallisista
-        seinäkalentereistaan sekä kielenvievistä Ravintolapäiväkattauksistaan,
-        jotka poikivat hyväntekeväisyyshengessä pariin turkulaiseen päiväkotiin
-        aimo annoksen liikuntavälineitä.
-        <br />
-        <br />
-        Tälle sivustolle päivitämme Kaatokerhon keilailusarjan viralliset
-        tilastot sekä kunkin kauden voimassa olevan kilpailukalenterin.
-      </p>
+      <img
+        th:src="@{/images/kerho_logo_väri.png}"
+        alt="Kaatokerho Logo"
+        style="max-width: 200px; display: block; margin: 0 auto 1rem"
+      />
+
+      <div class="text-center>">
+        <h1>Tervetuloa Internetin ytimeen - Kaatokerho Online</h1>
+        <p>
+          Kaatokerho on turkulainen, vuonna 2006 perustettu
+          varhaiskeski-ikäisten miesten keilailusarja, jossa leikkimielisyys,
+          huumori ja kilpailullisuus kättelevät sopusuhtaisesti. Keilauskausi
+          koostuu kolmestatoista kilpailusta, eli GP:stä, ja kauden päätteeksi
+          eniten GP-sijoituksesta pisteitä kerännyt kerholainen palkiaan
+          mestaruuspokaali Kollilla. Keilailun lisäksi Kaatokerho on ollut
+          mukana turkulaisessa harrastejalkapallossa meineikkaana Kuntoliiga- ja
+          Viking Line Hotsal-joukkueena. Tämän lisäksi "Kerho" ottaa suunnilleen
+          vuosittain mittaa tamperelaisesta Kauniiden uintiryhmästä
+          spektaakkelinomaisessa sekauintiviestissä. Kaatokerho muistetaan myös
+          jo nyt historiallisista seinäkalentereistaan sekä kielenvievistä
+          Ravintolapäiväkattauksistaan, jotka poikivat hyväntekeväisyyshengessä
+          pariin turkulaiseen päiväkotiin aimo annoksen liikuntavälineitä.
+          <br />
+          <br />
+          Tälle sivustolle päivitämme Kaatokerhon keilailusarjan viralliset
+          tilastot sekä kunkin kauden voimassa olevan kilpailukalenterin.
+        </p>
+      </div>
 
       <div class="main-buttons">
         <a th:href="@{/sarjataulukko}" class="btn btn-primary">Sarjataulukko</a>
