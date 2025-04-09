@@ -1,10 +1,19 @@
 package k25.kaatokerho.service;
 
-import k25.kaatokerho.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import k25.kaatokerho.domain.GP;
+import k25.kaatokerho.domain.Keilaaja;
+import k25.kaatokerho.domain.KuppiksenKunkku;
+import k25.kaatokerho.domain.KuppiksenKunkkuRepository;
+import k25.kaatokerho.domain.Tulos;
+import k25.kaatokerho.domain.TulosRepository;
 
 //Vastaa kuppiksenkunkku-taulun käsittelystä
 @Service
@@ -13,7 +22,6 @@ public class KuppiksenKunkkuService {
     private final KuppiksenKunkkuRepository kuppiksenKunkkuRepository;
     private final TulosRepository tulosRepository;
 
-    @Autowired
     public KuppiksenKunkkuService(KuppiksenKunkkuRepository kuppiksenKunkkuRepository,
             TulosRepository tulosRepository) {
         this.kuppiksenKunkkuRepository = kuppiksenKunkkuRepository;

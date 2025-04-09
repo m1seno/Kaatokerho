@@ -1,32 +1,109 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<!-- xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"> -->
+<html xmlns:th="http://www.thymeleaf.org">
   <head>
-    <title>Kaatokerho</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link
-      type="text/css"
-      rel="stylesheet"
-      href="css/bootstrap.rtl.min.css"
-      th:href="@{css/bootstrap.rtl.min.css}"
-    />
+    <meta charset="UTF-8" />
+    <title>Kaatokerho | Etusivu</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.rtl.min.css}" />
+    <style>
+      body {
+        padding: 2rem;
+      }
+      .top-buttons {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+      }
+      .main-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+      }
+      .gp-table th,
+      .gp-table td {
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
-    <div>
-        <h1>Tervetuloa Internetin ytimeen - Kaatokerho Online</h1>
-        <p>Kaatokerho on turkulainen, vuonna 2006 perustettu varhaiskeski-ikäisten miesten keilailusarja,
-            jossa leikkimielisyys, huumori ja kilpailullisuus kättelevät sopusuhtaisesti. Keilauskausi koostuu
-            kolmestatoista kilpailusta, eli GP:stä, ja kauden päätteeksi eniten GP-sijoituksesta pisteitä kerännyt
-            kerholainen palkiaan mestaruuspokaali Kollilla. Keilailun lisäksi Kaatokerho on ollut mukana turkulaisessa
-            harrastejalkapallossa meineikkaana Kuntoliiga- ja Viking Line Hotsal-joukkueena. Tämän lisäksi "Kerho"
-            ottaa suunnilleen vuosittain mittaa tamperelaisesta Kauniiden uintiryhmästä spektaakkelinomaisessa
-            sekauintiviestissä. Kaatokerho muistetaan myös jo nyt historiallisista seinäkalentereistaan sekä
-            kielenvievistä Ravintolapäiväkattauksistaan, jotka poikivat hyväntekeväisyyshengessä pariin
-            turkulaiseen päiväkotiin aimo annoksen liikuntavälineitä.
-            <br />
-            Tälle sivustolle päivitämme Kaatokerhon keilailusarjan viralliset tilastot sekä kunkin kauden
-            voimassa olevan kilpailukalenterin.
-        </p>
+    <div class="container">
+      <div class="top-buttons">
+        <a th:if="${!loggedIn}" th:href="@{/login}" class="btn btn-outline-primary">Kirjaudu sisään</a>
+    
+        <form th:if="${loggedIn}" th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-outline-danger">Kirjaudu ulos</button>
+        </form>
+        
+      </div>
+      <div th:if="${logoutMessage}" class="alert alert-info" role="alert">
+        <p th:text="${logoutMessage}"></p>
+    </div>
+
+      <h1>Tervetuloa Internetin ytimeen - Kaatokerho Online</h1>
+      <p>
+        Kaatokerho on turkulainen, vuonna 2006 perustettu varhaiskeski-ikäisten
+        miesten keilailusarja, jossa leikkimielisyys, huumori ja kilpailullisuus
+        kättelevät sopusuhtaisesti. Keilauskausi koostuu kolmestatoista
+        kilpailusta, eli GP:stä, ja kauden päätteeksi eniten GP-sijoituksesta
+        pisteitä kerännyt kerholainen palkiaan mestaruuspokaali Kollilla.
+        Keilailun lisäksi Kaatokerho on ollut mukana turkulaisessa
+        harrastejalkapallossa meineikkaana Kuntoliiga- ja Viking Line
+        Hotsal-joukkueena. Tämän lisäksi "Kerho" ottaa suunnilleen vuosittain
+        mittaa tamperelaisesta Kauniiden uintiryhmästä spektaakkelinomaisessa
+        sekauintiviestissä. Kaatokerho muistetaan myös jo nyt historiallisista
+        seinäkalentereistaan sekä kielenvievistä Ravintolapäiväkattauksistaan,
+        jotka poikivat hyväntekeväisyyshengessä pariin turkulaiseen päiväkotiin
+        aimo annoksen liikuntavälineitä.
+        <br />
+        <br />
+        Tälle sivustolle päivitämme Kaatokerhon keilailusarjan viralliset
+        tilastot sekä kunkin kauden voimassa olevan kilpailukalenterin.
+      </p>
+
+      <div class="main-buttons">
+        <a th:href="@{/sarjataulukko}" class="btn btn-primary">Sarjataulukko</a>
+        <a th:href="@{/kultainen-gp}" class="btn btn-warning">Kultainen GP</a>
+        <a th:href="@{/kuppiksen-kunkku}" class="btn btn-dark"
+          >Kuppiksen Kunkku</a
+        >
+        <a
+          th:if="${#authorization.expression('isAuthenticated()')}"
+          th:href="@{/admin}"
+          class="btn btn-success"
+          >Admin-paneeli</a
+        >
+      </div>
+
+      <h2>GP-kalenteri 2024-25</h2>
+      <table class="table table-striped gp-table">
+        <thead class="table-primary">
+          <tr>
+            <th>GP</th>
+            <th>Päiväys</th>
+            <th>Paikka</th>
+            <th>Voittaja</th>
+            <th>Voittotulos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="gp: ${gpLista}">
+            <td th:text="${gp.jarjestysnumero}"></td>
+            <td th:text="${#temporals.format(gp.pvm, 'dd.MM.yyyy')}"></td>
+            <td th:text="${gp.keilahalli}"></td>
+            <td th:text="${gp.voittaja != null ? gp.voittaja : '-'}"></td>
+            <td th:text="${gp.voittotulos != null ? gp.voittotulos : '-'}"></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="table-secondary">
+            <td colspan="4"></td>
+            <td class="text-end">
+              Keskiarvo:
+              <span th:text="${#numbers.formatDecimal(keskiarvo, 1, 1)}"></span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   </body>
 </html>
