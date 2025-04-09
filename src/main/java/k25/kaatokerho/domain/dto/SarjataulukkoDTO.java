@@ -16,7 +16,7 @@ public class SarjataulukkoDTO {
     private double kaSarja;
 
     public SarjataulukkoDTO(int sija, String nimi, int gpMaara, double pisteet, double pisteetPerGp, int gpVoitot,
-                             List<Integer> gpTulokset, int yhteensa, double kaGp, double kaSarja) {
+            List<Integer> gpTulokset, int yhteensa, double kaGp, double kaSarja) {
         this.sija = sija;
         this.nimi = nimi;
         this.gpMaara = gpMaara;
@@ -65,14 +65,11 @@ public class SarjataulukkoDTO {
         return yhteensa;
     }
 
-    public double getKaPerGp() {
+    public double getKaGp() {
         return kaGp;
     }
 
-    public double getKaPerSarja() {
+    public double getKaSarja() {
         return kaSarja;
     }
-} 
-
-    
-
+}

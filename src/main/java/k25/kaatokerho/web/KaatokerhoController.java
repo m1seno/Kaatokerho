@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
 import k25.kaatokerho.domain.dto.KalenteriDTO;
@@ -21,11 +22,13 @@ public class KaatokerhoController {
     private final KeilaajaRepository keilaajaRepository;
     private final KalenteriService kalenteriService;
     private final SarjataulukkoService sarjataulukkoService;
+    private final GpRepository gpRepository;
 
-    public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService, SarjataulukkoService sarjataulukkoService) {
+    public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService, SarjataulukkoService sarjataulukkoService, GpRepository gpRepository) {
         this.keilaajaRepository = keilaajaRepository;
         this.kalenteriService = kalenteriService;
         this.sarjataulukkoService = sarjataulukkoService;
+        this.gpRepository = gpRepository;
     }
 
     //Etusivu
@@ -62,6 +65,11 @@ public class KaatokerhoController {
     public String sarjataulukko (Model model) {
         List<SarjataulukkoDTO> sarjataulukko = sarjataulukkoService.haeSarjataulukko();
         model.addAttribute("sarjataulukko", sarjataulukko);
+
+        //Tehdään lista GP:n järjestysnumeroista
+        List <Integer> gpNumerot = sarjataulukkoService.haeJarjestysnumerot();
+        model.addAttribute("gpNumerot", gpNumerot);
+
         return "sarjataulukko";
     }
 
