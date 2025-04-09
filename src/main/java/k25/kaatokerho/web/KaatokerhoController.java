@@ -11,19 +11,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
 import k25.kaatokerho.domain.dto.KalenteriDTO;
+import k25.kaatokerho.domain.dto.SarjataulukkoDTO;
 import k25.kaatokerho.service.KalenteriService;
+import k25.kaatokerho.service.SarjataulukkoService;
 
 @Controller
 public class KaatokerhoController {
 
     private final KeilaajaRepository keilaajaRepository;
     private final KalenteriService kalenteriService;
+    private final SarjataulukkoService sarjataulukkoService;
 
-    public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService) {
+    public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService, SarjataulukkoService sarjataulukkoService) {
         this.keilaajaRepository = keilaajaRepository;
         this.kalenteriService = kalenteriService;
+        this.sarjataulukkoService = sarjataulukkoService;
     }
 
+    //Etusivu
     @GetMapping({ "/", "/home" })
     public String homePage(@RequestParam(required = false) String logout, Model model, Principal principal) {
         List<KalenteriDTO> gpLista = kalenteriService.GpTiedot();
@@ -51,4 +56,13 @@ public class KaatokerhoController {
 
         return "home";
     }
+
+    //Sarjataulukko
+    @GetMapping("/sarjataulukko")
+    public String sarjataulukko (Model model) {
+        List<SarjataulukkoDTO> sarjataulukko = sarjataulukkoService.haeSarjataulukko();
+        model.addAttribute("sarjataulukko", sarjataulukko);
+        return "sarjataulukko";
+    }
+
 }
