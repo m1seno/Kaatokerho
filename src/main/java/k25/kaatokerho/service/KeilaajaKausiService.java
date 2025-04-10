@@ -17,13 +17,25 @@ import k25.kaatokerho.domain.Tulos;
 @Service
 public class KeilaajaKausiService {
 
-    @Autowired
-    private KeilaajaKausiRepository keilaajaKausiRepository;
+    private final KeilaajaKausiRepository keilaajaKausiRepository;
+    private final PistelaskuService pistelaskuService;
+    private final KultainenGpService kultainenGpService;
+
+    public KeilaajaKausiService (
+            @Autowired KeilaajaKausiRepository keilaajaKausiRepository,
+            @Autowired PistelaskuService pistelaskuService,
+            @Autowired KultainenGpService kultainenGpService) {
+        this.keilaajaKausiRepository = keilaajaKausiRepository;
+        this.pistelaskuService = pistelaskuService;
+        this.kultainenGpService = kultainenGpService;
+    }
 
     public void paivitaKeilaajaKausi(GP gp) {
         // Kutsutaan pistelaskua
-        PistelaskuService pistelaskuService = new PistelaskuService();
         Map<Long, Double> tuloslista = pistelaskuService.laskeSijoitus(gp);
+
+        // Kutsutaan KultainenGpServiceä
+        kultainenGpService.kultainenPistelasku(gp);
 
         Kausi kausi = gp.getKausi();
 
