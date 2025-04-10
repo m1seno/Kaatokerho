@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import k25.kaatokerho.domain.GP;
@@ -21,10 +20,10 @@ public class KeilaajaKausiService {
     private final PistelaskuService pistelaskuService;
     private final KultainenGpService kultainenGpService;
 
-    public KeilaajaKausiService (
-            @Autowired KeilaajaKausiRepository keilaajaKausiRepository,
-            @Autowired PistelaskuService pistelaskuService,
-            @Autowired KultainenGpService kultainenGpService) {
+    public KeilaajaKausiService(
+            KeilaajaKausiRepository keilaajaKausiRepository,
+            PistelaskuService pistelaskuService,
+            KultainenGpService kultainenGpService) {
         this.keilaajaKausiRepository = keilaajaKausiRepository;
         this.pistelaskuService = pistelaskuService;
         this.kultainenGpService = kultainenGpService;
@@ -81,8 +80,7 @@ public class KeilaajaKausiService {
                 if (gpHuonoin != null) {
                     Integer nykyinenHuonoin = keilaajaKausi.getHuonoinSarja();
                     keilaajaKausi.setHuonoinSarja(
-                        (nykyinenHuonoin == null) ? gpHuonoin : Math.min(nykyinenHuonoin, gpHuonoin)
-                    );
+                            (nykyinenHuonoin == null) ? gpHuonoin : Math.min(nykyinenHuonoin, gpHuonoin));
                 }
                 keilaajaKausi.setKaudenPisteet(uudetPisteet);
                 keilaajaKausi.setVoittoja(uudetVoitot);

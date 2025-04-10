@@ -82,9 +82,7 @@
       <div class="main-buttons">
         <a th:href="@{/sarjataulukko}" class="btn btn-primary">Sarjataulukko</a>
         <a th:href="@{/kultainen-gp}" class="btn btn-warning">Kultainen GP</a>
-        <a th:href="@{/kuppiksen-kunkku}" class="btn btn-dark"
-          >Kuppiksen Kunkku</a
-        >
+        <!-- <a th:href="@{/kuppiksen-kunkku}" class="btn btn-dark">Kuppiksen Kunkku</a> -->
         <a
           th:if="${#authorization.expression('isAuthenticated()')}"
           th:href="@{/admin/gpLista}"

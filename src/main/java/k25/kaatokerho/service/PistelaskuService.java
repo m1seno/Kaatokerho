@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.Tulos;
 
+@Service
 public class PistelaskuService {
 
     public Map<Long, Double> laskeSijoitus(GP gp) {

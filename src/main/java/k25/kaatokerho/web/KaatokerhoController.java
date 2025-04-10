@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -20,11 +21,13 @@ import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
 import k25.kaatokerho.domain.KeilahalliRepository;
 import k25.kaatokerho.domain.dto.KalenteriDTO;
+import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
 import k25.kaatokerho.domain.dto.SarjataulukkoDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 import k25.kaatokerho.service.KalenteriService;
 import k25.kaatokerho.service.LisaaGpService;
 import k25.kaatokerho.service.SarjataulukkoService;
+import k25.kaatokerho.service.TulosService;
 
 @Controller
 public class KaatokerhoController {
@@ -35,15 +38,18 @@ public class KaatokerhoController {
     private final SarjataulukkoService sarjataulukkoService;
     private final GpRepository gpRepository;
     private final LisaaGpService lisaaGpService;
+    private final TulosService tulosService;
 
     public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService,
-            SarjataulukkoService sarjataulukkoService, GpRepository gpRepository, LisaaGpService lisaaGpService, KeilahalliRepository keilahalliRepository) {
+            SarjataulukkoService sarjataulukkoService, GpRepository gpRepository, LisaaGpService lisaaGpService,
+            KeilahalliRepository keilahalliRepository, TulosService tulosService) {
         this.keilaajaRepository = keilaajaRepository;
         this.kalenteriService = kalenteriService;
         this.sarjataulukkoService = sarjataulukkoService;
         this.gpRepository = gpRepository;
         this.lisaaGpService = lisaaGpService;
         this.keilahalliRepository = keilahalliRepository;
+        this.tulosService = tulosService;
     }
 
     // Etusivu
@@ -94,7 +100,7 @@ public class KaatokerhoController {
     @GetMapping("/admin/gpLista")
     public String gpLista(Model model) {
         Iterable<GP> gpListaIterable = gpRepository.findAll();
-        
+
         // Muutetaan Iterable listaksi
         List<GP> gpLista = StreamSupport
                 .stream(gpListaIterable.spliterator(), false)
@@ -116,7 +122,8 @@ public class KaatokerhoController {
 
     // Tallennetaan uusi GP
     @PostMapping("/admin/gp/save")
-    public String tallennaGp(@Valid @ModelAttribute("gpDTO") UusiGpDTO gpDTO, BindingResult bindingResult, Model model) {
+    public String tallennaGp(@Valid @ModelAttribute("gpDTO") UusiGpDTO gpDTO, BindingResult bindingResult,
+            Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("keilahallit", keilahalliRepository.findAll());
             return "uusiGp";
@@ -130,6 +137,37 @@ public class KaatokerhoController {
             return "uusiGp";
         }
 
+        return "redirect:/admin/gpLista";
+    }
+
+    @GetMapping("/admin/gp/{id}/tulokset")
+    public String syotaTulokset(@PathVariable Long id, Model model) {
+        GP gp = gpRepository.findById(id).orElseThrow();
+        List<Keilaaja> keilaajat = (List<Keilaaja>) keilaajaRepository.findAll();
+
+        LisaaTuloksetDTO dto = new LisaaTuloksetDTO();
+        dto.setGpId(id);
+        List<LisaaTuloksetDTO.TulosForm> tulosFormit = keilaajat.stream().map(k -> {
+            LisaaTuloksetDTO.TulosForm tf = new LisaaTuloksetDTO.TulosForm();
+            tf.setKeilaajaId(k.getKeilaajaId());
+            return tf;
+        }).toList();
+        dto.setTulokset(tulosFormit);
+
+        model.addAttribute("tuloksetForm", dto);
+        model.addAttribute("keilaajat", keilaajat);
+        return "syotaTulokset";
+    }
+
+    @PostMapping("/admin/gp/tulokset/save")
+    public String tallennaTulokset(@Valid @ModelAttribute("dto") LisaaTuloksetDTO dto, BindingResult bindingResult,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            List<Keilaaja> keilaajat = (List<Keilaaja>) keilaajaRepository.findAll();
+            model.addAttribute("keilaajat", keilaajat);
+            return "syotaTulokset";
+        }
+        tulosService.tallennaTulokset(dto);
         return "redirect:/admin/gpLista";
     }
 }

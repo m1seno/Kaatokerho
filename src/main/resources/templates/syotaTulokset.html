@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Syötä tulokset</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.rtl.min.css}" />
+    <style>
+        body { padding: 2rem; }
+        .form-label { font-weight: bold; margin-top: 1rem; }
+        .form-control-sm { width: 100px; display: inline-block; margin-right: 1rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Syötä GP:n tulokset</h2>
+
+    <form th:action="@{/admin/gp/tulokset/save}" th:object="${tuloksetForm}" method="post">
+        <input type="hidden" th:field="*{gpId}" />
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Keilaaja</th>
+                <th>Sarja 1</th>
+                <th>Sarja 2</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tulos, iterStat : *{tulokset}">
+                <td>
+                    <span th:text="${keilaajat[iterStat.index].etunimi + ' ' + keilaajat[iterStat.index].sukunimi}"></span>
+                    <input type="hidden" th:field="*{tulokset[__${iterStat.index}__].keilaajaId}" />
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm"
+                           th:field="*{tulokset[__${iterStat.index}__].sarja1}" min="0" />
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm"
+                           th:field="*{tulokset[__${iterStat.index}__].sarja2}" min="0" />
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-success">Tallenna tulokset</button>
+        <a th:href="@{/admin/gpLista}" class="btn btn-secondary">Takaisin listaan</a>
+    </form>
+</div>
+</body>
+</html>
