@@ -35,8 +35,8 @@ public class KeilaajaKausiService {
         for (Tulos tulos : tulokset) {
             Integer sarja1 = tulos.getSarja1();
             Integer sarja2 = tulos.getSarja2();
-            Integer gpParas = sarja1 != null && sarja2 != null ? Math.max(sarja1, sarja2) : 0;
-            Integer gpHuonoin = sarja1 != null && sarja2 != null ? Math.min(sarja1, sarja2) : 0;
+            Integer gpParas = sarja1 != null && sarja2 != null ? Math.max(sarja1, sarja2) : null;
+            Integer gpHuonoin = sarja1 != null && sarja2 != null ? Math.min(sarja1, sarja2) : null;
             Keilaaja keilaaja = tulos.getKeilaaja();
             Long keilaajaId = keilaaja.getKeilaajaId();
             boolean osallistui = tulos.getOsallistui();
@@ -61,8 +61,17 @@ public class KeilaajaKausiService {
                 Integer uudetOsallistumiset = osallistui ? vanhatOsallistumiset + 1 : vanhatOsallistumiset;
 
                 // Päivitetään olemassaolevan keilaajakauden tietoja
-                keilaajaKausi.setParasSarja(Math.max(keilaajaKausi.getParasSarja(), gpParas));
-                keilaajaKausi.setHuonoinSarja(Math.min(keilaajaKausi.getHuonoinSarja(), gpHuonoin));
+                if (gpParas != null) {
+                    Integer nykyinenParas = keilaajaKausi.getParasSarja();
+                    keilaajaKausi.setParasSarja(
+                            (nykyinenParas == null) ? gpParas : Math.max(nykyinenParas, gpParas));
+                }
+                if (gpHuonoin != null) {
+                    Integer nykyinenHuonoin = keilaajaKausi.getHuonoinSarja();
+                    keilaajaKausi.setHuonoinSarja(
+                        (nykyinenHuonoin == null) ? gpHuonoin : Math.min(nykyinenHuonoin, gpHuonoin)
+                    );
+                }
                 keilaajaKausi.setKaudenPisteet(uudetPisteet);
                 keilaajaKausi.setVoittoja(uudetVoitot);
                 keilaajaKausi.setOsallistumisia(uudetOsallistumiset);
