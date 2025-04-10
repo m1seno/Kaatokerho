@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Uusi GP</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.rtl.min.css}" />
+    <style>
+        body { padding: 2rem; }
+        .form-label { font-weight: bold; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Luo uusi GP</h2>
+
+    <!-- Lomake -->
+    <form th:action="@{/admin/gp/save}" th:object="${gpDTO}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Järjestysnumero</label>
+            <input type="number" class="form-control" th:field="*{jarjestysnumero}" required />
+            <div class="error" th:if="${#fields.hasErrors('jarjestysnumero')}" th:errors="*{jarjestysnumero}"></div>
+        </div>
+        
+        <div class="form-check form-check-inline mb-3">
+            <input class="form-check-input" type="checkbox" th:field="*{kultainenGp}" id="kultainenGp">
+            <label class="form-check-label" for="kultainenGp">Kultainen GP</label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Päivämäärä</label>
+            <input type="date" class="form-control" th:field="*{pvm}" required />
+            <div class="error" th:if="${#fields.hasErrors('pvm')}" th:errors="*{pvm}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Keilahalli</label>
+            <select class="form-select" th:field="*{keilahalliId}" required>
+                <option th:each="halli : ${keilahallit}" th:value="${halli.keilahalliId}" th:text="${halli.nimi}"></option>
+            </select>
+            <div class="error" th:if="${#fields.hasErrors('keilahalliId')}" th:errors="*{keilahalliId}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Kausi</label>
+            <input type="text" class="form-control" th:value="*{kausi.nimi}" name="kausi.nimi" readonly />
+        </div>
+
+        <button type="submit" class="btn btn-success">Tallenna GP</button>
+        <a th:href="@{/admin/gpLista}" class="btn btn-secondary ms-2">Takaisin listaan</a>
+    </form>
+</div>
+</body>
+</html>
