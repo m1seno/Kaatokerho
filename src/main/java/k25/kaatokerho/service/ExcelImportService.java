@@ -159,18 +159,9 @@ public class ExcelImportService {
 
                     nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
 
-                    // Kultaiset GP-pisteet vasta nyt
-                    for (Tulos t : nykyisetTulokset) {
-                        if (t.getOsallistui()) {
-                            kultainenGpService.kultainenPistelasku(
-                                    nykyinenGp.isOnKultainenGp(),
-                                    t.getSarja1(),
-                                    t.getSarja2(),
-                                    t.getKeilaaja(),
-                                    kausiOptional.get(),
-                                    nykyinenGp);
-                        }
-                    }
+                    // Kultaiset GP-pisteet laskumetodia kutsutaan
+
+                    kultainenGpService.kultainenPistelasku(nykyinenGp);
 
                     // Haetaan tieto onko vyö unohtunut (1 = kyllä, 0 = ei)
                     boolean vyoUnohtui = false;
@@ -240,17 +231,7 @@ public class ExcelImportService {
             if (nykyinenGp != null && !nykyisetTulokset.isEmpty()) {
                 nykyinenGp.setTulokset(nykyisetTulokset);
 
-                for (Tulos t : nykyisetTulokset) {
-                    if (t.getOsallistui()) {
-                        kultainenGpService.kultainenPistelasku(
-                                nykyinenGp.isOnKultainenGp(),
-                                t.getSarja1(),
-                                t.getSarja2(),
-                                t.getKeilaaja(),
-                                kausiOptional.get(),
-                                nykyinenGp);
-                    }
-                }
+                kultainenGpService.kultainenPistelasku(nykyinenGp);
 
                 boolean vyoUnohtui = false;
                 if (viimeisinRivi != null) {
@@ -264,7 +245,7 @@ public class ExcelImportService {
                         .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
                 kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                 keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
-                ;
+
             }
 
         } catch (Exception e) {

@@ -1,6 +1,8 @@
 package k25.kaatokerho.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -22,78 +24,80 @@ public class KultainenGpService {
     private final KultainenGpRepository kultainenGpRepository;
     private final KeilaajaKausiRepository keilaajaKausiRepository;
 
-    public KultainenGpService(KultainenGpRepository kultainenGPRepository,
+    public KultainenGpService(KultainenGpRepository kultainenGpRepository,
             KeilaajaKausiRepository keilaajaKausiRepository) {
-        this.kultainenGpRepository = kultainenGPRepository;
+        this.kultainenGpRepository = kultainenGpRepository;
         this.keilaajaKausiRepository = keilaajaKausiRepository;
     }
 
-    public void kultainenPistelasku(boolean onKultainenGp, Integer sarja1, Integer sarja2, Keilaaja keilaaja,
-            Kausi kausi,
-            GP gp) {
-        if (!onKultainenGp)
+    // Säilytetään keilaajan hankkimia lisäpisteitä metodien ulkopuolella
+    private final Map<Long, Double> keilaajaPisteetMap = new HashMap<>();
+
+    public void kultainenPistelasku(GP gp) {
+        if (!gp.isOnKultainenGp())
             return;
 
-        // Jos sarjat ovat null, keilaaja ei osallistunut → ei pistelaskentaa
-        if (sarja1 == null || sarja2 == null)
-            return;
+        Kausi kausi = gp.getKausi();
 
-        int paras = Math.max(sarja1, sarja2);
-        int huonoin = Math.min(sarja1, sarja2);
+        // Käydään läpi kaikki kultaisen gp:n tulokset
+        for (Tulos tulos : gp.getTulokset()) {
 
-        // Hae keilaajan tilastot kyseiseltä kaudelta
-        Optional<KeilaajaKausi> keilaajaKausi = keilaajaKausiRepository.findByKeilaajaAndKausi(keilaaja,
-                kausi);
-        if (keilaajaKausi.isEmpty()) {
-            throw new IllegalArgumentException("KeilaajaKausi not found for keilaajaId: " + keilaaja.getKeilaajaId()
-                    + " and kausiId: " + kausi.getKausiId());
+            // Skipataan jos ei osallistunut
+            if (!tulos.getOsallistui())
+                continue;
+
+            Keilaaja keilaaja = tulos.getKeilaaja();
+            Integer sarja1 = tulos.getSarja1();
+            Integer sarja2 = tulos.getSarja2();
+
+            // Lasketaan paras ja huonoin sarja
+            int paras = Math.max(sarja1, sarja2);
+            int huonoin = Math.min(sarja1, sarja2);
+
+            // Kutsutaan metodia, joka laskee kultaisen gp:n parhaimman ja huonoimman sarjan
+            gpParasJaHuonoin(gp, keilaaja, paras, huonoin);
+
+            Optional<KeilaajaKausi> keilaajaKausiOpt = keilaajaKausiRepository.findByKeilaajaAndKausi(keilaaja, kausi);
+            if (keilaajaKausiOpt.isEmpty())
+                continue;
+
+            // Haetaan paras ja huonoin voimassaoleva sarja ennen tätä GP:tä
+            KeilaajaKausi keilaajaKausi = keilaajaKausiOpt.get();
+            Integer kaudenParas = keilaajaKausi.getParasSarja();
+            Integer kaudenHuonoin = keilaajaKausi.getHuonoinSarja();
+
+            // Jos sivutaan tai parannetaan/huononnetaan, lisätään tai vähennetään piste.
+            if (kaudenParas != null && paras >= kaudenParas) {
+                paivitaKeilaajanKultainenPiste(keilaaja, 1);
+            }
+            if (kaudenHuonoin != null && huonoin <= kaudenHuonoin) {
+                paivitaKeilaajanKultainenPiste(keilaaja, -1);
+            }
         }
-        Integer kaudenParas = keilaajaKausi.get().getParasSarja();
-        Integer kaudenHuonoin = keilaajaKausi.get().getHuonoinSarja();
-
-        // Lisäpiste gp:n parhaasta, miinuspiste huonoimmasta
-        gpParasJaHuonoin(gp, keilaaja, paras, huonoin);
-
-        // Jos KultainenGP on kauden ensimmäinen GP -> ei pistelisäykiä tai vähennyksiä.
-        if (kaudenParas == null || kaudenHuonoin == null) {
-            pistemuutokset(gp, keilaaja, 0);
-            return;
-        }
-        // Lisäpiste kauden parhaasta, miinuspiste huonoimmasta
-        if (paras >= kaudenParas) {
-            pistemuutokset(gp, keilaaja, 1);
-
-        } else if (huonoin <= kaudenHuonoin) {
-            pistemuutokset(gp, keilaaja, -1);
-        } else {
-            pistemuutokset(gp, keilaaja, 0);
-        }
-
     }
 
-    // Vertaillaan keilaajan tulosta muiden keilaajien tuloksiin
-    public void gpParasJaHuonoin(GP gp, Keilaaja keilaaja, int omaParas, int omaHuonoin) {
+    private void gpParasJaHuonoin(GP gp, Keilaaja keilaaja, int omaParas, int omaHuonoin) {
         List<Tulos> tulokset = gp.getTulokset();
 
-        // Poistetaan keilaajan omat tulokset vertailusta
+        // Filteröidään streamista vain ne tulokset, jotka eivät ole keilaajan omaia tuloksia
         List<Tulos> muidenTulokset = tulokset.stream()
                 .filter(t -> !t.getKeilaaja().getKeilaajaId().equals(keilaaja.getKeilaajaId()))
                 .toList();
 
-        // Haetaan muiden paras ja huonoin sarjat
+        // Lasketaan paras ja huonoin sarja kaikista muista keilaajista
         int parasKaikista = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
                 .filter(Objects::nonNull)
                 .max(Integer::compareTo)
-                .orElseThrow(() -> new IllegalStateException("GP:llä ei ole vertailukelpoisia tuloksia"));
+                .orElse(omaParas);
 
         int huonoinKaikista = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
                 .filter(Objects::nonNull)
                 .min(Integer::compareTo)
-                .orElseThrow(() -> new IllegalStateException("GP:llä ei ole vertailukelpoisia tuloksia"));
+                .orElse(omaHuonoin);
 
-        // Kuinka moni keilaaja heitti parhaan/huonoimman sarjan?
+        // Lasketaan kuinka monta keilaajaa on saanut parhaan ja huonoimman sarjan
         long parhaat = muidenTulokset.stream()
                 .flatMap(t -> Stream.of(t.getSarja1(), t.getSarja2()))
                 .filter(Objects::nonNull)
@@ -106,31 +110,55 @@ public class KultainenGpService {
                 .filter(s -> s == huonoinKaikista)
                 .count();
 
-        // Vertaillaan omaan tulokseen ja jaetaan piste jos kuuluu joukkoon
-        if (omaParas == parasKaikista && parhaat > 0) {
-            double piste = 1 / (int) parhaat;
-            pistemuutokset(gp, keilaaja, piste);
-        } else if (omaParas == parasKaikista) {
-            pistemuutokset(gp, keilaaja, 1);
-        } else {
-            pistemuutokset(gp, keilaaja, 0);
+        /* 
+         *  Vertaillaan omaa parasta ja huonointa sarjaa muiden tuloksiin.
+         *  Jos tulos jaetaan, jaetaan myös lisä tai miinuspiste.
+         */ 
+        if (omaParas >= parasKaikista && parhaat > 0) {
+            paivitaKeilaajanKultainenPiste(keilaaja, 1.0 / parhaat);
+        } else if (omaParas > parasKaikista) {
+            paivitaKeilaajanKultainenPiste(keilaaja, 1);
         }
 
-        if (omaHuonoin == huonoinKaikista && huonoimmat > 0) {
-            double miinus = -1 / (int) huonoimmat;
-            pistemuutokset(gp, keilaaja, miinus);
-        } else if (omaParas == huonoinKaikista) {
-            pistemuutokset(gp, keilaaja, -1);
-        } else {
-            pistemuutokset(gp, keilaaja, 0);
+        if (omaHuonoin <= huonoinKaikista && huonoimmat > 0) {
+            paivitaKeilaajanKultainenPiste(keilaaja, -1.0 / huonoimmat);
+        } else if (omaHuonoin < huonoinKaikista) {
+            paivitaKeilaajanKultainenPiste(keilaaja, -1);
         }
+
+        // Kutsutaan metodia, joka tallentaa kultaisen gp:n tulokset
+        tallennaPisteet(gp);
     }
 
-    public void pistemuutokset(GP gp, Keilaaja keilaaja, double lisapisteet) {
-        KultainenGp uusi = new KultainenGp();
-        uusi.setGp(gp);
-        uusi.setKeilaaja(keilaaja);
-        uusi.setLisapisteet(lisapisteet);
-        kultainenGpRepository.save(uusi);
+
+    // Lasketaan yhteen keilaajan lisäpisteet
+    // ChatGPT:n ehdotus: käytetään merge-metodia, joka yhdistää arvot ja laskee yhteen
+    private void paivitaKeilaajanKultainenPiste(Keilaaja keilaaja, double pisteet) {
+        keilaajaPisteetMap.merge(keilaaja.getKeilaajaId(), pisteet, Double::sum);
+    }
+
+    private void tallennaPisteet(GP gp) {
+        Kausi kausi = gp.getKausi();
+        for (Tulos tulos : gp.getTulokset()) {
+            Keilaaja keilaaja = tulos.getKeilaaja();
+            double pisteet = keilaajaPisteetMap.getOrDefault(keilaaja.getKeilaajaId(), 0.0);
+
+            KultainenGp kultainenGp = new KultainenGp();
+            kultainenGp.setGp(gp);
+            kultainenGp.setKeilaaja(keilaaja);
+            kultainenGp.setLisapisteet(pisteet);
+            kultainenGpRepository.save(kultainenGp);
+
+            // Tallennetaan pisteet myös sarjataulukkoon
+            Optional<KeilaajaKausi> keilaajaKausiOpt = keilaajaKausiRepository.findByKeilaajaAndKausi(keilaaja, kausi);
+            if (keilaajaKausiOpt.isPresent()) {
+                KeilaajaKausi keilaajaKausi = keilaajaKausiOpt.get();
+                keilaajaKausi.setKaudenPisteet(keilaajaKausi.getKaudenPisteet() + pisteet);
+                keilaajaKausiRepository.save(keilaajaKausi);
+            }
+        }
+
+        // Tyhjennetään keilaajaPisteetMap, jotta se ei sisällä vanhoja arvoja seuraavassa GP:ssä
+        keilaajaPisteetMap.clear();
     }
 }
