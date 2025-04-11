@@ -40,7 +40,7 @@ public class LisaaGpService {
         // Luodaan uusi GP-olio ja palautetaan se Controllerille
         UusiGpDTO gp = new UusiGpDTO();
         gp.setJarjestysnumero(seuraavaJarjestysnumero);
-        gp.setKausi(aktiivinenKausi);
+        gp.setKausiId(aktiivinenKausi.getKausiId());
         return gp;
     }
 
@@ -62,4 +62,36 @@ public class LisaaGpService {
         kausi.setGpMaara(kausi.getGpMaara() + 1);
         kausiRepository.save(kausi);
     }
+
+    public GP tallennaGpJaPalauta(UusiGpDTO uusiGp) {
+        // Haetaan viimeisin kausi
+        Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
+    
+        // Estetään GP:n lisääminen jos kauden gpMaara on jo täynnä
+        if (kausi.getGpMaara() >= kausi.getSuunniteltuGpMaara()) {
+            throw new IllegalStateException("Kaudelle ei voi lisätä enempää GP:itä.");
+        }
+    
+        // Haetaan keilahalli ID:n perusteella
+        Keilahalli halli = keilahalliRepository.findById(uusiGp.getKeilahalliId())
+                .orElseThrow(() -> new IllegalArgumentException("Keilahallia ei löytynyt"));
+    
+        // Luodaan GP-olio ja asetetaan tiedot
+        GP gp = new GP();
+        gp.setJarjestysnumero(uusiGp.getJarjestysnumero());
+        gp.setPvm(uusiGp.getPvm());
+        gp.setKeilahalli(halli);
+        gp.setOnKultainenGp(uusiGp.isKultainenGp());
+        gp.setKausi(kausi);
+    
+        // Tallennetaan GP
+        GP tallennettuGp = gpRepository.save(gp);
+    
+        // Päivitetään kauden gpMaara
+        kausi.setGpMaara(kausi.getGpMaara() + 1);
+        kausiRepository.save(kausi);
+    
+        return tallennettuGp;
+    }
+    
 }

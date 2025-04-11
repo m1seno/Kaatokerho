@@ -3,6 +3,8 @@ package k25.kaatokerho.domain;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +27,7 @@ public class GP {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "gp_id")
     private Long gpId;
-
+    
     @ManyToOne
     @JoinColumn(name = "kausi_id", nullable = false)
     private Kausi kausi;
@@ -47,12 +49,15 @@ public class GP {
     @Column(name = "on_kultainen_gp", nullable = false)
     private boolean onKultainenGp;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "gp", cascade = CascadeType.ALL, orphanRemoval = true)
     private KuppiksenKunkku kuppiksenKunkku;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "gp", cascade = CascadeType.ALL)
     private List<Tulos> tulokset;
-
+    
+    @JsonIgnore
     @OneToMany(mappedBy = "gp", cascade = CascadeType.ALL)
     private List<KultainenGp> kultaisetGp;
 

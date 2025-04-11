@@ -2,6 +2,8 @@ package k25.kaatokerho.domain;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +34,7 @@ public class Keilahalli {
     @Column(name = "valtio", nullable = false, length = 50)
     private String valtio;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilahalli")
     private List<GP> gpLista;
 

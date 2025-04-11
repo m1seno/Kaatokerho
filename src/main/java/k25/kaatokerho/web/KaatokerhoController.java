@@ -28,6 +28,7 @@ import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
 import k25.kaatokerho.domain.dto.SarjataulukkoDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 import k25.kaatokerho.service.KalenteriService;
+import k25.kaatokerho.service.KeilaajaKausiService;
 import k25.kaatokerho.service.KultainenGpService;
 import k25.kaatokerho.service.LisaaGpService;
 import k25.kaatokerho.service.SarjataulukkoService;
@@ -44,11 +45,12 @@ public class KaatokerhoController {
     private final LisaaGpService lisaaGpService;
     private final TulosService tulosService;
     private final KultainenGpService kultainenGpService;
+    private final KeilaajaKausiService keilaajaKausiService;
 
     public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService,
             SarjataulukkoService sarjataulukkoService, GpRepository gpRepository, LisaaGpService lisaaGpService,
             KeilahalliRepository keilahalliRepository, TulosService tulosService,
-            KultainenGpService kultainenGpService) {
+            KultainenGpService kultainenGpService, KeilaajaKausiService keilaajaKausiService) {
         this.keilaajaRepository = keilaajaRepository;
         this.kalenteriService = kalenteriService;
         this.sarjataulukkoService = sarjataulukkoService;
@@ -57,6 +59,7 @@ public class KaatokerhoController {
         this.keilahalliRepository = keilahalliRepository;
         this.tulosService = tulosService;
         this.kultainenGpService = kultainenGpService;
+        this.keilaajaKausiService = keilaajaKausiService;
     }
 
     // Etusivu
@@ -209,9 +212,14 @@ public class KaatokerhoController {
         return "redirect:/admin/gpLista";
     }
 
+    // Poistetaan GP
     @PostMapping("/admin/gp/delete/{id}")
     public String poistaGp(@PathVariable Long id) {
         gpRepository.deleteById(id);
+
+        // Päivitetään sarjataulukko
+        keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
+        
         return "redirect:/admin/gpLista";
     }
 

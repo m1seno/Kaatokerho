@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import k25.kaatokerho.domain.GP;
+import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaKausi;
@@ -19,14 +20,17 @@ public class KeilaajaKausiService {
     private final KeilaajaKausiRepository keilaajaKausiRepository;
     private final PistelaskuService pistelaskuService;
     private final KultainenGpService kultainenGpService;
+    private final GpRepository gpRepository;
 
     public KeilaajaKausiService(
             KeilaajaKausiRepository keilaajaKausiRepository,
             PistelaskuService pistelaskuService,
-            KultainenGpService kultainenGpService) {
+            KultainenGpService kultainenGpService,
+            GpRepository gpRepository) {
         this.keilaajaKausiRepository = keilaajaKausiRepository;
         this.pistelaskuService = pistelaskuService;
         this.kultainenGpService = kultainenGpService;
+        this.gpRepository = gpRepository;
     }
 
     public void paivitaKeilaajaKausi(GP gp) {
@@ -104,6 +108,18 @@ public class KeilaajaKausiService {
 
                 keilaajaKausiRepository.save(uusiKeilaajaKausi);
             }
+        }
+    }
+
+    public void paivitaKaikkiKeilaajaKausiTiedot() {
+        List<GP> kaikkiGp = (List<GP>) gpRepository.findAll();
+    
+        // Poistetaan kaikki keilaajakaudet
+        keilaajaKausiRepository.deleteAll();
+    
+        // Luodaan uudet tilastot pohjautuen jäljellä oleviin GP:ihin
+        for (GP gp : kaikkiGp) {
+            paivitaKeilaajaKausi(gp);
         }
     }
 }

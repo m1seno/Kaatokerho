@@ -3,7 +3,6 @@ package k25.kaatokerho.domain.dto;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
-import k25.kaatokerho.domain.Kausi;
 
 public class UusiGpDTO {
 
@@ -20,18 +19,18 @@ public class UusiGpDTO {
     private boolean kultainenGp;
 
     @NotNull
-    private Kausi kausi;
+    private Long kausiId;
 
     public UusiGpDTO() {
     }
 
     public UusiGpDTO(@NotNull Integer jarjestysnumero, @NotNull LocalDate pvm, @NotNull Long keilahalliId,
-            boolean kultainenGp, Kausi kausi) {
+            boolean kultainenGp, Long kausiId) {
         this.jarjestysnumero = jarjestysnumero;
         this.pvm = pvm;
         this.keilahalliId = keilahalliId;
         this.kultainenGp = kultainenGp;
-        this.kausi = kausi;
+        this.kausiId = kausiId;
     }
 
     public Integer getJarjestysnumero() {
@@ -66,11 +65,11 @@ public class UusiGpDTO {
         this.kultainenGp = kultainenGp;
     }
 
-    public Kausi getKausi() {
-        return kausi;
+    public Long getKausiId() {
+        return kausiId;
     }
 
-    public void setKausi(Kausi kausi) {
-        this.kausi = kausi;
+    public void setKausiId(Long kausiId) {
+        this.kausiId = kausiId;
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
@@ -25,7 +26,8 @@ public class WebSecurityConfig {
     private static final AntPathRequestMatcher[] WHITE_LIST_URLS = {
         new AntPathRequestMatcher("/home**"),
         new AntPathRequestMatcher("/login**"),
-        new AntPathRequestMatcher("/sarjataulukko**")
+        new AntPathRequestMatcher("/sarjataulukko**"),
+        new AntPathRequestMatcher("/api/gp/**"),
     };
 
     @Bean
@@ -46,7 +48,9 @@ public class WebSecurityConfig {
             .logout(logout -> logout
             .logoutSuccessUrl("/home?logout")
             .permitAll())
-            .csrf(csrf -> csrf.disable());
+            .csrf(csrf -> csrf
+    .ignoringRequestMatchers("/api/gp/**") // REST-reitti ilman CSRF
+    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
         return http.build();
     }
 

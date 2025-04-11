@@ -3,6 +3,8 @@ package k25.kaatokerho.domain;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,18 +54,23 @@ public class Keilaaja {
     @Column(name = "salasana_hash", length = 60)
     private String salasanaHash;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
     private List<Tulos> tulokset;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
     private List<KultainenGp> kultaisetGp;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "hallitseva")
     private List<KuppiksenKunkku> hallitsevat;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "haastaja")
     private List<KuppiksenKunkku> haastajat;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
     private List<KeilaajaKausi> kausiTilastot;
 

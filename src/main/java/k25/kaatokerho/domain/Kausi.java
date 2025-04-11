@@ -2,6 +2,8 @@ package k25.kaatokerho.domain;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,9 +39,11 @@ public class Kausi {
     @Column(name = "osallistujamaara", nullable = false)
     private Integer osallistujamaara;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "kausi")
     private List<GP> gpLista;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "kausi")
     private List<KeilaajaKausi> keilaajaTilastot;
 
