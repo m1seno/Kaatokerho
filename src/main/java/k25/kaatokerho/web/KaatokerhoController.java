@@ -1,15 +1,19 @@
 package k25.kaatokerho.web;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +23,7 @@ import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
+import k25.kaatokerho.domain.Keilahalli;
 import k25.kaatokerho.domain.KeilahalliRepository;
 import k25.kaatokerho.domain.dto.KalenteriDTO;
 import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
@@ -140,9 +145,9 @@ public class KaatokerhoController {
         return "redirect:/admin/gpLista";
     }
 
+    // Haetaan yksittäinen GP
     @GetMapping("/admin/gp/{id}/tulokset")
     public String syotaTulokset(@PathVariable Long id, Model model) {
-        GP gp = gpRepository.findById(id).orElseThrow();
         List<Keilaaja> keilaajat = (List<Keilaaja>) keilaajaRepository.findAll();
 
         LisaaTuloksetDTO dto = new LisaaTuloksetDTO();
@@ -159,6 +164,7 @@ public class KaatokerhoController {
         return "syotaTulokset";
     }
 
+    //Tallennetaan GP:n tulokset
     @PostMapping("/admin/gp/tulokset/save")
     public String tallennaTulokset(@Valid @ModelAttribute("dto") LisaaTuloksetDTO dto, BindingResult bindingResult,
             Model model) {
@@ -170,4 +176,38 @@ public class KaatokerhoController {
         tulosService.tallennaTulokset(dto);
         return "redirect:/admin/gpLista";
     }
+
+    @GetMapping("/admin/gp/edit/{id}")
+public String muokkaaGp(@PathVariable Long id, Model model) {
+    GP gp = gpRepository.findById(id).orElseThrow();
+    List<Keilahalli> keilahallit = (List<Keilahalli>) keilahalliRepository.findAll();
+    model.addAttribute("gp", gp);
+    model.addAttribute("keilahallit", keilahallit);
+    return "muokkaaGp";
+}
+
+@PatchMapping("/admin/gp/update")
+public String paivitaGp(@Valid @RequestParam Long gpId,
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate pvm,
+                        @RequestParam Long keilahalliId,
+                        @RequestParam(required = false) boolean onKultainenGp) {
+    GP gp = gpRepository.findById(gpId).orElseThrow();
+    Keilahalli halli = keilahalliRepository.findById(keilahalliId).orElseThrow();
+
+    gp.setPvm(pvm);
+    gp.setKeilahalli(halli);
+    gp.setOnKultainenGp(onKultainenGp);
+
+    gpRepository.save(gp);
+
+    return "redirect:/admin/gpLista";
+}
+
+@DeleteMapping("/admin/gp/delete/{id}")
+public String poistaGp(@PathVariable Long id) {
+    gpRepository.deleteById(id);
+    return "redirect:/admin/gpLista";
+}
+
+
 }
