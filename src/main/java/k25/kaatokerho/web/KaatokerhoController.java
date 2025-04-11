@@ -10,10 +10,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +28,7 @@ import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
 import k25.kaatokerho.domain.dto.SarjataulukkoDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 import k25.kaatokerho.service.KalenteriService;
+import k25.kaatokerho.service.KultainenGpService;
 import k25.kaatokerho.service.LisaaGpService;
 import k25.kaatokerho.service.SarjataulukkoService;
 import k25.kaatokerho.service.TulosService;
@@ -44,10 +43,12 @@ public class KaatokerhoController {
     private final GpRepository gpRepository;
     private final LisaaGpService lisaaGpService;
     private final TulosService tulosService;
+    private final KultainenGpService kultainenGpService;
 
     public KaatokerhoController(KeilaajaRepository keilaajaRepository, KalenteriService kalenteriService,
             SarjataulukkoService sarjataulukkoService, GpRepository gpRepository, LisaaGpService lisaaGpService,
-            KeilahalliRepository keilahalliRepository, TulosService tulosService) {
+            KeilahalliRepository keilahalliRepository, TulosService tulosService,
+            KultainenGpService kultainenGpService) {
         this.keilaajaRepository = keilaajaRepository;
         this.kalenteriService = kalenteriService;
         this.sarjataulukkoService = sarjataulukkoService;
@@ -55,6 +56,7 @@ public class KaatokerhoController {
         this.lisaaGpService = lisaaGpService;
         this.keilahalliRepository = keilahalliRepository;
         this.tulosService = tulosService;
+        this.kultainenGpService = kultainenGpService;
     }
 
     // Etusivu
@@ -164,7 +166,7 @@ public class KaatokerhoController {
         return "syotaTulokset";
     }
 
-    //Tallennetaan GP:n tulokset
+    // Tallennetaan GP:n tulokset
     @PostMapping("/admin/gp/tulokset/save")
     public String tallennaTulokset(@Valid @ModelAttribute("dto") LisaaTuloksetDTO dto, BindingResult bindingResult,
             Model model) {
@@ -178,36 +180,39 @@ public class KaatokerhoController {
     }
 
     @GetMapping("/admin/gp/edit/{id}")
-public String muokkaaGp(@PathVariable Long id, Model model) {
-    GP gp = gpRepository.findById(id).orElseThrow();
-    List<Keilahalli> keilahallit = (List<Keilahalli>) keilahalliRepository.findAll();
-    model.addAttribute("gp", gp);
-    model.addAttribute("keilahallit", keilahallit);
-    return "muokkaaGp";
-}
+    public String muokkaaGp(@PathVariable Long id, Model model) {
+        GP gp = gpRepository.findById(id).orElseThrow();
+        List<Keilahalli> keilahallit = (List<Keilahalli>) keilahalliRepository.findAll();
+        model.addAttribute("gp", gp);
+        model.addAttribute("keilahallit", keilahallit);
+        return "muokkaaGp";
+    }
 
-@PatchMapping("/admin/gp/update")
-public String paivitaGp(@Valid @RequestParam Long gpId,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate pvm,
-                        @RequestParam Long keilahalliId,
-                        @RequestParam(required = false) boolean onKultainenGp) {
-    GP gp = gpRepository.findById(gpId).orElseThrow();
-    Keilahalli halli = keilahalliRepository.findById(keilahalliId).orElseThrow();
+    @PostMapping("/admin/gp/update")
+    public String paivitaGp(@Valid @RequestParam Long gpId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate pvm,
+            @RequestParam Long keilahalliId,
+            @RequestParam(required = false) boolean onKultainenGp) {
+        GP gp = gpRepository.findById(gpId).orElseThrow();
+        Keilahalli halli = keilahalliRepository.findById(keilahalliId).orElseThrow();
 
-    gp.setPvm(pvm);
-    gp.setKeilahalli(halli);
-    gp.setOnKultainenGp(onKultainenGp);
+        gp.setPvm(pvm);
+        gp.setKeilahalli(halli);
+        gp.setOnKultainenGp(onKultainenGp);
 
-    gpRepository.save(gp);
+        gpRepository.save(gp);
 
-    return "redirect:/admin/gpLista";
-}
+        if (onKultainenGp) {
+            kultainenGpService.kultainenPistelasku(gp);
+        }
 
-@DeleteMapping("/admin/gp/delete/{id}")
-public String poistaGp(@PathVariable Long id) {
-    gpRepository.deleteById(id);
-    return "redirect:/admin/gpLista";
-}
+        return "redirect:/admin/gpLista";
+    }
 
+    @PostMapping("/admin/gp/delete/{id}")
+    public String poistaGp(@PathVariable Long id) {
+        gpRepository.deleteById(id);
+        return "redirect:/admin/gpLista";
+    }
 
 }

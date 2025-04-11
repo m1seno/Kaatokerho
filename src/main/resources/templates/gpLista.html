@@ -35,7 +35,9 @@
                 <td th:text="${gp.keilahalli.nimi}"></td>
                 <td class="actions">
                     <a th:href="@{/admin/gp/edit/{id}(id=${gp.gpId})}" class="btn btn-sm btn-warning">Muokkaa</a>
-                    <a th:href="@{/admin/gp/delete/{id}(id=${gp.GpId})}" class="btn btn-sm btn-danger">Poista</a>
+                    <form th:action="@{'/admin/gp/delete/' + ${gp.gpId}}" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Haluatko varmasti poistaa GP:n?')">Poista</button>
+                    </form>
                 </td>
                 <td>
                     <a th:if="${#lists.isEmpty(gp.tulokset)}" 

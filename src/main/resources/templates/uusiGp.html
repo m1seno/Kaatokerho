@@ -17,7 +17,7 @@
     <form th:action="@{/admin/gp/save}" th:object="${gpDTO}" method="post">
         <div class="mb-3">
             <label class="form-label">Järjestysnumero</label>
-            <input type="number" class="form-control" th:field="*{jarjestysnumero}" required />
+            <input type="number" class="form-control" th:field="*{jarjestysnumero}" required readonly/>
             <div class="error" th:if="${#fields.hasErrors('jarjestysnumero')}" th:errors="*{jarjestysnumero}"></div>
         </div>
         
