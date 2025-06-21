@@ -1,9 +1,6 @@
 package k25.kaatokerho.web;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +21,7 @@ public class KausiController {
 
     @GetMapping
     public ResponseEntity<List<Kausi>> haeKaikkiKausi() {
-        Iterable<Kausi> kausiListaIterable = kausiRepository.findAll();
-
-        List<Kausi> kausiLista = StreamSupport
-                .stream(kausiListaIterable.spliterator(), false)
-                .collect(Collectors.toList());
+        List<Kausi> kausiLista = kausiRepository.findAll();
 
         return ResponseEntity.ok(kausiLista);
     }

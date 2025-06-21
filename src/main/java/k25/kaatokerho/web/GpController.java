@@ -2,9 +2,6 @@ package k25.kaatokerho.web;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,13 +39,9 @@ public class GpController {
 
     @GetMapping
     public ResponseEntity<List<GP>> haeKaikkiGp(){
-    Iterable<GP> gpListaIterable = gpRepository.findAll();
+    List<GP> gpLista = gpRepository.findAll();
 
-        List<GP> gpLista = StreamSupport
-                .stream(gpListaIterable.spliterator(), false)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(gpLista);
+                return ResponseEntity.ok(gpLista);
     }
 
     @GetMapping("/{id}")
