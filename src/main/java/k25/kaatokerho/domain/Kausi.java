@@ -11,9 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Table; 
 
 @Entity
 @Table(name = "kausi")
@@ -23,19 +21,15 @@ public class Kausi {
     @Column(name = "kausi_id")
     private Long kausiId;
 
-    @NotEmpty(message = "Kauden nimi ei voi olla tyhjä (käytä esim. 2024-2025)")
     @Column(name = "nimi", nullable = false, length = 20)
     private String nimi;
 
-    @NotNull(message = "Kauden GP määrä ei voi olla null")
     @Column(name = "gp_maara", nullable = false)
     private Integer gpMaara;
 
-    @NotNull(message = "Kauden suunniteltu GP määrä ei voi olla null")
     @Column(name = "suunniteltu_gp_maara", nullable = false)
     private Integer suunniteltuGpMaara;
 
-    @NotNull(message = "Kauden osallistujamäärä ei voi olla null")
     @Column(name = "osallistujamaara", nullable = false)
     private Integer osallistujamaara;
 
@@ -50,9 +44,8 @@ public class Kausi {
     public Kausi() {
     }
 
-    public Kausi(Integer gpMaara, Long kausiId, String nimi, Integer osallistujamaara, Integer suunniteltuGpMaara) {
+    public Kausi(Integer gpMaara, String nimi, Integer osallistujamaara, Integer suunniteltuGpMaara) {
         this.gpMaara = gpMaara;
-        this.kausiId = kausiId;
         this.nimi = nimi;
         this.osallistujamaara = osallistujamaara;
         this.suunniteltuGpMaara = suunniteltuGpMaara;
