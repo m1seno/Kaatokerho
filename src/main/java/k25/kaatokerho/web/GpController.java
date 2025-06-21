@@ -27,13 +27,13 @@ import k25.kaatokerho.service.LisaaGpService;
 
 @RestController
 @RequestMapping("/api/gp")
-public class GpRestController {
+public class GpController {
 
     private final GpRepository gpRepository;
     private final LisaaGpService lisaaGpService;
     private final KeilahalliRepository keilahalliRepository;
 
-    public GpRestController(GpRepository gpRepository, LisaaGpService lisaaGpService,
+    public GpController(GpRepository gpRepository, LisaaGpService lisaaGpService,
                             KeilahalliRepository keilahalliRepository) {
         this.gpRepository = gpRepository;
         this.lisaaGpService = lisaaGpService;
