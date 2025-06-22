@@ -11,45 +11,39 @@ import org.springframework.web.bind.annotation.RestController;
 import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.dto.KausiDTO;
+import k25.kaatokerho.service.KausiService;
 
 @RestController
 @RequestMapping("/api/kausi")
 public class KausiController {
 
     private final KausiRepository kausiRepository;
+    private final KausiService kausiService;
 
-    public KausiController(KausiRepository kausiRepository) {
+    public KausiController(KausiRepository kausiRepository, KausiService kausiService) {
         this.kausiRepository = kausiRepository;
+        this.kausiService = kausiService;
     }
 
-    // Get list of all seasons
-    @GetMapping
+    // Lista kaikista kausista
+    @GetMapping("/all")
     public ResponseEntity<List<KausiDTO>> getAllKausi() {
-        List<KausiDTO> kausiList = kausiRepository.findAll();
-
-        return ResponseEntity.ok(kausiList);
+        return ResponseEntity.ok(kausiService.getAllKausi());
     }
 
-    // Get current season
+    // Nykyinen kausi
     @GetMapping("/current")
-    public ResponseEntity<Kausi> getCurrentKausi() {
-        Kausi currentKausi = kausiRepository.findTopByOrderByKausiIdDesc();
-        if (currentKausi != null) {
-            return ResponseEntity.ok(currentKausi);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<KausiDTO> getCurrentKausi() {
+        return ResponseEntity.ok(kausiService.getCurrentKausi());
     }
 
-    // Get season by Id
+    // Kusi Id:n perusteella
     @GetMapping("/{id}")
-    public ResponseEntity<Kausi> getKausiById(@PathVariable Long id) {
-        return kausiRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<KausiDTO> haeKausi(@PathVariable Long id) {
+        return ResponseEntity.ok(kausiService.getKausiById(id));
     }
 
-    // Add new season
+    // Lisää uusi kausi
     @PostMapping
     public ResponseEntity<Kausi> addNewKausi(Kausi kausi) {
         Kausi savedKausi = kausiRepository.save(kausi);
