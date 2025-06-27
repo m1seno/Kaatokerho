@@ -1,7 +1,7 @@
 -- KEILAAJAT
 INSERT INTO keilaaja (etunimi, sukunimi, syntymapaiva, aktiivijasen, admin, kayttajanimi, salasana_hash) VALUES
 ('Jami', 'Kallio', '1992-04-23', true, false, null, null),
-('Miika', 'Nordblad', '1991-05-27', true, true, 'miseno', '$2a$12$7yGZ64HFqJ7Hi5I.INkOpeLhYuQklnmUnf5gOHLHlS2FZx1f1Ldye'),
+('Miika', 'Nordblad', '1991-05-27', true, true, 'miseno', '$2y$10$qjgNzBIY5NwI0C.RcpjwhOEGvOHEzBfWfqCg7o8zDAKf.buwsIdBC'),
 ('Henri', 'Verho', '1988-07-16', true, true, 'hverho', '$2a$12$qt2A5YMC4csifjmykEMBR.xxMS9AZKoTOajCrJQkVR1Tu8zy6DwYa'),
 ('Ossi', 'Oksa', '1988-10-28', true, false, null, null),
 ('Niko', 'Reunanen', '1988-01-12', true, false, null, null),

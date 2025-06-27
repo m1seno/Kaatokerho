@@ -17,5 +17,5 @@ public class LoginDTO {
     private String kayttajanimi;
     @NotEmpty(message = "Salasana ei saa olla tyhjä")
     @Size(min = 8, max = 60, message = "Salasanan tulee olla vähintään 8 merkkiä pitkä")
-    private String salasanaHash;
+    private String salasana;
 }

@@ -101,8 +101,10 @@ public class KuppiksenKunkkuService {
         }
 
         // Tarkistetaan oliko haastaja lopulta paikalla (jos valittiin)
+        /*
         boolean haastajaPaikalla = lopullinenHaastaja[0] != null &&
                 tulokset.stream().anyMatch(t -> t.getKeilaaja().equals(lopullinenHaastaja[0]));
+        */
 
         // Tallennetaan kaksintaistelun tiedot tietokantaan
         lisaaKaksintaistelu(gp, uusiVoittaja, lopullinenHaastaja[0],

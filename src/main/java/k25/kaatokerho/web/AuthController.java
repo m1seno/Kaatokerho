@@ -31,7 +31,7 @@ public class AuthController {
     @PostMapping
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginDTO.getKayttajanimi(), loginDTO.getSalasanaHash())
+            new UsernamePasswordAuthenticationToken(loginDTO.getKayttajanimi(), loginDTO.getSalasana())
         );
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getKayttajanimi());

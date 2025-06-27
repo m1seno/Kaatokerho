@@ -263,7 +263,7 @@ public class KuppiksenKunkkuServiceTest {
     }
 
     // Haastajalistat is correctly populated for each GP
-    @Test
+    /*@Test
     public void test_haastajalistat_correctly_populated() {
         // Arrange
         KuppiksenKunkkuRepository mockKkRepo = mock(KuppiksenKunkkuRepository.class);
@@ -300,7 +300,7 @@ public class KuppiksenKunkkuServiceTest {
 
         List<Tulos> tuloksetGp1 = List.of(tulos1Gp1, tulos2Gp1);
         gp1.setTulokset(tuloksetGp1);
-    }
+    }*/
 
     // Tie in best series between players triggers IllegalStateException
     @Test

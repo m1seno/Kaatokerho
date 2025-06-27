@@ -155,7 +155,7 @@ public class ExcelImportService {
                 }
 
                 // Jos pvm vaihtuu JA ei olla ensimmäisellä kierroksella
-                if (edellinenPvm != null && !pvm.equals(edellinenPvm)) {
+                if (edellinenPvm != null && !pvm.equals(edellinenPvm) && nykyinenGp != null) {
 
                     nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
 
