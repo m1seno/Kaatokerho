@@ -21,7 +21,7 @@ public class Kausi {
     @Column(name = "kausi_id")
     private Long kausiId;
 
-    @Column(name = "nimi", nullable = false, length = 20)
+    @Column(name = "nimi", unique = true, nullable = false, length = 20)
     private String nimi;
 
     @Column(name = "gp_maara", nullable = false)

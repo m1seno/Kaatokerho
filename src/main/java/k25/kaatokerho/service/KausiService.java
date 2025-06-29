@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.dto.KausiDTO;
+import k25.kaatokerho.domain.dto.UusiKausiDTO;
 
 @Service
 public class KausiService {
@@ -50,11 +51,30 @@ public class KausiService {
     // Haetaan nykyinen kausi
     public KausiDTO getCurrentKausi() {
         Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
-    
+
         if (kausi == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
         }
-    
+
         return mapToDto(kausi);
+    }
+
+    // Lisää uusi kausi
+    public Kausi addNewKausi(UusiKausiDTO dto) {
+
+        if (dto.getNimi() != null && kausiRepository.findByNimi(dto.getNimi()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kausi " + dto.getNimi() + " on jo olemassa.");
+        } else {
+            Kausi kausi = new Kausi();
+            kausi.setNimi(dto.getNimi());
+            kausi.setGpMaara(0);
+            kausi.setSuunniteltuGpMaara(dto.getSuunniteltuGpMaara());
+            kausi.setOsallistujamaara(dto.getOsallistujamaara());
+            Kausi tallennettuKausi = kausiRepository.save(kausi);
+
+            return tallennettuKausi;
+
+        }
+
     }
 }
