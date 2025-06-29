@@ -1,6 +1,7 @@
 package k25.kaatokerho.web;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,20 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import k25.kaatokerho.domain.Kausi;
-import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.dto.KausiDTO;
 import k25.kaatokerho.domain.dto.UusiKausiDTO;
+import k25.kaatokerho.exception.ApiException;
 import k25.kaatokerho.service.KausiService;
 
 @RestController
 @RequestMapping("/api/kausi")
 public class KausiController {
 
-    private final KausiRepository kausiRepository;
     private final KausiService kausiService;
 
-    public KausiController(KausiRepository kausiRepository, KausiService kausiService) {
-        this.kausiRepository = kausiRepository;
+    public KausiController(KausiService kausiService) {
         this.kausiService = kausiService;
     }
 
@@ -45,7 +44,8 @@ public class KausiController {
     // Kusi Id:n perusteella
     @GetMapping("/{id}")
     public ResponseEntity<KausiDTO> haeKausi(@PathVariable Long id) {
-        return ResponseEntity.ok(kausiService.getKausiById(id));
+        KausiDTO kausiDTO = kausiService.getKausiById(id);
+        return ResponseEntity.ok(kausiDTO);
     }
 
     // Lisää uusi kausi

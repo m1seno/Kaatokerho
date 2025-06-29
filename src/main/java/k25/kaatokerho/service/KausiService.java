@@ -11,6 +11,7 @@ import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.dto.KausiDTO;
 import k25.kaatokerho.domain.dto.UusiKausiDTO;
+import k25.kaatokerho.exception.ApiException;
 
 @Service
 public class KausiService {
@@ -32,10 +33,10 @@ public class KausiService {
 
     // Haetaan yhden kauden tiedot
     public KausiDTO getKausiById(Long kausiId) {
-        Kausi kausi = kausiRepository.findById(kausiId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Kautta ei löydy id:llä: " + kausiId));
+        Kausi kausi = kausiRepository.findById(kausiId).orElse(null);
+        if (kausi == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId);
+        }
 
         return mapToDto(kausi);
     }
@@ -53,7 +54,7 @@ public class KausiService {
         Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
 
         if (kausi == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
         }
 
         return mapToDto(kausi);
@@ -63,7 +64,7 @@ public class KausiService {
     public Kausi addNewKausi(UusiKausiDTO dto) {
 
         if (dto.getNimi() != null && kausiRepository.findByNimi(dto.getNimi()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kausi " + dto.getNimi() + " on jo olemassa.");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Kausi " + dto.getNimi() + " on jo olemassa.");
         } else {
             Kausi kausi = new Kausi();
             kausi.setNimi(dto.getNimi());
