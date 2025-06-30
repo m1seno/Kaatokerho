@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
-import k25.kaatokerho.domain.dto.KausiDTO;
+import k25.kaatokerho.domain.dto.KausiResponseDTO;
 import k25.kaatokerho.domain.dto.UusiKausiDTO;
 import k25.kaatokerho.exception.ApiException;
 
@@ -20,8 +20,8 @@ public class KausiService {
         this.kausiRepository = kausiRepository;
     }
 
-    private KausiDTO mapToDto(Kausi kausi) {
-        return KausiDTO.builder()
+    private KausiResponseDTO mapToDto(Kausi kausi) {
+        return KausiResponseDTO.builder()
                 .nimi(kausi.getNimi())
                 .gpMaara(kausi.getGpMaara())
                 .suunniteltuGpMaara(kausi.getSuunniteltuGpMaara())
@@ -30,7 +30,7 @@ public class KausiService {
     }
 
     // Haetaan yhden kauden tiedot
-    public KausiDTO getKausiById(Long kausiId) {
+    public KausiResponseDTO getKausiById(Long kausiId) {
         Kausi kausi = kausiRepository.findById(kausiId).orElse(null);
         if (kausi == null) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId);
@@ -40,8 +40,8 @@ public class KausiService {
     }
 
     // Haetaan kaikki kaudet
-    public List<KausiDTO> getAllKausi() {
-        List <KausiDTO> kausilista = kausiRepository.findAll()
+    public List<KausiResponseDTO> getAllKausi() {
+        List <KausiResponseDTO> kausilista = kausiRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -53,7 +53,7 @@ public class KausiService {
     }
 
     // Haetaan nykyinen kausi
-    public KausiDTO getCurrentKausi() {
+    public KausiResponseDTO getCurrentKausi() {
         Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
 
         if (kausi == null) {
@@ -64,7 +64,7 @@ public class KausiService {
     }
 
     // Lisää uusi kausi
-    public Kausi addNewKausi(UusiKausiDTO dto) {
+    public KausiResponseDTO addNewKausi(UusiKausiDTO dto) {
 
         String nimi = dto.getNimi().trim();
 
@@ -76,14 +76,15 @@ public class KausiService {
             kausi.setGpMaara(0);
             kausi.setSuunniteltuGpMaara(dto.getSuunniteltuGpMaara());
             kausi.setOsallistujamaara(dto.getOsallistujamaara());
-            return kausiRepository.save(kausi);
+            Kausi uusiKausi = kausiRepository.save(kausi);
 
+            return mapToDto(uusiKausi);
         }
 
     }
 
     //Päivitä kausi
-    public Kausi updateKausi(Long kausiId, UusiKausiDTO dto) {
+    public KausiResponseDTO updateKausi(Long kausiId, UusiKausiDTO dto) {
         Kausi kausi = kausiRepository.findById(kausiId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
 
@@ -98,7 +99,9 @@ public class KausiService {
         kausi.setSuunniteltuGpMaara(dto.getSuunniteltuGpMaara());
         kausi.setOsallistujamaara(dto.getOsallistujamaara());
 
-        return kausiRepository.save(kausi);
+        Kausi paivitettyKausi = kausiRepository.save(kausi);
+
+        return mapToDto(paivitettyKausi);
     }
 
     // Poista kausi

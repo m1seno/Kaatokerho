@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class KausiDTO {
+public class KausiResponseDTO {
 
     @NotEmpty(message = "Kauden nimi ei saa olla tyhjä")
     private String nimi;

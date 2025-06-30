@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import k25.kaatokerho.domain.Kausi;
-import k25.kaatokerho.domain.dto.KausiDTO;
+import k25.kaatokerho.domain.dto.KausiResponseDTO;
 import k25.kaatokerho.domain.dto.UusiKausiDTO;
 import k25.kaatokerho.service.KausiService;
 
@@ -30,34 +30,34 @@ public class KausiController {
 
     // Lista kaikista kausista
     @GetMapping("/all")
-    public ResponseEntity<List<KausiDTO>> haeKaikkiKaudet() {
+    public ResponseEntity<List<KausiResponseDTO>> haeKaikkiKaudet() {
         return ResponseEntity.ok(kausiService.getAllKausi());
     }
 
     // Nykyinen kausi
     @GetMapping("/current")
-    public ResponseEntity<KausiDTO> haeNykyinenKausi() {
+    public ResponseEntity<KausiResponseDTO> haeNykyinenKausi() {
         return ResponseEntity.ok(kausiService.getCurrentKausi());
     }
 
     // Kusi Id:n perusteella
     @GetMapping("/{id}")
-    public ResponseEntity<KausiDTO> haeKausi(@PathVariable Long id) {
-        KausiDTO kausiDTO = kausiService.getKausiById(id);
+    public ResponseEntity<KausiResponseDTO> haeKausi(@PathVariable Long id) {
+        KausiResponseDTO kausiDTO = kausiService.getKausiById(id);
         return ResponseEntity.ok(kausiDTO);
     }
 
     // Lisää uusi kausi
     @PostMapping
-    public ResponseEntity<Kausi> lisaaUusiKausi(@Valid @RequestBody UusiKausiDTO kausi) {
-        Kausi tallennettuKausi = kausiService.addNewKausi(kausi);
+    public ResponseEntity<KausiResponseDTO> lisaaUusiKausi(@Valid @RequestBody UusiKausiDTO kausi) {
+        KausiResponseDTO tallennettuKausi = kausiService.addNewKausi(kausi);
         return ResponseEntity.status(HttpStatus.CREATED).body(tallennettuKausi);
     }
 
     // Päivitä kausi
     @PutMapping("/{id}")
-    public ResponseEntity<Kausi> paivitaKausi(@PathVariable Long id, @Valid @RequestBody UusiKausiDTO dto) {
-        Kausi paivitettyKausi = kausiService.updateKausi(id, dto);
+    public ResponseEntity<KausiResponseDTO> paivitaKausi(@PathVariable Long id, @Valid @RequestBody UusiKausiDTO dto) {
+        KausiResponseDTO paivitettyKausi = kausiService.updateKausi(id, dto);
         return ResponseEntity.ok(paivitettyKausi);
     }
 
