@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.dto.KausiDTO;
@@ -43,10 +41,15 @@ public class KausiService {
 
     // Haetaan kaikki kaudet
     public List<KausiDTO> getAllKausi() {
-        return kausiRepository.findAll()
+        List <KausiDTO> kausilista = kausiRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+
+        if (kausilista.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
+        }
+        return kausilista;
     }
 
     // Haetaan nykyinen kausi
@@ -63,19 +66,46 @@ public class KausiService {
     // Lisää uusi kausi
     public Kausi addNewKausi(UusiKausiDTO dto) {
 
-        if (dto.getNimi() != null && kausiRepository.findByNimi(dto.getNimi()).isPresent()) {
+        String nimi = dto.getNimi().trim();
+
+        if (nimi != null && kausiRepository.findByNimi(dto.getNimi()).isPresent()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Kausi " + dto.getNimi() + " on jo olemassa.");
         } else {
             Kausi kausi = new Kausi();
-            kausi.setNimi(dto.getNimi());
+            kausi.setNimi(nimi);
             kausi.setGpMaara(0);
             kausi.setSuunniteltuGpMaara(dto.getSuunniteltuGpMaara());
             kausi.setOsallistujamaara(dto.getOsallistujamaara());
-            Kausi tallennettuKausi = kausiRepository.save(kausi);
-
-            return tallennettuKausi;
+            return kausiRepository.save(kausi);
 
         }
 
+    }
+
+    //Päivitä kausi
+    public Kausi updateKausi(Long kausiId, UusiKausiDTO dto) {
+        Kausi kausi = kausiRepository.findById(kausiId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
+
+        String uusiNimi = dto.getNimi().trim();
+
+        if (uusiNimi != null && !uusiNimi.equals(kausi.getNimi()) &&
+            kausiRepository.findByNimi(uusiNimi).isPresent()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Kausi " + uusiNimi + " on jo olemassa.");
+        }
+
+        kausi.setNimi(uusiNimi);
+        kausi.setSuunniteltuGpMaara(dto.getSuunniteltuGpMaara());
+        kausi.setOsallistujamaara(dto.getOsallistujamaara());
+
+        return kausiRepository.save(kausi);
+    }
+
+    // Poista kausi
+    public void deleteKausi(Long kausiId) {
+        Kausi kausi = kausiRepository.findById(kausiId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
+
+        kausiRepository.delete(kausi);
     }
 }
