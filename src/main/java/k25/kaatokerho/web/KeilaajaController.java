@@ -1,6 +1,8 @@
 package k25.kaatokerho.web;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import k25.kaatokerho.domain.dto.KeilaajaResponseDTO;
+import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.service.KeilaajaService;
 
@@ -52,6 +55,17 @@ public class KeilaajaController {
     public ResponseEntity<KeilaajaResponseDTO> editKeilaaja(@PathVariable Long id, @Valid @RequestBody UusiKeilaajaDTO dto) {
         KeilaajaResponseDTO updatedKeilaaja = keilaajaService.updateKeilaaja(id, dto);
         return ResponseEntity.ok(updatedKeilaaja);
+    }
+
+    // Vaihda salasana
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> updateSalasana(@PathVariable Long id, @Valid @RequestBody PaivitaSalasanaDTO dto){
+        keilaajaService.updateSalasana(id, dto);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Salasana päivitetty onnistuneesti!");
+
+        return ResponseEntity.ok(response);
     }
 
     // Poista Keilaaja

@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
-import k25.kaatokerho.domain.dto.KausiResponseDTO;
 import k25.kaatokerho.domain.dto.KeilaajaResponseDTO;
-import k25.kaatokerho.domain.dto.UusiKausiDTO;
+import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.exception.ApiException;
 
@@ -20,9 +19,11 @@ import k25.kaatokerho.exception.ApiException;
 public class KeilaajaService {
 
     private final KeilaajaRepository keilaajaRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public KeilaajaService(KeilaajaRepository keilaajaRepository) {
+    public KeilaajaService(KeilaajaRepository keilaajaRepository, PasswordEncoder passwordEncoder) {
         this.keilaajaRepository = keilaajaRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private KeilaajaResponseDTO mapToDto(Keilaaja keilaaja) {
@@ -94,38 +95,53 @@ public class KeilaajaService {
         }
     }
 
-    //Päivitä keilaaja
+    // Päivitä kaikki keilaajan tiedot paitsi salasana
     public KeilaajaResponseDTO updateKeilaaja(Long keilaajaId, UusiKeilaajaDTO dto) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+                .orElseThrow(
+                        () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
         String kayttajanimi = dto.getKayttajanimi().trim();
 
         if (kayttajanimi != null && !kayttajanimi.equals(keilaaja.getKayttajanimi()) &&
-        keilaajaRepository.findByKayttajanimi(kayttajanimi).equals(kayttajanimi)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Käyttäjänimi " + kayttajanimi + " on jo olemassa toisella keilaajalla.");
+                keilaajaRepository.findByKayttajanimi(kayttajanimi).equals(kayttajanimi)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Käyttäjänimi " + kayttajanimi + " on jo olemassa toisella keilaajalla.");
         }
 
         keilaaja.setEtunimi(dto.getEtunimi());
         keilaaja.setSukunimi(dto.getSukunimi());
         keilaaja.setSyntymapaiva(dto.getSyntymapaiva());
-            keilaaja.setAktiivijasen(dto.getAktiivijasen());
-            keilaaja.setAdmin(dto.getAdmin());
+        keilaaja.setAktiivijasen(dto.getAktiivijasen());
+        keilaaja.setAdmin(dto.getAdmin());
 
-            if (dto.getAdmin()) {
-                keilaaja.setKayttajanimi(dto.getKayttajanimi());
-                keilaaja.setSalasanaHash(dto.getSalasana());
-            } else {
-                keilaaja.setKayttajanimi(null);
-                keilaaja.setSalasanaHash(null);
-            }
-            return mapToDto(keilaajaRepository.save(keilaaja));
+        if (dto.getAdmin()) {
+            keilaaja.setKayttajanimi(kayttajanimi);
+            keilaaja.setSalasanaHash(passwordEncoder.encode(dto.getSalasana()));
+        } else {
+            keilaaja.setKayttajanimi(null);
+            keilaaja.setSalasanaHash(null);
+        }
+        return mapToDto(keilaajaRepository.save(keilaaja));
+    }
+
+    // Päivitä keilaajan salasana
+    public void updateSalasana(Long keilaajaId, PaivitaSalasanaDTO dto) {
+        Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+
+        if (!passwordEncoder.matches(keilaaja.getSalasanaHash(), dto.getVanhaSalasana())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Väärä vanha salasana");
+        }
+            keilaaja.setSalasanaHash(passwordEncoder.encode(dto.getUusiSalasana()));
+            keilaajaRepository.save(keilaaja);
     }
 
     // Poista keilaaja
     public void deleteKeilaaja(Long keilaajaId) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+                .orElseThrow(
+                        () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
         keilaajaRepository.delete(keilaaja);
     }
