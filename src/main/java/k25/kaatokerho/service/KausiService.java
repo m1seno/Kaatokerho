@@ -69,7 +69,7 @@ public class KausiService {
         String nimi = dto.getNimi().trim();
 
         if (nimi != null && kausiRepository.findByNimi(dto.getNimi()).isPresent()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Kausi " + dto.getNimi() + " on jo olemassa.");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Kausi " + nimi + " on jo olemassa.");
         } else {
             Kausi kausi = new Kausi();
             kausi.setNimi(nimi);

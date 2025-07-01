@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.dto.KausiResponseDTO;
 import k25.kaatokerho.domain.dto.UusiKausiDTO;
 import k25.kaatokerho.service.KausiService;
@@ -29,7 +28,7 @@ public class KausiController {
     }
 
     // Lista kaikista kausista
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<KausiResponseDTO>> haeKaikkiKaudet() {
         return ResponseEntity.ok(kausiService.getAllKausi());
     }

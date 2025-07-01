@@ -47,7 +47,7 @@ public class Keilaaja {
     @Column(name = "admin", nullable = false)
     private Boolean admin;
 
-    @Column(name = "kayttajanimi", length = 50)
+    @Column(name = "kayttajanimi", unique = true, length = 50)
     private String kayttajanimi;
 
     @Column(name = "salasana_hash", length = 60)
