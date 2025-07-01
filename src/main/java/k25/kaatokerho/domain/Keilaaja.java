@@ -47,7 +47,6 @@ public class Keilaaja {
     @Column(name = "admin", nullable = false)
     private Boolean admin;
 
-    @NotNull
     @Column(name = "kayttajanimi", length = 50)
     private String kayttajanimi;
 
