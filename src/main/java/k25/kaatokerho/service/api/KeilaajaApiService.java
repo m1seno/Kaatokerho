@@ -72,7 +72,7 @@ public class KeilaajaApiService {
 
         if (dto.getAdmin()) {
             keilaaja.setKayttajanimi(kayttajanimi);
-            keilaaja.setSalasanaHash(dto.getSalasana());
+            keilaaja.setSalasanaHash(passwordEncoder.encode(dto.getSalasana()));
         } else {
             keilaaja.setKayttajanimi(null);
             keilaaja.setSalasanaHash(null);
@@ -89,10 +89,11 @@ public class KeilaajaApiService {
 
         String kayttajanimi = dto.getKayttajanimi() != null ? dto.getKayttajanimi().trim() : null;
 
-        if (kayttajanimi != null && !kayttajanimi.equals(keilaaja.getKayttajanimi()) &&
-                keilaajaRepository.findByKayttajanimi(kayttajanimi).equals(kayttajanimi)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST,
-                    "Käyttäjänimi " + kayttajanimi + " on jo olemassa toisella keilaajalla.");
+        if (kayttajanimi != null &&
+                !kayttajanimi.equals(keilaaja.getKayttajanimi()) &&
+                keilaajaRepository.findByKayttajanimi(kayttajanimi).isPresent()) {
+
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Käyttäjänimi " + kayttajanimi + " on jo käytössä.");
         }
 
         keilaaja.setEtunimi(dto.getEtunimi());
@@ -103,10 +104,8 @@ public class KeilaajaApiService {
 
         if (dto.getAdmin()) {
             keilaaja.setKayttajanimi(kayttajanimi);
-            keilaaja.setSalasanaHash(passwordEncoder.encode(dto.getSalasana()));
         } else {
             keilaaja.setKayttajanimi(null);
-            keilaaja.setSalasanaHash(null);
         }
         return mapToDto(keilaajaRepository.save(keilaaja));
     }
