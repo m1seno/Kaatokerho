@@ -39,8 +39,8 @@ public class KeilaajaController {
 
     // Hae keilaaja Id:n perusteella
     @GetMapping("/{id}")
-    public ResponseEntity<KeilaajaResponseDTO> getKeilaaja(@PathVariable Long Id) {
-        return ResponseEntity.ok(keilaajaService.getKeilaajaById(Id));
+    public ResponseEntity<KeilaajaResponseDTO> getKeilaaja(@PathVariable Long id) {
+        return ResponseEntity.ok(keilaajaService.getKeilaajaById(id));
     }
 
     // Lisää uusi keilaaja

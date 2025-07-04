@@ -58,18 +58,18 @@ public class KeilaajaApiService {
     // Lisää uusi keilaaja
     public KeilaajaResponseDTO addNewKeilaaja(UusiKeilaajaDTO dto) {
         String kayttajanimi = dto.getKayttajanimi() != null ? dto.getKayttajanimi().trim() : null;
-    
+
         if (kayttajanimi != null && keilaajaRepository.findByKayttajanimi(kayttajanimi).isPresent()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Käyttäjänimi " + kayttajanimi + " on jo käytössä.");
         }
-    
+
         Keilaaja keilaaja = new Keilaaja();
         keilaaja.setEtunimi(dto.getEtunimi());
         keilaaja.setSukunimi(dto.getSukunimi());
         keilaaja.setSyntymapaiva(dto.getSyntymapaiva());
         keilaaja.setAktiivijasen(dto.getAktiivijasen());
         keilaaja.setAdmin(dto.getAdmin());
-    
+
         if (dto.getAdmin()) {
             keilaaja.setKayttajanimi(kayttajanimi);
             keilaaja.setSalasanaHash(dto.getSalasana());
@@ -77,7 +77,7 @@ public class KeilaajaApiService {
             keilaaja.setKayttajanimi(null);
             keilaaja.setSalasanaHash(null);
         }
-    
+
         return mapToDto(keilaajaRepository.save(keilaaja));
     }
 
@@ -87,7 +87,7 @@ public class KeilaajaApiService {
                 .orElseThrow(
                         () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
-        String kayttajanimi = dto.getKayttajanimi().trim();
+        String kayttajanimi = dto.getKayttajanimi() != null ? dto.getKayttajanimi().trim() : null;
 
         if (kayttajanimi != null && !kayttajanimi.equals(keilaaja.getKayttajanimi()) &&
                 keilaajaRepository.findByKayttajanimi(kayttajanimi).equals(kayttajanimi)) {
