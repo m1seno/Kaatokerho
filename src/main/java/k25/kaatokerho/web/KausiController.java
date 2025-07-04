@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import k25.kaatokerho.domain.dto.KausiResponseDTO;
 import k25.kaatokerho.domain.dto.UusiKausiDTO;
-import k25.kaatokerho.service.KausiService;
+import k25.kaatokerho.service.api.KausiApiService;
 
 @RestController
 @RequestMapping("/api/kausi")
 public class KausiController {
 
-    private final KausiService kausiService;
+    private final KausiApiService kausiService;
 
-    public KausiController(KausiService kausiService) {
+    public KausiController(KausiApiService kausiService) {
         this.kausiService = kausiService;
     }
 

@@ -1,4 +1,4 @@
-package k25.kaatokerho.service;
+package k25.kaatokerho.service.api;
 
 import org.springframework.stereotype.Service;
 
@@ -11,13 +11,13 @@ import k25.kaatokerho.domain.KeilahalliRepository;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 
 @Service
-public class LisaaGpService {
+public class GpApiService {
 
     private final GpRepository gpRepository;
     private final KausiRepository kausiRepository;
     private final KeilahalliRepository keilahalliRepository;
 
-    public LisaaGpService(GpRepository gpRepository, KausiRepository kausiRepository, KeilahalliRepository keilahalliRepository) {
+    public GpApiService(GpRepository gpRepository, KausiRepository kausiRepository, KeilahalliRepository keilahalliRepository) {
         this.gpRepository = gpRepository;
         this.kausiRepository = kausiRepository;
         this.keilahalliRepository = keilahalliRepository;

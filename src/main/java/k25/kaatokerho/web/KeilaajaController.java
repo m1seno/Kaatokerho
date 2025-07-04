@@ -19,15 +19,15 @@ import jakarta.validation.Valid;
 import k25.kaatokerho.domain.dto.KeilaajaResponseDTO;
 import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
-import k25.kaatokerho.service.KeilaajaService;
+import k25.kaatokerho.service.api.KeilaajaApiService;
 
 @RestController
 @RequestMapping("api/keilaaja")
 public class KeilaajaController {
 
-    private final KeilaajaService keilaajaService;
+    private final KeilaajaApiService keilaajaService;
 
-    public KeilaajaController(KeilaajaService keilaajaService) {
+    public KeilaajaController(KeilaajaApiService keilaajaService) {
         this.keilaajaService = keilaajaService;
     }
 
@@ -58,7 +58,7 @@ public class KeilaajaController {
     }
 
     // Vaihda salasana
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/salasana")
     public ResponseEntity<Map<String, String>> updateSalasana(@PathVariable Long id, @Valid @RequestBody PaivitaSalasanaDTO dto){
         keilaajaService.updateSalasana(id, dto);
 

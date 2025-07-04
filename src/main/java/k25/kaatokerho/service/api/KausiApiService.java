@@ -1,4 +1,4 @@
-package k25.kaatokerho.service;
+package k25.kaatokerho.service.api;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,11 +12,11 @@ import k25.kaatokerho.domain.dto.UusiKausiDTO;
 import k25.kaatokerho.exception.ApiException;
 
 @Service
-public class KausiService {
+public class KausiApiService {
 
     private final KausiRepository kausiRepository;
 
-    public KausiService(KausiRepository kausiRepository) {
+    public KausiApiService(KausiRepository kausiRepository) {
         this.kausiRepository = kausiRepository;
     }
 

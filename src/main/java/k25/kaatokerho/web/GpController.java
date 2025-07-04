@@ -20,17 +20,17 @@ import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.KeilahalliRepository;
 import k25.kaatokerho.domain.dto.PaivitaGpDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
-import k25.kaatokerho.service.LisaaGpService;
+import k25.kaatokerho.service.api.GpApiService;
 
 @RestController
 @RequestMapping("/api/gp")
 public class GpController {
 
     private final GpRepository gpRepository;
-    private final LisaaGpService lisaaGpService;
+    private final GpApiService lisaaGpService;
     private final KeilahalliRepository keilahalliRepository;
 
-    public GpController(GpRepository gpRepository, LisaaGpService lisaaGpService,
+    public GpController(GpRepository gpRepository, GpApiService lisaaGpService,
                             KeilahalliRepository keilahalliRepository) {
         this.gpRepository = gpRepository;
         this.lisaaGpService = lisaaGpService;
