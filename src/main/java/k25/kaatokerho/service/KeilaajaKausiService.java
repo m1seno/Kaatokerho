@@ -58,65 +58,59 @@ public class KeilaajaKausiService {
             Double gpPisteet = osallistui ? tuloslista.getOrDefault(keilaajaId, 0.0) : 0.0;
 
             boolean voittaja = osallistui && tuloslista.containsKey(keilaajaId)
-                    && tuloslista.get(keilaajaId) == parasPiste;
+                    && Double.compare(tuloslista.get(keilaajaId), parasPiste) == 0;
 
             // Tarkista, onko keilaaja jo olemassa kaudella
-            Optional<KeilaajaKausi> keilaajaKausiOpt = keilaajaKausiRepository
-                    .findByKeilaajaAndKausi(keilaaja, kausi);
-            if (keilaajaKausiOpt.isPresent()) {
-                // Haetaan vanhat tiedot
-                KeilaajaKausi keilaajaKausi = keilaajaKausiOpt.get();
-                Double vanhatPisteet = keilaajaKausi.getKaudenPisteet();
-                Integer vanhatVoitot = keilaajaKausi.getVoittoja();
-                Integer vanhatOsallistumiset = keilaajaKausi.getOsallistumisia();
+            KeilaajaKausi keilaajaKausi = haeTaiLuoKeilaajaKausi(keilaaja, kausi);
 
-                // Lasketaan uudet tiedot
-                Double uudetPisteet = vanhatPisteet + gpPisteet;
-                Integer uudetVoitot = voittaja ? vanhatVoitot + 1 : vanhatVoitot;
-                Integer uudetOsallistumiset = osallistui ? vanhatOsallistumiset + 1 : vanhatOsallistumiset;
-
-                // Päivitetään olemassaolevan keilaajakauden tietoja
-                if (gpParas != null) {
-                    Integer nykyinenParas = keilaajaKausi.getParasSarja();
-                    keilaajaKausi.setParasSarja(
-                            (nykyinenParas == null) ? gpParas : Math.max(nykyinenParas, gpParas));
-                }
-                if (gpHuonoin != null) {
-                    Integer nykyinenHuonoin = keilaajaKausi.getHuonoinSarja();
-                    keilaajaKausi.setHuonoinSarja(
-                            (nykyinenHuonoin == null) ? gpHuonoin : Math.min(nykyinenHuonoin, gpHuonoin));
-                }
-                keilaajaKausi.setKaudenPisteet(uudetPisteet);
-                keilaajaKausi.setVoittoja(uudetVoitot);
-                keilaajaKausi.setOsallistumisia(uudetOsallistumiset);
-
-                keilaajaKausiRepository.save(keilaajaKausi);
-            } else {
-                // Luo uusi keilaajakausi
-                Integer voittoja = voittaja ? 1 : 0;
-                Integer osallistumisia = osallistui ? 1 : 0;
-                Double pisteet = gpPisteet;
-
-                KeilaajaKausi uusiKeilaajaKausi = new KeilaajaKausi();
-                uusiKeilaajaKausi.setKeilaaja(keilaaja);
-                uusiKeilaajaKausi.setKausi(kausi);
-                uusiKeilaajaKausi.setParasSarja(gpParas);
-                uusiKeilaajaKausi.setHuonoinSarja(gpHuonoin);
-                uusiKeilaajaKausi.setKaudenPisteet(pisteet);
-                uusiKeilaajaKausi.setVoittoja(voittoja);
-                uusiKeilaajaKausi.setOsallistumisia(osallistumisia);
-
-                keilaajaKausiRepository.save(uusiKeilaajaKausi);
+            // Päivitä paras sarja
+            if (gpParas != null) {
+                Integer nykyinen = keilaajaKausi.getParasSarja();
+                keilaajaKausi.setParasSarja(nykyinen == null ? gpParas : Math.max(nykyinen, gpParas));
             }
+
+            // Päivitä huonoin sarja
+            if (gpHuonoin != null) {
+                Integer nykyinen = keilaajaKausi.getHuonoinSarja();
+                keilaajaKausi.setHuonoinSarja(nykyinen == null ? gpHuonoin : Math.min(nykyinen, gpHuonoin));
+            }
+
+            // Päivitä pisteet, voitot ja osallistumiset
+            keilaajaKausi.setKaudenPisteet(keilaajaKausi.getKaudenPisteet() + gpPisteet);
+            if (voittaja) {
+                keilaajaKausi.setVoittoja(keilaajaKausi.getVoittoja() + 1);
+            }
+            if (osallistui) {
+                keilaajaKausi.setOsallistumisia(keilaajaKausi.getOsallistumisia() + 1);
+            }
+
+            keilaajaKausiRepository.save(keilaajaKausi);
+
         }
+    }
+
+    public KeilaajaKausi haeTaiLuoKeilaajaKausi(Keilaaja keilaaja, Kausi kausi) {
+        return keilaajaKausiRepository
+                .findByKeilaajaAndKausi(keilaaja, kausi)
+                .orElseGet(() -> {
+                    KeilaajaKausi uusi = new KeilaajaKausi();
+                    uusi.setKeilaaja(keilaaja);
+                    uusi.setKausi(kausi);
+                    uusi.setKaudenPisteet(0.0);
+                    uusi.setVoittoja(0);
+                    uusi.setOsallistumisia(0);
+                    uusi.setParasSarja(null);
+                    uusi.setHuonoinSarja(null);
+                    return uusi;
+                });
     }
 
     public void paivitaKaikkiKeilaajaKausiTiedot() {
         List<GP> kaikkiGp = (List<GP>) gpRepository.findAll();
-    
+
         // Poistetaan kaikki keilaajakaudet
         keilaajaKausiRepository.deleteAll();
-    
+
         // Luodaan uudet tilastot pohjautuen jäljellä oleviin GP:ihin
         for (GP gp : kaikkiGp) {
             paivitaKeilaajaKausi(gp);
