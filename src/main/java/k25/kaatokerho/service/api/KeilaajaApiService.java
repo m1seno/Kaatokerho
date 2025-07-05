@@ -28,6 +28,7 @@ public class KeilaajaApiService {
 
     private KeilaajaResponseDTO mapToDto(Keilaaja keilaaja) {
         return KeilaajaResponseDTO.builder()
+                .keilaajaId(keilaaja.getKeilaajaId())
                 .etunimi(keilaaja.getEtunimi())
                 .sukunimi(keilaaja.getSukunimi())
                 .syntymapaiva(keilaaja.getSyntymapaiva())

@@ -22,6 +22,7 @@ public class KausiApiService {
 
     private KausiResponseDTO mapToDto(Kausi kausi) {
         return KausiResponseDTO.builder()
+                .kausiId(kausi.getKausiId())
                 .nimi(kausi.getNimi())
                 .gpMaara(kausi.getGpMaara())
                 .suunniteltuGpMaara(kausi.getSuunniteltuGpMaara())

@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class KeilaajaResponseDTO {
 
+    private Long keilaajaId;
+
     private String etunimi;
 
     private String sukunimi;
