@@ -1,6 +1,5 @@
 package k25.kaatokerho.service;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,16 +52,22 @@ public class PistelaskuService {
             int loppuIndeksi = i;
             int jaettuSijoitus = alkuIndeksi + 1;
 
-            // Lasketaan jaettavat pisteet tälle tulosjoukolle
-            double jaetutPisteet = 0;
-            for (int s = jaettuSijoitus; s <= loppuIndeksi + 1; s++) {
-                jaetutPisteet += laskeSijoituspisteet(s);
-            }
-
-            // Päätetään jaetaanko pisteet vai annetaanko 0
             boolean viimeinenSija = loppuIndeksi == osallistujia - 1;
             boolean viimeinenSijaJaettu = loppuIndeksi > alkuIndeksi;
             boolean jaetaankoPisteet = osallistujia > 10 || !viimeinenSija || viimeinenSijaJaettu;
+
+            double jaetutPisteet;
+
+            if (viimeinenSija && viimeinenSijaJaettu && osallistujia <= 10) {
+                // Jaetaan vain toiseksi viimeisen sijoituksen pisteet
+                int toiseksiViimeinenSijoitus = osallistujia - 1;
+                jaetutPisteet = laskeSijoituspisteet(toiseksiViimeinenSijoitus);
+            } else {
+                jaetutPisteet = 0;
+                for (int s = jaettuSijoitus; s <= loppuIndeksi + 1; s++) {
+                    jaetutPisteet += laskeSijoituspisteet(s);
+                }
+            }
 
             double keskiarvo = jaetaankoPisteet
                     ? jaetutPisteet / (loppuIndeksi - alkuIndeksi + 1)
