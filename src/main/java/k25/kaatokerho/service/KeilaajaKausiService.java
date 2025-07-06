@@ -2,8 +2,6 @@ package k25.kaatokerho.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 import k25.kaatokerho.domain.GP;
