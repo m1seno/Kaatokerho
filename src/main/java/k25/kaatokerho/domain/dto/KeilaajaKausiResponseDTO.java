@@ -1,7 +1,5 @@
 package k25.kaatokerho.domain.dto;
 
-import k25.kaatokerho.domain.Kausi;
-import k25.kaatokerho.domain.Keilaaja;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,18 +11,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class KeilaajaKausiResponseDTO {
 
-    private Keilaaja keilaaja;
+    private Long keilaajaKausiId;
 
-    private Kausi kausi;
+    private Long keilaajaId;
+    private String keilaajaNimi;
+
+    private Long kausiId;
+    private String kausiNimi;
     
     private Integer parasSarja;
-
     private Integer huonoinSarja;
-
     private Double kaudenPisteet;
-
     private Integer voittoja;
-
     private Integer osallistumisia;
 
 }
