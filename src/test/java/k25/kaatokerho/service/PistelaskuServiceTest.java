@@ -40,9 +40,9 @@ public class PistelaskuServiceTest {
     public void testaaNormaaliJarjestys() {
         GP gp = luoGPTestiTuloksilla(
                 List.of(
-                    new int[] { 150, 150 }, new int[] { 140, 140 }, new int[] { 130, 130 }, new int[] { 120, 120 },
-                    new int[] { 110, 110 }, new int[] { 100, 100 }, new int[] { 90, 90 }, new int[] { 80, 80 },
-                    new int[] { 70, 70 }, new int[] { 60, 60 }, new int[] { 50, 50 }, new int[] { 40, 40 }),
+                        new int[] { 150, 150 }, new int[] { 140, 140 }, new int[] { 130, 130 }, new int[] { 120, 120 },
+                        new int[] { 110, 110 }, new int[] { 100, 100 }, new int[] { 90, 90 }, new int[] { 80, 80 },
+                        new int[] { 70, 70 }, new int[] { 60, 60 }, new int[] { 50, 50 }, new int[] { 40, 40 }),
                 List.of(true, true, true, true, true, true, true, true, true, true, true, true));
 
         Map<Long, Double> tulokset = pistelaskuService.laskeSijoitus(gp);
@@ -65,8 +65,8 @@ public class PistelaskuServiceTest {
     public void testaaTasapeliKarki() {
         GP gp = luoGPTestiTuloksilla(
                 List.of(new int[] { 150, 150 }, new int[] { 150, 150 }, new int[] { 130, 130 }, new int[] { 120, 120 },
-                new int[] { 110, 110 }, new int[] { 100, 100 }, new int[] { 90, 90 }, new int[] { 80, 80 },
-                new int[] { 70, 70 }, new int[] { 60, 60 }, new int[] { 50, 50 }),
+                        new int[] { 110, 110 }, new int[] { 100, 100 }, new int[] { 90, 90 }, new int[] { 80, 80 },
+                        new int[] { 70, 70 }, new int[] { 60, 60 }, new int[] { 50, 50 }),
                 List.of(true, true, true, true, true, true, true, true, true, true, true));
 
         Map<Long, Double> tulokset = pistelaskuService.laskeSijoitus(gp);
@@ -135,12 +135,11 @@ public class PistelaskuServiceTest {
                         new int[] { 150, 150 }, // 300, 1st
                         new int[] { 125, 125 }, // 250, 2nd
                         new int[] { 100, 100 }, // 200, 3rd tie
-                        new int[] { 100, 100 },  // 200, 3rd tie
-                        new int[] { 90, 90 },    // 180, 5th
-                        new int[] { 80, 80 }    // 160, 6th
+                        new int[] { 100, 100 }, // 200, 3rd tie
+                        new int[] { 90, 90 }, // 180, 5th
+                        new int[] { 80, 80 } // 160, 6th
                 ),
-                List.of(true, true, true, true, true, true)
-        );
+                List.of(true, true, true, true, true, true));
 
         Map<Long, Double> tulokset = pistelaskuService.laskeSijoitus(gp);
         assertEquals(12.0, tulokset.get(1L));
@@ -149,6 +148,95 @@ public class PistelaskuServiceTest {
         assertEquals(7.5, tulokset.get(4L));
         assertEquals(6.0, tulokset.get(5L));
         assertEquals(0.0, tulokset.get(6L));
+    }
+
+    @Test
+    public void testaaKymmenenOsallistujaaUniikitPisteet() {
+        GP gp = luoGPTestiTuloksilla(
+                List.of(
+                        new int[] { 200, 200 }, // 400, 1st
+                        new int[] { 190, 190 }, // 380, 2nd
+                        new int[] { 180, 180 }, // 360, 3rd
+                        new int[] { 170, 170 }, // 340, 4th
+                        new int[] { 160, 160 }, // 320, 5th
+                        new int[] { 150, 150 }, // 300, 6th
+                        new int[] { 140, 140 }, // 280, 7th
+                        new int[] { 130, 130 }, // 260, 8th
+                        new int[] { 120, 120 }, // 240, 9th
+                        new int[] { 110, 110 } // 220, 10th
+                ),
+                List.of(true, true, true, true, true, true, true, true, true, true));
+
+        Map<Long, Double> tulokset = pistelaskuService.laskeSijoitus(gp);
+        assertEquals(12.0, tulokset.get(1L));
+        assertEquals(10.0, tulokset.get(2L));
+        assertEquals(8.0, tulokset.get(3L));
+        assertEquals(7.0, tulokset.get(4L));
+        assertEquals(6.0, tulokset.get(5L));
+        assertEquals(5.0, tulokset.get(6L));
+        assertEquals(4.0, tulokset.get(7L));
+        assertEquals(3.0, tulokset.get(8L));
+        assertEquals(2.0, tulokset.get(9L));
+        assertEquals(0.0, tulokset.get(10L));
+    }
+
+    @Test
+    public void testaaTasapeliUseammallakunKahdella() {
+        GP gp = luoGPTestiTuloksilla(
+                List.of(
+                        new int[] { 200, 200 }, // 400, 1st
+                        new int[] { 190, 190 }, // 380, 2nd
+                        new int[] { 180, 180 }, // 360, 3rd (tasapeli)
+                        new int[] { 180, 180 }, // 360, 3rd (tasapeli)
+                        new int[] { 180, 180 }, // 360, 3rd (tasapeli)
+                        new int[] { 170, 170 }, // 340, 6th
+                        new int[] { 160, 160 }, // 320, 7th
+                        new int[] { 150, 150 }, // 300, 8th
+                        new int[] { 140, 140 }, // 280, 9th
+                        new int[] { 130, 130 }, // 260, 10th
+                        new int[] { 120, 120 } // 240, 11th
+
+                ),
+                List.of(true, true, true, true, true, true, true, true, true, true, true));
+
+        Map<Long, Double> tulokset = pistelaskuService.laskeSijoitus(gp);
+        assertEquals(12.0, tulokset.get(1L));
+        assertEquals(10.0, tulokset.get(2L));
+        assertEquals(7.0, tulokset.get(3L));
+        assertEquals(7.0, tulokset.get(4L));
+        assertEquals(7.0, tulokset.get(5L));
+        assertEquals(5.0, tulokset.get(6L));
+        assertEquals(4.0, tulokset.get(7L));
+        assertEquals(3.0, tulokset.get(8L));
+        assertEquals(2.0, tulokset.get(9L));
+        assertEquals(1.0, tulokset.get(10L));
+        assertEquals(0.0, tulokset.get(11L));
+    }
+
+    @Test
+    public void testaaPitkaDesimaalilukuJaossa() {
+        GP gp = luoGPTestiTuloksilla(
+                List.of(
+                        new int[] { 200, 200 },
+                        new int[] { 200, 200 },
+                        new int[] { 200, 200 },
+                        new int[] { 200, 200 },
+                        new int[] { 200, 200 },
+                        new int[] { 200, 200 },
+                        new int[] { 200, 200 },
+                        new int[] { 100, 100 }
+                ),
+                List.of(true, true, true, true, true, true, true, true));
+
+        Double expected = (12.0 + 10.0 + 8.0 + 7.0 + 6.0 + 5.0 + 4.0) / 7; // Sijoitukset 1-7 jaetaan, kaikki saavat 7.42857143
+
+        Map<Long, Double> tulokset = pistelaskuService.laskeSijoitus(gp);
+        assertEquals(expected, tulokset.get(1L));
+        assertEquals(expected, tulokset.get(2L));
+        assertEquals(expected, tulokset.get(3L));
+        assertEquals(expected, tulokset.get(4L));
+        assertEquals(expected, tulokset.get(5L));
+        assertEquals(expected, tulokset.get(6L));
     }
 
 }
