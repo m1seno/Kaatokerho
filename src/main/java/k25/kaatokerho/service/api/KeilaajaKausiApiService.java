@@ -13,7 +13,7 @@ import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaKausi;
 import k25.kaatokerho.domain.KeilaajaKausiRepository;
 import k25.kaatokerho.domain.KeilaajaRepository;
-import k25.kaatokerho.domain.dto.KeilaajaKausiResponseDTO;
+import k25.kaatokerho.domain.dto.ResponseKeilaajaKausiDTO;
 import k25.kaatokerho.exception.ApiException;
 
 @Service
@@ -30,8 +30,8 @@ public class KeilaajaKausiApiService {
         this.keilaajaRepo = keilaajaRepo;
     }
 
-    private KeilaajaKausiResponseDTO mapToDto(KeilaajaKausi keilaajaKausi) {
-        return KeilaajaKausiResponseDTO.builder()
+    private ResponseKeilaajaKausiDTO mapToDto(KeilaajaKausi keilaajaKausi) {
+        return ResponseKeilaajaKausiDTO.builder()
                 .keilaajaKausiId(keilaajaKausi.getKeilaajaKausiId())
                 .keilaajaId(keilaajaKausi.getKeilaaja().getKeilaajaId())
                 .keilaajaNimi(
@@ -47,7 +47,7 @@ public class KeilaajaKausiApiService {
     }
 
     // Hakee kaikki keilaajakausitiedot (kaikista kausista ja keilaajista)
-    public List<KeilaajaKausiResponseDTO> getAllKeilaajaKaudet() {
+    public List<ResponseKeilaajaKausiDTO> getAllKeilaajaKaudet() {
         List<KeilaajaKausi> kkLista = new ArrayList<>();
         kkRepo.findAll().forEach(kkLista::add);
 
@@ -57,7 +57,7 @@ public class KeilaajaKausiApiService {
     }
 
     // Hakee kauden kaikkien keilaajien tilastot (esim. sarjataulukkoa varten)
-    public List<KeilaajaKausiResponseDTO> getKaudenKeilaajat(Long kausiId) {
+    public List<ResponseKeilaajaKausiDTO> getKaudenKeilaajat(Long kausiId) {
         Kausi kausi = kausiRepo.findById(kausiId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
 
@@ -73,7 +73,7 @@ public class KeilaajaKausiApiService {
     }
 
     // Hakee yksittäisen keilaajan tilastot kaikilta kausilta
-    public List<KeilaajaKausiResponseDTO> getKeilaajanKaudet(Long keilaajaId) {
+    public List<ResponseKeilaajaKausiDTO> getKeilaajanKaudet(Long keilaajaId) {
         Keilaaja keilaaja = keilaajaRepo.findById(keilaajaId)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
@@ -89,7 +89,7 @@ public class KeilaajaKausiApiService {
     }
 
     // Hakee tietyn keilaajan kausitilastot tietyltä kaudelta
-    public KeilaajaKausiResponseDTO getKeilaajanKausi(Long keilaajaId, Long kausiId) {
+    public ResponseKeilaajaKausiDTO getKeilaajanKausi(Long keilaajaId, Long kausiId) {
         Keilaaja keilaaja = keilaajaRepo.findById(keilaajaId)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 

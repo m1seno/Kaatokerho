@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class KeilaajaResponseDTO {
+public class ResponseKeilaajaDTO {
 
     private Long keilaajaId;
 

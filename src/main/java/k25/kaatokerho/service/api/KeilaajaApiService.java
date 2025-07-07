@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
-import k25.kaatokerho.domain.dto.KeilaajaResponseDTO;
+import k25.kaatokerho.domain.dto.ResponseKeilaajaDTO;
 import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.exception.ApiException;
@@ -26,8 +26,8 @@ public class KeilaajaApiService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    private KeilaajaResponseDTO mapToDto(Keilaaja keilaaja) {
-        return KeilaajaResponseDTO.builder()
+    private ResponseKeilaajaDTO mapToDto(Keilaaja keilaaja) {
+        return ResponseKeilaajaDTO.builder()
                 .keilaajaId(keilaaja.getKeilaajaId())
                 .etunimi(keilaaja.getEtunimi())
                 .sukunimi(keilaaja.getSukunimi())
@@ -39,7 +39,7 @@ public class KeilaajaApiService {
     }
 
     // Haetaan yhden keilaajan tiedot
-    public KeilaajaResponseDTO getKeilaajaById(Long keilaajaId) {
+    public ResponseKeilaajaDTO getKeilaajaById(Long keilaajaId) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löydy id:llä " + keilaajaId));
 
@@ -47,7 +47,7 @@ public class KeilaajaApiService {
     }
 
     // Haetaan lista kaikista keilaajista
-    public List<KeilaajaResponseDTO> getAllKeilaajat() {
+    public List<ResponseKeilaajaDTO> getAllKeilaajat() {
         List<Keilaaja> keilaajaLista = new ArrayList<>();
         keilaajaRepository.findAll().forEach(keilaajaLista::add);
 
@@ -57,7 +57,7 @@ public class KeilaajaApiService {
     }
 
     // Lisää uusi keilaaja
-    public KeilaajaResponseDTO addNewKeilaaja(UusiKeilaajaDTO dto) {
+    public ResponseKeilaajaDTO addNewKeilaaja(UusiKeilaajaDTO dto) {
         String kayttajanimi = dto.getKayttajanimi() != null ? dto.getKayttajanimi().trim() : null;
 
         if (kayttajanimi != null && keilaajaRepository.findByKayttajanimi(kayttajanimi).isPresent()) {
@@ -83,7 +83,7 @@ public class KeilaajaApiService {
     }
 
     // Päivitä kaikki keilaajan tiedot paitsi salasana
-    public KeilaajaResponseDTO updateKeilaaja(Long keilaajaId, UusiKeilaajaDTO dto) {
+    public ResponseKeilaajaDTO updateKeilaaja(Long keilaajaId, UusiKeilaajaDTO dto) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(
                         () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import k25.kaatokerho.domain.dto.LoginDTO;
-import k25.kaatokerho.domain.dto.LoginResponseDTO;
+import k25.kaatokerho.domain.dto.ResponseLoginDTO;
 import k25.kaatokerho.service.JwtService;
 
 @RestController
@@ -37,6 +37,6 @@ public class AuthController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getKayttajanimi());
         String jwt = jwtService.generateToken(userDetails);
         
-        return ResponseEntity.ok(new LoginResponseDTO(jwt));
+        return ResponseEntity.ok(new ResponseLoginDTO(jwt));
     }
 }

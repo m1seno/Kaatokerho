@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import k25.kaatokerho.domain.dto.KeilaajaResponseDTO;
+import k25.kaatokerho.domain.dto.ResponseKeilaajaDTO;
 import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.service.api.KeilaajaApiService;
@@ -33,27 +33,27 @@ public class KeilaajaController {
 
     // Hae lista kaikista keilaajista
     @GetMapping
-    public ResponseEntity<List<KeilaajaResponseDTO>> getAllKeilaajat() {
+    public ResponseEntity<List<ResponseKeilaajaDTO>> getAllKeilaajat() {
         return ResponseEntity.ok(keilaajaService.getAllKeilaajat());
     }
 
     // Hae keilaaja Id:n perusteella
     @GetMapping("/{id}")
-    public ResponseEntity<KeilaajaResponseDTO> getKeilaaja(@PathVariable Long id) {
+    public ResponseEntity<ResponseKeilaajaDTO> getKeilaaja(@PathVariable Long id) {
         return ResponseEntity.ok(keilaajaService.getKeilaajaById(id));
     }
 
     // Lisää uusi keilaaja
     @PostMapping
-    public ResponseEntity<KeilaajaResponseDTO> addNewKeilaaja(@Valid @RequestBody UusiKeilaajaDTO dto) {
-        KeilaajaResponseDTO tallennettuKeilaaja = keilaajaService.addNewKeilaaja(dto);
+    public ResponseEntity<ResponseKeilaajaDTO> addNewKeilaaja(@Valid @RequestBody UusiKeilaajaDTO dto) {
+        ResponseKeilaajaDTO tallennettuKeilaaja = keilaajaService.addNewKeilaaja(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(tallennettuKeilaaja);
     }
 
     // Muokkaa keilaajaa
     @PutMapping("/{id}")
-    public ResponseEntity<KeilaajaResponseDTO> editKeilaaja(@PathVariable Long id, @Valid @RequestBody UusiKeilaajaDTO dto) {
-        KeilaajaResponseDTO updatedKeilaaja = keilaajaService.updateKeilaaja(id, dto);
+    public ResponseEntity<ResponseKeilaajaDTO> editKeilaaja(@PathVariable Long id, @Valid @RequestBody UusiKeilaajaDTO dto) {
+        ResponseKeilaajaDTO updatedKeilaaja = keilaajaService.updateKeilaaja(id, dto);
         return ResponseEntity.ok(updatedKeilaaja);
     }
 

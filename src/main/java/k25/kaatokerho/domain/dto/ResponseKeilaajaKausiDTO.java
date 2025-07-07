@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class KeilaajaKausiResponseDTO {
+public class ResponseKeilaajaKausiDTO {
 
     private Long keilaajaKausiId;
 

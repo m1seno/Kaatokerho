@@ -1,9 +1,9 @@
 package k25.kaatokerho.domain.dto;
 
-public class LoginResponseDTO {
+public class ResponseLoginDTO {
     private String token;
 
-    public LoginResponseDTO(String token) {
+    public ResponseLoginDTO(String token) {
         this.token = token;
     }
 
