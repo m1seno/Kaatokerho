@@ -3,10 +3,13 @@ package k25.kaatokerho.web;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import k25.kaatokerho.domain.KeilaajaKausiRepository;
 import k25.kaatokerho.domain.dto.ResponseKeilaajaKausiDTO;
 import k25.kaatokerho.service.api.KeilaajaKausiApiService;
 
@@ -47,5 +50,12 @@ public class KeilaajaKausiController {
     public ResponseEntity<ResponseKeilaajaKausiDTO> getKeilaajanKausi(Long keilaajaId, Long kausiId) {
         ResponseKeilaajaKausiDTO keilaajaKausi = keilaajaKausiApiService.getKeilaajanKausi(keilaajaId, kausiId);
         return ResponseEntity.ok(keilaajaKausi);
+    }
+
+    // Poistaa KeilaajaKausi
+    @DeleteMapping("/{keilaajaKausiId}")
+    public ResponseEntity<Void> poistaKeilaajaKausi(@PathVariable Long keilaajaKausiId) {
+        keilaajaKausiApiService.deleteKeilaajaKausi(keilaajaKausiId);
+        return ResponseEntity.noContent().build();
     }
 }

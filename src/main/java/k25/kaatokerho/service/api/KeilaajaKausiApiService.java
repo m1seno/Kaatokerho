@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
@@ -13,6 +16,7 @@ import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaKausi;
 import k25.kaatokerho.domain.KeilaajaKausiRepository;
 import k25.kaatokerho.domain.KeilaajaRepository;
+import k25.kaatokerho.domain.KultainenGp;
 import k25.kaatokerho.domain.dto.ResponseKeilaajaKausiDTO;
 import k25.kaatokerho.exception.ApiException;
 
@@ -101,5 +105,16 @@ public class KeilaajaKausiApiService {
 
         return mapToDto(keilaajaKausi);
     }
+
+    // Poista KeilaajaKausi
+    public void deleteKeilaajaKausi(Long keilaajaKausiId)  {
+        KeilaajaKausi keilaajaKausi = kkRepo.findById(keilaajaKausiId)
+                    .orElseThrow(
+                        () -> new ApiException(HttpStatus.NOT_FOUND, "KeilaajaKausi-instanssia ei löytynyt id:llä " + keilaajaKausiId));
+
+        kkRepo.delete(keilaajaKausi);
+    }
+
+    
 
 }
