@@ -52,7 +52,7 @@ public class KultainenGpController {
 
     // Hakee tietyn keilaajan kausitilastot tietyltä kaudelta
     @GetMapping("/keilaaja/{keilaajaId}/kausi/{kausiId}")
-    public ResponseEntity<List<ResponseKultainenGpDTO>> getKeilaajanKausiKGP(@PathVariable Long keilaajaId, Long kausiId) {
+    public ResponseEntity<List<ResponseKultainenGpDTO>> getKeilaajanKausiKGP(@PathVariable Long keilaajaId, @PathVariable Long kausiId) {
         List<ResponseKultainenGpDTO> keilaajakausiKGP = kultainenService.getKeilaajanKausiKGP(keilaajaId, kausiId);
         return ResponseEntity.ok(keilaajakausiKGP);
     }
