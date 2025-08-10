@@ -74,7 +74,7 @@ public class KultainenGpApiService {
         Kausi kausi = kausiRepo.findById(kausiId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt Id:llä " + kausiId));
 
-        List<KultainenGp> kgpLista = kultainenRepo.findByKausi_KausiId(kausiId);
+        List<KultainenGp> kgpLista = kultainenRepo.findByGp_Kausi_KausiId(kausiId);
 
         if (kgpLista.isEmpty()) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Tilastoja ei löydy kaudelta " + kausi.getNimi());
@@ -112,7 +112,7 @@ public class KultainenGpApiService {
         Kausi kausi = kausiRepo.findById(kausiId)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
 
-            List<KultainenGp> kgpLista = kultainenRepo.findByKeilaajanKausi(keilaajaId, kausiId);
+            List<KultainenGp> kgpLista = kultainenRepo.findByKeilaaja_KeilaajaIdAndGp_Kausi_KausiId(keilaajaId, kausiId);
 
         if (kgpLista.isEmpty()) {
             throw new ApiException(HttpStatus.NOT_FOUND,

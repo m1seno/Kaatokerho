@@ -8,10 +8,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "kultainengp")
+@Table(name = "kultainengp",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"gp_id", "keilaaja_id"}))
 public class KultainenGp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,7 +13,6 @@ import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaKausi;
 import k25.kaatokerho.domain.KeilaajaKausiRepository;
 import k25.kaatokerho.domain.KeilaajaRepository;
-import k25.kaatokerho.domain.KultainenGp;
 import k25.kaatokerho.domain.dto.ResponseKeilaajaKausiDTO;
 import k25.kaatokerho.exception.ApiException;
 
