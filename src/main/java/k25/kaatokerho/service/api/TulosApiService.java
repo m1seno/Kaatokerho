@@ -1,4 +1,4 @@
-package k25.kaatokerho.service;
+package k25.kaatokerho.service.api;
 
 import java.util.List;
 
@@ -15,16 +15,17 @@ import k25.kaatokerho.domain.TulosRepository;
 import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
 import k25.kaatokerho.domain.dto.TulosResponseDTO;
 import k25.kaatokerho.exception.ApiException;
+import k25.kaatokerho.service.KeilaajaKausiService;
 
 @Service
-public class TulosService {
+public class TulosApiService {
 
     private final TulosRepository tulosRepository;
     private final KeilaajaRepository keilaajaRepository;
     private final GpRepository gpRepository;
     private final KeilaajaKausiService keilaajaKausiService;
 
-    public TulosService(TulosRepository tulosRepository,
+    public TulosApiService(TulosRepository tulosRepository,
                         KeilaajaRepository keilaajaRepository,
                         GpRepository gpRepository,
                         KeilaajaKausiService keilaajaKausiService) {
