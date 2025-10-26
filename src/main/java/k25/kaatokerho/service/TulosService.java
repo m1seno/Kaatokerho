@@ -1,6 +1,10 @@
 package k25.kaatokerho.service;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
@@ -9,6 +13,8 @@ import k25.kaatokerho.domain.KeilaajaRepository;
 import k25.kaatokerho.domain.Tulos;
 import k25.kaatokerho.domain.TulosRepository;
 import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
+import k25.kaatokerho.domain.dto.TulosResponseDTO;
+import k25.kaatokerho.exception.ApiException;
 
 @Service
 public class TulosService {
@@ -18,22 +24,28 @@ public class TulosService {
     private final GpRepository gpRepository;
     private final KeilaajaKausiService keilaajaKausiService;
 
-    public TulosService(TulosRepository tulosRepository, KeilaajaRepository keilaajaRepository,
-                        GpRepository gpRepository, KeilaajaKausiService keilaajaKausiService) {
+    public TulosService(TulosRepository tulosRepository,
+                        KeilaajaRepository keilaajaRepository,
+                        GpRepository gpRepository,
+                        KeilaajaKausiService keilaajaKausiService) {
         this.tulosRepository = tulosRepository;
         this.keilaajaRepository = keilaajaRepository;
         this.gpRepository = gpRepository;
         this.keilaajaKausiService = keilaajaKausiService;
     }
 
-    public void tallennaTulokset(LisaaTuloksetDTO dto) {
+    @Transactional
+    public List<TulosResponseDTO> korvaaGpTulokset(LisaaTuloksetDTO dto) {
         GP gp = gpRepository.findById(dto.getGpId())
-                .orElseThrow(() -> new IllegalArgumentException("GP:tä ei löydy"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + dto.getGpId()));
 
-        // Käydään läpi tulokset ja tallennetaan ne tietokantaan
+        // Idempotentti: pudotetaan ensin vanhat tämän GP:n tulokset, ettei synny duplikaatteja
+        tulosRepository.deleteByGp_GpId(gp.getGpId());
+
+        // Tallenna uudet
         for (LisaaTuloksetDTO.TulosForm tf : dto.getTulokset()) {
             Keilaaja keilaaja = keilaajaRepository.findById(tf.getKeilaajaId())
-                    .orElseThrow(() -> new IllegalArgumentException("Keilaajaa ei löydy"));
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + tf.getKeilaajaId()));
 
             Tulos tulos = new Tulos();
             tulos.setGp(gp);
@@ -45,7 +57,70 @@ public class TulosService {
             tulosRepository.save(tulos);
         }
 
-        // Päivitetään keilaajaKausi tiedot GP:n perusteella
+        // Päivitä kausitilastot tämän GP:n perusteella (tämä käynnistää pistelaskut)
         keilaajaKausiService.paivitaKeilaajaKausi(gp);
+
+        // Palauta tallennetut
+        return haeTuloksetGp(gp.getGpId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TulosResponseDTO> haeTuloksetGp(Long gpId) {
+        GP gp = gpRepository.findById(gpId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
+
+        List<Tulos> list = tulosRepository.findByGp_GpId(gp.getGpId());
+        if (list.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Tuloksia ei löytynyt GP:lle " + gp.getGpId());
+        }
+        return list.stream().map(this::mapToDto).toList();
+    }
+
+    @Transactional
+    public void poistaTuloksetGp(Long gpId) {
+        GP gp = gpRepository.findById(gpId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
+
+        tulosRepository.deleteByGp_GpId(gp.getGpId());
+        // HUOM: jos poistat tulokset, kausitilasto pitää laskea uudelleen kaikista aiemmista GP:stä
+        keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TulosResponseDTO> haeKeilaajanTulokset(Long keilaajaId) {
+        keilaajaRepository.findById(keilaajaId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+
+        List<Tulos> list = tulosRepository.findByKeilaaja_KeilaajaId(keilaajaId);
+        if (list.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Tuloksia ei löytynyt keilaajalle ID: " + keilaajaId);
+        }
+        return list.stream().map(this::mapToDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TulosResponseDTO> haeKeilaajanTuloksetKaudella(Long keilaajaId, Long kausiId) {
+        keilaajaRepository.findById(keilaajaId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+
+        List<Tulos> list = tulosRepository.findByKeilaaja_KeilaajaIdAndGp_Kausi_KausiId(keilaajaId, kausiId);
+        if (list.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Tuloksia ei löytynyt keilaajalle/kaudelle (keilaajaId: "
+                    + keilaajaId + ", kausiId: " + kausiId + ")");
+        }
+        return list.stream().map(this::mapToDto).toList();
+    }
+
+    private TulosResponseDTO mapToDto(Tulos t) {
+        return TulosResponseDTO.builder()
+                .tulosId(t.getTulosId())
+                .gpId(t.getGp().getGpId())
+                .keilaajaId(t.getKeilaaja().getKeilaajaId())
+                .keilaajaEtunimi(t.getKeilaaja().getEtunimi())
+                .keilaajaSukunimi(t.getKeilaaja().getSukunimi())
+                .sarja1(t.getSarja1())
+                .sarja2(t.getSarja2())
+                .osallistui(Boolean.TRUE.equals(t.getOsallistui()))
+                .build();
     }
 }
