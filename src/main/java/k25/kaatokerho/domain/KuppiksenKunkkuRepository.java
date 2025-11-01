@@ -5,5 +5,6 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
 public interface KuppiksenKunkkuRepository extends CrudRepository<KuppiksenKunkku, Long>{
-    Optional<KuppiksenKunkku> findByGp_Jarjestysnumero(int jarjestysnumero);
+    Optional<KuppiksenKunkku> findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(
+    Kausi kausi, int jarjestysnumero);
 }

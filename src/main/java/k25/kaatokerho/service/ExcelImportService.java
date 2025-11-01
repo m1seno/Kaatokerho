@@ -172,7 +172,8 @@ public class ExcelImportService {
 
                     // Käsitellään KuppiksenKunkku ja KeilaajaKausi
                     Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
-                            .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero());
+                            .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(
+                                    nykyinenGp.getKausi(), nykyinenGp.getJarjestysnumero());
                     kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                     keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
 
@@ -242,7 +243,8 @@ public class ExcelImportService {
                 }
 
                 Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
-                        .findByGp_Jarjestysnumero(nykyinenGp.getJarjestysnumero() - 1);
+                        .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(
+                                nykyinenGp.getKausi(), nykyinenGp.getJarjestysnumero());
                 kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                 keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
 

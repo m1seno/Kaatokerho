@@ -3,6 +3,8 @@ package k25.kaatokerho.domain;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.hibernate.Hibernate;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -200,6 +202,25 @@ public class Keilaaja {
                 + ", syntymapaiva=" + syntymapaiva + ", aktiivijasen=" + aktiivijasen + ", admin=" + admin
                 + ", kayttajanimi=" + kayttajanimi
                 + ", salasanaHash=" + salasanaHash + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        // huom: Hibernate-proxyt!
+        if (Hibernate.getClass(this) != Hibernate.getClass(o))
+            return false;
+        Keilaaja other = (Keilaaja) o;
+        return this.keilaajaId != null && this.keilaajaId.equals(other.keilaajaId);
+    }
+
+    @Override
+    public int hashCode() {
+        // Kun id on olemassa → käytä sitä; muuten objekti-identiteetti
+        return (keilaajaId != null) ? keilaajaId.hashCode() : System.identityHashCode(this);
     }
 
 }
