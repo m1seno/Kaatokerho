@@ -30,7 +30,6 @@ import k25.kaatokerho.domain.KuppiksenKunkkuRepository;
 import k25.kaatokerho.domain.Tulos;
 import k25.kaatokerho.domain.TulosRepository;
 
-//https://www.youtube.com/watch?v=ipjl49Hgsg8&list=PLUDwpEzHYYLsN1kpIjOyYW6j_GLgOyA07&index=1
 @Service
 public class ExcelImportService {
 
@@ -61,42 +60,35 @@ public class ExcelImportService {
     @Autowired
     private KeilaajaKausiService keilaajaKausiService;
 
-    // Luetaan tiedot excelistä vain, jos kyseiset taulut ovat tyhjiä
     public boolean isImportNeeded() {
         return (tulosRepository.count() == 0 && gpRepository.count() == 0);
     }
 
     public void importExcel(String filePath) throws IOException {
-        // Luetaan Excel-tiedoston data-välilehti inputstreamistä
         try (FileInputStream inputStream = new FileInputStream(filePath);
-                XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+             XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+
             XSSFSheet sheet = workbook.getSheet("Data");
 
-            // For -loopin ulkopuolella säilytettäviä tietoja
             GP nykyinenGp = null;
             LocalDate edellinenPvm = null;
             List<Tulos> nykyisetTulokset = new ArrayList<>();
             Optional<Kausi> kausiOptional = kausiRepository.findByNimi("2024-2025");
-            Row viimeisinRivi = null;
             if (kausiOptional.isEmpty())
                 throw new IllegalArgumentException("Kautta 2024-2025 ei löytynyt");
 
-            for (Row row : sheet) {
+            // UUSI: kasaava vyölippu
+            boolean vyoUnohtuiForCurrentGp = false;
 
-                // Debug-printti rivistä
+            for (Row row : sheet) {
                 System.out.println("Käsitellään rivi: " + (row.getRowNum() + 1));
 
-                // Skipataan otsikkorivi
-                if (row.getRowNum() == 0) {
-                    continue;
-                }
+                if (row.getRowNum() == 0) continue;
                 if (row.getRowNum() == 181) {
                     System.out.println("Lopetetaan excelin rivillä 182");
                     break;
                 }
 
-                // ChatGPT:n tekemää debuggausta
-                // Tarkistetaan päivämäärä
                 Cell cell = row.getCell(2);
                 LocalDate pvm;
 
@@ -109,11 +101,9 @@ public class ExcelImportService {
                         if (DateUtil.isCellDateFormatted(cell)) {
                             pvm = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                         } else {
-                            throw new IllegalArgumentException(
-                                    "NUMERIC-muotoinen solu ei ole päivämäärä rivillä " + (row.getRowNum() + 1));
+                            throw new IllegalArgumentException("NUMERIC-muotoinen solu ei ole päivämäärä rivillä " + (row.getRowNum() + 1));
                         }
                     }
-
                     case STRING -> {
                         try {
                             String[] pvmString = cell.getStringCellValue().split("/");
@@ -122,11 +112,9 @@ public class ExcelImportService {
                                     Integer.parseInt(pvmString[1]),
                                     Integer.parseInt(pvmString[0]));
                         } catch (Exception e) {
-                            throw new IllegalArgumentException(
-                                    "Päivämäärän tekstimuoto on virheellinen rivillä " + (row.getRowNum() + 1));
+                            throw new IllegalArgumentException("Päivämäärän tekstimuoto on virheellinen rivillä " + (row.getRowNum() + 1));
                         }
                     }
-
                     case FORMULA -> {
                         CellType resultType = cell.getCachedFormulaResultType();
                         if (resultType == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
@@ -139,49 +127,39 @@ public class ExcelImportService {
                                         Integer.parseInt(pvmString[1]),
                                         Integer.parseInt(pvmString[0]));
                             } catch (Exception e) {
-                                throw new IllegalArgumentException(
-                                        "Kaavan palauttama päivämäärä (STRING) on virheellinen rivillä "
-                                                + (row.getRowNum() + 1));
+                                throw new IllegalArgumentException("Kaavan palauttama päivämäärä (STRING) on virheellinen rivillä " + (row.getRowNum() + 1));
                             }
                         } else {
-                            throw new IllegalArgumentException(
-                                    "Kaavan palauttama arvo ei ole tuettu rivillä " + (row.getRowNum() + 1));
+                            throw new IllegalArgumentException("Kaavan palauttama arvo ei ole tuettu rivillä " + (row.getRowNum() + 1));
                         }
                     }
-
-                    default -> throw new IllegalArgumentException(
-                            "Päivämäärän solun tyyppi ei ole tuettu rivillä " + (row.getRowNum() + 1) +
-                                    ". Tyyppi: " + cell.getCellType());
+                    default -> throw new IllegalArgumentException("Päivämäärän solun tyyppi ei ole tuettu rivillä " + (row.getRowNum() + 1) +
+                            ". Tyyppi: " + cell.getCellType());
                 }
 
-                // Jos pvm vaihtuu JA ei olla ensimmäisellä kierroksella
+                // 🔸 UUSI: luetaan BP-sarake (67) jokaiselta riviltä ja päivitetään lippu
+                Cell vyoUnohtuiCell = row.getCell(67);
+                boolean vyolippu = parseVyoUnohtui(vyoUnohtuiCell);
+                vyoUnohtuiForCurrentGp = vyoUnohtuiForCurrentGp || vyolippu;
+
+                // GP vaihtui
                 if (edellinenPvm != null && !pvm.equals(edellinenPvm) && nykyinenGp != null) {
-
-                    nykyinenGp.setTulokset(nykyisetTulokset); // jotta palvelut saavat tulokset
-
-                    // Kultaiset GP-pisteet laskumetodia kutsutaan
-
+                    nykyinenGp.setTulokset(nykyisetTulokset);
                     kultainenGpService.kultainenPistelasku(nykyinenGp);
 
-                    // Haetaan tieto onko vyö unohtunut (1 = kyllä, 0 = ei)
-                    boolean vyoUnohtui = false;
-                    Cell vyoCell = row.getCell(67);
-                    if (vyoCell != null && vyoCell.getCellType() == CellType.NUMERIC) {
-                        vyoUnohtui = (int) vyoCell.getNumericCellValue() == 1;
-                    }
+                    boolean vyoUnohtui = vyoUnohtuiForCurrentGp;
 
-                    // Käsitellään KuppiksenKunkku ja KeilaajaKausi
                     Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                             .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(
                                     nykyinenGp.getKausi(), nykyinenGp.getJarjestysnumero());
                     kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                     keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
 
-                    // Nollataan tilapäinen tuloslista
                     nykyisetTulokset.clear();
+                    vyoUnohtuiForCurrentGp = false; // 🔹 nollataan uuden GP:n alkuun
                 }
 
-                // GP haetaan tai luodaan
+                // GP:n luonti tai haku
                 if (nykyinenGp == null || !pvm.equals(edellinenPvm)) {
                     edellinenPvm = pvm;
 
@@ -194,8 +172,7 @@ public class ExcelImportService {
 
                     String[] keilahalli = row.getCell(3).getStringCellValue().split(" ");
                     String hakusana = keilahalli[0];
-                    Optional<Keilahalli> keilahalliOptional = keilahalliRepository
-                            .findByNimiContainingIgnoreCase(hakusana);
+                    Optional<Keilahalli> keilahalliOptional = keilahalliRepository.findByNimiContainingIgnoreCase(hakusana);
                     if (keilahalliOptional.isEmpty())
                         throw new IllegalArgumentException("Keilahallia ei löytynyt hakusanalla: " + hakusana);
                     uusiGp.setKeilahalli(keilahalliOptional.get());
@@ -203,16 +180,12 @@ public class ExcelImportService {
                     nykyinenGp = gpRepository.save(uusiGp);
                 }
 
-                // Haetaan keilaaja
+                // Keilaaja ja tulos
                 String[] nimi = row.getCell(8).getStringCellValue().split(" ");
                 Optional<Keilaaja> keilaajaOptional = keilaajaRepository.findByEtunimiAndSukunimi(nimi[0], nimi[1]);
-
-                // Luodaan tulos
                 boolean osallistui = ((int) row.getCell(12).getNumericCellValue()) == 1;
-                Integer sarja1 = osallistui && row.getCell(9) != null ? (int) row.getCell(9).getNumericCellValue()
-                        : null;
-                Integer sarja2 = osallistui && row.getCell(10) != null ? (int) row.getCell(10).getNumericCellValue()
-                        : null;
+                Integer sarja1 = osallistui && row.getCell(9) != null ? (int) row.getCell(9).getNumericCellValue() : null;
+                Integer sarja2 = osallistui && row.getCell(10) != null ? (int) row.getCell(10).getNumericCellValue() : null;
 
                 Tulos tulos = new Tulos();
                 tulos.setSarja1(sarja1);
@@ -223,37 +196,37 @@ public class ExcelImportService {
                 tulosRepository.save(tulos);
 
                 nykyisetTulokset.add(tulos);
-
-                viimeisinRivi = row;
-
             }
 
-            // Viimeisen GP:n käsittely
+            // 🔹 Viimeinen GP
             if (nykyinenGp != null && !nykyisetTulokset.isEmpty()) {
                 nykyinenGp.setTulokset(nykyisetTulokset);
-
                 kultainenGpService.kultainenPistelasku(nykyinenGp);
 
-                boolean vyoUnohtui = false;
-                if (viimeisinRivi != null) {
-                    Cell vyoCell = viimeisinRivi.getCell(67);
-                    if (vyoCell != null && vyoCell.getCellType() == CellType.NUMERIC) {
-                        vyoUnohtui = (int) vyoCell.getNumericCellValue() == 1;
-                    }
-                }
+                boolean vyoUnohtui = vyoUnohtuiForCurrentGp;
 
                 Optional<KuppiksenKunkku> edellinenOpt = kuppiksenKunkkuRepository
                         .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(
                                 nykyinenGp.getKausi(), nykyinenGp.getJarjestysnumero());
                 kuppiksenKunkkuService.kasitteleKuppiksenKunkku(nykyinenGp, edellinenOpt.orElse(null), vyoUnohtui);
                 keilaajaKausiService.paivitaKeilaajaKausi(nykyinenGp);
-
             }
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
 
+    private boolean parseVyoUnohtui(Cell c) {
+        if (c == null) return false;
+        if (c.getCellType() == CellType.NUMERIC) {
+            return c.getNumericCellValue() >= 0.5;
+        }
+        if (c.getCellType() == CellType.STRING) {
+            String s = c.getStringCellValue().trim().toLowerCase();
+            return s.equals("1") || s.equals("x") || s.equals("true") ||
+                   s.equals("kyllä") || s.equals("kylla") || s.equals("yes");
+        }
+        return false;
     }
 }
