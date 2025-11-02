@@ -10,6 +10,8 @@ public interface TulosRepository extends CrudRepository<Tulos, Long> {
 
     List<Tulos> findByGp_GpId(Long gpId);
 
+    List<Tulos> findByGp(GP gp);
+
     void deleteByGp_GpId(Long gpId);
 
     List<Tulos> findByKeilaaja_KeilaajaId(Long keilaajaId);

@@ -64,12 +64,16 @@ public class Keilaaja {
     private List<KultainenGp> kultaisetGp;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hallitseva")
-    private List<KuppiksenKunkku> hallitsevat;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "puolustaja")
+    private List<KuppiksenKunkku> puolustajat;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "haastaja")
     private List<KuppiksenKunkku> haastajat;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "voittaja")
+    private List<KuppiksenKunkku> voittajat;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "keilaaja")
@@ -172,12 +176,12 @@ public class Keilaaja {
         this.kultaisetGp = kultaisetGp;
     }
 
-    public List<KuppiksenKunkku> getHallitsevat() {
-        return hallitsevat;
+    public List<KuppiksenKunkku> getPuolustajat() {
+        return puolustajat;
     }
 
-    public void setHallitsevat(List<KuppiksenKunkku> hallitsevat) {
-        this.hallitsevat = hallitsevat;
+    public void setPuolustajat(List<KuppiksenKunkku> puolustajat) {
+        this.puolustajat = puolustajat;
     }
 
     public List<KuppiksenKunkku> getHaastajat() {
@@ -186,6 +190,14 @@ public class Keilaaja {
 
     public void setHaastajat(List<KuppiksenKunkku> haastajat) {
         this.haastajat = haastajat;
+    }
+
+    public List<KuppiksenKunkku> getVoittajat() {
+        return voittajat;
+    }
+
+    public void setVoittajat(List<KuppiksenKunkku> voittajat) {
+        this.voittajat = voittajat;
     }
 
     public List<KeilaajaKausi> getKausiTilastot() {

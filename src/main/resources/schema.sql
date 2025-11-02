@@ -61,9 +61,11 @@ CREATE TABLE kultainengp (
 CREATE TABLE kuppiksenkunkku (
     kuppiksenkunkku_id SERIAL PRIMARY KEY,
     gp_id INT NOT NULL UNIQUE REFERENCES gp(gp_id),
-    hallitseva_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
+    puolustaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
     haastaja_id INT REFERENCES keilaaja(keilaaja_id),
-    vyo_unohtui BOOLEAN NOT NULL
+    voittaja_id INT NOT NULL REFERENCES keilaaja(keilaaja_id),
+    vyo_unohtui BOOLEAN NOT NULL,
+    CONSTRAINT chk_haastaja_puolustaja CHECK (haastaja_id IS NULL OR puolustaja_id <> haastaja_id)
 );
 
 CREATE TABLE keilaaja_kausi (

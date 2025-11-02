@@ -24,12 +24,16 @@ public class KuppiksenKunkku {
     private GP gp;
 
     @ManyToOne
-    @JoinColumn(name = "hallitseva_id", nullable = false)
-    private Keilaaja hallitseva;
+    @JoinColumn(name = "puolustaja_id", nullable = false)
+    private Keilaaja puolustaja;
 
     @ManyToOne
     @JoinColumn(name = "haastaja_id", nullable = true)
     private Keilaaja haastaja;
+
+    @ManyToOne
+    @JoinColumn(name = "voittaja_id", nullable = true)
+    private Keilaaja voittaja;
 
     @NotNull(message = "Unohtunut vyö tulee merkata")
     @Column(name = "vyo_unohtui")
@@ -38,11 +42,12 @@ public class KuppiksenKunkku {
     public KuppiksenKunkku() {
     }
 
-    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja hallitseva, Keilaaja haastaja, boolean vyoUnohtui) {
+    public KuppiksenKunkku(Long kuppiksenKunkkuId, GP gp, Keilaaja puolustaja, Keilaaja haastaja, Keilaaja voittaja, boolean vyoUnohtui) {
         this.kuppiksenKunkkuId = kuppiksenKunkkuId;
         this.gp = gp;
-        this.hallitseva = hallitseva;
+        this.puolustaja = puolustaja;
         this.haastaja = haastaja;
+        this.voittaja = voittaja;
         this.vyoUnohtui = vyoUnohtui;
     }
 
@@ -62,12 +67,12 @@ public class KuppiksenKunkku {
         this.gp = gp;
     }
 
-    public Keilaaja getHallitseva() {
-        return hallitseva;
+    public Keilaaja getPuolustaja() {
+        return puolustaja;
     }
 
-    public void setHallitseva(Keilaaja hallitseva) {
-        this.hallitseva = hallitseva;
+    public void setPuolustaja(Keilaaja puolustaja) {
+        this.puolustaja = puolustaja;
     }
 
     public Keilaaja getHaastaja() {
@@ -76,6 +81,14 @@ public class KuppiksenKunkku {
 
     public void setHaastaja(Keilaaja haastaja) {
         this.haastaja = haastaja;
+    }
+
+    public Keilaaja getVoittaja() {
+        return voittaja;
+    }
+
+    public void setVoittaja(Keilaaja voittaja) {
+        this.voittaja = voittaja;
     }
 
     public boolean getVyoUnohtui() {
@@ -88,8 +101,8 @@ public class KuppiksenKunkku {
 
     @Override
     public String toString() {
-        return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", hallitseva=" + hallitseva
-                + ", haastaja=" + haastaja + ", vyoUnohtui=" + vyoUnohtui + "]";
+        return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", puolustaja=" + puolustaja
+                + ", haastaja=" + haastaja + ", voittaja=" + voittaja + ", vyoUnohtui=" + vyoUnohtui + "]";
     }
 
 }
