@@ -99,6 +99,10 @@ public class KuppiksenKunkku {
         this.vyoUnohtui = vyoUnohtui;
     }
 
+    public boolean isVyoUnohtui() {
+        return vyoUnohtui;
+    }
+
     @Override
     public String toString() {
         return "KuppiksenKunkku [kuppiksenKunkkuId=" + kuppiksenKunkkuId + ", gp=" + gp + ", puolustaja=" + puolustaja
