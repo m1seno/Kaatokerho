@@ -21,6 +21,7 @@ import k25.kaatokerho.domain.KeilahalliRepository;
 import k25.kaatokerho.domain.dto.PaivitaGpDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 import k25.kaatokerho.service.api.GpApiService;
+import k25.kaatokerho.service.KuppiksenKunkkuService
 
 @RestController
 @RequestMapping("/api/gp")
@@ -29,12 +30,15 @@ public class GpController {
     private final GpRepository gpRepository;
     private final GpApiService lisaaGpService;
     private final KeilahalliRepository keilahalliRepository;
+    private final KuppiksenKunkkuService kuppiksenKunkkuService;
 
     public GpController(GpRepository gpRepository, GpApiService lisaaGpService,
-                            KeilahalliRepository keilahalliRepository) {
+                            KeilahalliRepository keilahalliRepository,
+                            KuppiksenKunkkuService kuppiksenKunkkuService) {
         this.gpRepository = gpRepository;
         this.lisaaGpService = lisaaGpService;
         this.keilahalliRepository = keilahalliRepository;
+        this.kuppiksenKunkkuService = kuppiksenKunkkuService;
     }
 
     @GetMapping
@@ -80,6 +84,7 @@ public class GpController {
         Optional<GP> gpOpt = gpRepository.findById(id);
         if (gpOpt.isPresent()) {
             gpRepository.delete(gpOpt.get());
+            kuppiksenKunkkuService.poistaKkMerkinnatGpsta(id);
             return ResponseEntity.noContent().build();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "GP:tä id:llä " + id + " ei löytynyt");
