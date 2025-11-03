@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface KuppiksenKunkkuRepository extends CrudRepository<KuppiksenKunkku, Long> {
-    Optional<KuppiksenKunkku> findByGp_Id(Long gpId);
+    Optional<KuppiksenKunkku> findByGp_GpId(Long gpId);
 
     List<KuppiksenKunkku> findByGp_Kausi_NimiOrderByGp_JarjestysnumeroAsc(String seasonName);
 

@@ -1,14 +1,11 @@
 package k25.kaatokerho.service;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import k25.kaatokerho.domain.GP;
+import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaKausiRepository;
 import k25.kaatokerho.domain.KuppiksenKunkku;
@@ -33,21 +30,23 @@ import k25.kaatokerho.domain.TulosRepository;
 @Service
 public class KuppiksenKunkkuService {
 
-    private static final Logger log = LoggerFactory.getLogger(KuppiksenKunkkuService.class);
 
     private final KuppiksenKunkkuRepository kkRepo;
     private final TulosRepository tulosRepo;
     private final KeilaajaKausiRepository kkSeasonRepo;
+    private final GpRepository gpRepo;
 
     // Haastajalista muistissa GP:tä kohti (ei DB:hen)
     private final Map<Long, List<Keilaaja>> haastajalistaByGp = new HashMap<>();
 
     public KuppiksenKunkkuService(KuppiksenKunkkuRepository kkRepo,
                                   TulosRepository tulosRepo,
-                                  KeilaajaKausiRepository kkSeasonRepo) {
+                                  KeilaajaKausiRepository kkSeasonRepo,
+                                  GpRepository gpRepo) {
         this.kkRepo = kkRepo;
         this.tulosRepo = tulosRepo;
         this.kkSeasonRepo = kkSeasonRepo;
+        this.gpRepo = gpRepo;
     }
 
     @Transactional
@@ -58,13 +57,10 @@ public class KuppiksenKunkkuService {
                 .toList();
         if (osallistuneet.isEmpty()) return;
 
-        log.debug("=== KK START GP#{} (pvm={}) ===", gp.getJarjestysnumero(), gp.getPvm());
-        log.debug("vyöUnohtui = {}", vyoUnohtui);
 
         // 1) Selvitä puolustaja tälle GP:lle JA rakenna haastajalista oikeasta lähteestä
         Keilaaja puolustaja;
         List<Keilaaja> haastajalistaForThisGp;
-        GP listanLahdeGp; // lokitusta varten
 
         if (edellinen == null || gp.getJarjestysnumero() == 1) {
             // Kauden eka GP: puolustaja = tämän GP:n rankingin ykkönen
@@ -74,7 +70,6 @@ public class KuppiksenKunkkuService {
             puolustaja = rankThisGp.get(0);
             // Haastajalista UI:lle = ilman puolustajaa
             haastajalistaForThisGp = rankThisGp.stream().skip(1).toList();
-            listanLahdeGp = gp;
         } else {
             // Normaalit GP:t: puolustaja = edellisen KK:n voittaja (fallback: edellisen KK:n puolustaja)
             Keilaaja edVoittaja = edellinen.getVoittaja();
@@ -87,17 +82,11 @@ public class KuppiksenKunkkuService {
             GP edellinenGp = edellinen.getGp();
             List<Tulos> tuloksetEdellisesta = tulosRepo.findByGp(edellinenGp);
             haastajalistaForThisGp = muodostaHaastajalistaTuloksista(tuloksetEdellisesta, puolustaja);
-            listanLahdeGp = edellinenGp;
         }
 
         // Talleta UI:lle näytettävä lista (ei sisällä puolustajaa)
         haastajalistaByGp.put(gp.getGpId(), haastajalistaForThisGp);
 
-        // Debug: näytä haastajalista, jossa sarjat tulevat listan lähde-GP:stä
-        log.debug("Haastajalista GP#{} (lähde={} -> ilman puolustajaa): {}",
-                gp.getJarjestysnumero(),
-                (listanLahdeGp == gp ? "tämä GP" : "edellinen GP"),
-                formatHaastajalista(listanLahdeGp, haastajalistaForThisGp));
 
         // 2) Valitse lopullinen puolustaja & haastaja NYKYISEEN GP:hen läsnäolot huomioiden
         Keilaaja haastaja;
@@ -114,9 +103,6 @@ public class KuppiksenKunkkuService {
             haastaja = uusiHaastaja;
         }
 
-        // Debuggaus (sarjat nykyisestä GP:stä, koska ottelu pelataan tässä GP:ssä)
-        log.debug("Valittu puolustaja: {} ({})", n(puolustaja), sarjatFor(gp, puolustaja));
-        log.debug("Valittu haastaja  : {} ({})", n(haastaja), sarjatFor(gp, haastaja));
 
         // 3) Ratkaise ottelu → VOITTAJA
         Keilaaja voittaja;
@@ -126,8 +112,6 @@ public class KuppiksenKunkkuService {
             voittaja = ratkaiseOttelu(gp, puolustaja, haastaja);
         }
 
-        // Debuggaus
-        log.debug("VOITTAJA: {} ({})", n(voittaja), sarjatFor(gp, voittaja));
 
         // 4) Tallenna yksi rivi: puolustaja, haastaja, voittaja, vyöUnohtui
         tallennaKkRivi(gp, puolustaja, haastaja, voittaja, vyoUnohtui);
@@ -135,23 +119,10 @@ public class KuppiksenKunkkuService {
         // 5) +1 piste voittajalle
         lisaaYksiPisteSarjataulukkoon(voittaja, gp);
 
-        // Debuggaus
-        log.debug("Persistoitu KK (gpId={}, puolustaja={}, haastaja={}, voittaja={}, vyöUnohtui={})",
-                gp.getGpId(), n(puolustaja), n(haastaja), n(voittaja), vyoUnohtui);
-        log.debug("=== KK END   GP#{} ===", gp.getJarjestysnumero());
     }
 
     // ---------- apurit ----------
 
-    /**
-     * Rakentaa järjestetyn haastajalistan annetun GP:n tuloksista (haetaan repositorysta).
-     * Järjestys: paras DESC, huonompi DESC, keilaajaId ASC.
-     * Jos exclude != null, poistetaan hänet listalta (esim. puolustaja).
-     */
-    private List<Keilaaja> muodostaHaastajalistaGpsta(GP gp, Keilaaja exclude) {
-        List<Tulos> tulokset = tulosRepo.findByGp(gp);
-        return muodostaHaastajalistaTuloksista(tulokset, exclude);
-    }
 
     /**
      * Yleismuotoinen rakentaja: tee ranking annetusta tuloslistasta.
@@ -178,6 +149,7 @@ public class KuppiksenKunkkuService {
             .filter(k -> exclude == null || !k.equals(exclude))
             .toList();
     }
+
 
     private Keilaaja ratkaiseOttelu(GP gp, Keilaaja k1, Keilaaja k2) {
         Tulos t1 = tulosRepo.findByGpAndKeilaaja(gp, k1);
@@ -233,39 +205,19 @@ public class KuppiksenKunkkuService {
         });
     }
 
+    @Transactional
+    public long poistaKkMerkinnatGpsta(Long gpId) {
+        // (Valinnainen) varmista, että GP on olemassa:
+        if (!gpRepo.existsById(gpId)) {
+            // voit myös vain palauttaa 0, jos et halua heittää poikkeusta
+            throw new IllegalArgumentException("GP id " + gpId + " ei löytynyt");
+        }
+        return kkRepo.deleteByGp_GpId(gpId);
+    }
+
     // Julkinen getter UI:lle / testeille, ei DB-kirjoitusta
     public List<Keilaaja> getHaastajalista(GP gp) {
         return haastajalistaByGp.getOrDefault(gp.getGpId(), List.of());
-    }
-
-    // --- DEBUG/APU: nimet ja sarjat lokitusta varten ---
-
-    /** Palauttaa turvallisesti nimen: "id:Etunimi Sukunimi" tai "null". */
-    private String n(Keilaaja k) {
-        return (k == null) ? "null" : (k.getKeilaajaId() + ":" + k.getEtunimi() + " " + k.getSukunimi());
-    }
-
-    /** Palauttaa "paras XXX, huonompi YYY" annetulle keilaajalle tästä GP:stä. */
-    private String sarjatFor(GP gp, Keilaaja k) {
-        if (gp == null || k == null) return "—";
-        Tulos t = tulosRepo.findByGpAndKeilaaja(gp, k);
-        if (t == null) return "—";
-        int s1 = nullSafe(t.getSarja1());
-        int s2 = nullSafe(t.getSarja2());
-        int paras = Math.max(s1, s2);
-        int huonompi = Math.min(s1, s2);
-        return "paras " + paras + ", huonompi " + huonompi;
-    }
-
-    /** Muotoilee haastajalistan lokiin tyyliin: [id:Nimi (paras,huonompi), ...]. */
-    private String formatHaastajalista(GP gp, List<Keilaaja> lista) {
-        if (lista == null || lista.isEmpty()) return "[]";
-        List<String> parts = new ArrayList<>();
-        for (Keilaaja k : lista) {
-            String sj = sarjatFor(gp, k);
-            parts.add(k.getKeilaajaId() + ":" + k.getEtunimi() + " " + k.getSukunimi() + " (" + sj + ")");
-        }
-        return parts.toString();
     }
 
     /** Null-suojattu Integer -> int (null => 0). */
