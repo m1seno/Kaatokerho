@@ -19,6 +19,9 @@ public class LisaaTuloksetDTO {
     @NotNull(message = "GP id on pakollinen")
     private Long gpId;
 
+    @NotNull(message = "Vyö unohtui -tieto on pakollinen")
+    private Boolean vyoUnohtui;
+
     @NotEmpty(message = "Tulokset-lista ei saa olla tyhjä")
     @Valid
     private List<TulosForm> tulokset;

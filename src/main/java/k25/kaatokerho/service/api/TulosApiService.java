@@ -1,6 +1,7 @@
 package k25.kaatokerho.service.api;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,12 +11,15 @@ import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
+import k25.kaatokerho.domain.KuppiksenKunkku;
 import k25.kaatokerho.domain.Tulos;
 import k25.kaatokerho.domain.TulosRepository;
 import k25.kaatokerho.domain.dto.LisaaTuloksetDTO;
 import k25.kaatokerho.domain.dto.TulosResponseDTO;
 import k25.kaatokerho.exception.ApiException;
 import k25.kaatokerho.service.KeilaajaKausiService;
+import k25.kaatokerho.service.KuppiksenKunkkuService;
+import k25.kaatokerho.domain.KuppiksenKunkkuRepository;
 
 @Service
 public class TulosApiService {
@@ -24,29 +28,37 @@ public class TulosApiService {
     private final KeilaajaRepository keilaajaRepository;
     private final GpRepository gpRepository;
     private final KeilaajaKausiService keilaajaKausiService;
+    private final KuppiksenKunkkuService kuppiksenKunkkuService;
+    private final KuppiksenKunkkuRepository kuppiksenKunkkuRepository;
 
     public TulosApiService(TulosRepository tulosRepository,
-                        KeilaajaRepository keilaajaRepository,
-                        GpRepository gpRepository,
-                        KeilaajaKausiService keilaajaKausiService) {
+            KeilaajaRepository keilaajaRepository,
+            GpRepository gpRepository,
+            KeilaajaKausiService keilaajaKausiService,
+            KuppiksenKunkkuService kuppiksenKunkkuService,
+            KuppiksenKunkkuRepository kuppiksenKunkkuRepository) {
         this.tulosRepository = tulosRepository;
         this.keilaajaRepository = keilaajaRepository;
         this.gpRepository = gpRepository;
         this.keilaajaKausiService = keilaajaKausiService;
+        this.kuppiksenKunkkuService = kuppiksenKunkkuService;
+        this.kuppiksenKunkkuRepository = kuppiksenKunkkuRepository;
     }
 
     @Transactional
-    public List<TulosResponseDTO> korvaaGpTulokset(LisaaTuloksetDTO dto) {
+    public List<TulosResponseDTO> LisaaTaiKorvaaGpTulokset(LisaaTuloksetDTO dto) {
         GP gp = gpRepository.findById(dto.getGpId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + dto.getGpId()));
 
-        // Idempotentti: pudotetaan ensin vanhat tämän GP:n tulokset, ettei synny duplikaatteja
+        // Idempotentti: pudotetaan ensin vanhat tämän GP:n tulokset, ettei synny
+        // duplikaatteja
         tulosRepository.deleteByGp_GpId(gp.getGpId());
 
         // Tallenna uudet
         for (LisaaTuloksetDTO.TulosForm tf : dto.getTulokset()) {
             Keilaaja keilaaja = keilaajaRepository.findById(tf.getKeilaajaId())
-                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + tf.getKeilaajaId()));
+                    .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
+                            "Keilaajaa ei löytynyt ID:llä " + tf.getKeilaajaId()));
 
             Tulos tulos = new Tulos();
             tulos.setGp(gp);
@@ -57,6 +69,13 @@ public class TulosApiService {
 
             tulosRepository.save(tulos);
         }
+
+        // Hae edellinen KK-merkintä
+        var prevOpt = kuppiksenKunkkuRepository
+                .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(gp.getKausi(), gp.getJarjestysnumero());
+
+        // Päivitä kuppiksen kunkku
+        kuppiksenKunkkuService.kasitteleKuppiksenKunkku(gp, prevOpt, vyoUnohtui);
 
         // Päivitä kausitilastot tämän GP:n perusteella (tämä käynnistää pistelaskut)
         keilaajaKausiService.paivitaKeilaajaKausi(gp);
@@ -83,14 +102,16 @@ public class TulosApiService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
 
         tulosRepository.deleteByGp_GpId(gp.getGpId());
-        // HUOM: jos poistat tulokset, kausitilasto pitää laskea uudelleen kaikista aiemmista GP:stä
+        // HUOM: jos poistat tulokset, kausitilasto pitää laskea uudelleen kaikista
+        // aiemmista GP:stä
         keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
     }
 
     @Transactional(readOnly = true)
     public List<TulosResponseDTO> haeKeilaajanTulokset(Long keilaajaId) {
         keilaajaRepository.findById(keilaajaId)
-            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+                .orElseThrow(
+                        () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
         List<Tulos> list = tulosRepository.findByKeilaaja_KeilaajaId(keilaajaId);
         if (list.isEmpty()) {
@@ -102,7 +123,8 @@ public class TulosApiService {
     @Transactional(readOnly = true)
     public List<TulosResponseDTO> haeKeilaajanTuloksetKaudella(Long keilaajaId, Long kausiId) {
         keilaajaRepository.findById(keilaajaId)
-            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+                .orElseThrow(
+                        () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
         List<Tulos> list = tulosRepository.findByKeilaaja_KeilaajaIdAndGp_Kausi_KausiId(keilaajaId, kausiId);
         if (list.isEmpty()) {

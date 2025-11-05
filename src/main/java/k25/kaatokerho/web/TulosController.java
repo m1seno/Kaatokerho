@@ -34,7 +34,7 @@ public class TulosController {
      */
     @PostMapping
     public ResponseEntity<List<TulosResponseDTO>> lisaaTaiKorvaaGpTulokset(@Valid @RequestBody LisaaTuloksetDTO dto) {
-        List<TulosResponseDTO> tallennetut = tulosService.korvaaGpTulokset(dto);
+        List<TulosResponseDTO> tallennetut = tulosService.LisaaTaiKorvaaGpTulokset(dto);
         return ResponseEntity.ok(tallennetut);
     }
 
