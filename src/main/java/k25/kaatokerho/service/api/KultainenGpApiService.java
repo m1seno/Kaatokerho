@@ -126,10 +126,6 @@ public class KultainenGpApiService {
 
     // Poista KultainenGP-instanssi
     public void deleteKultainenGp(Long kultainenGpId)  {
-        KultainenGp kultainenGp = kultainenRepo.findById(kultainenGpId)
-                    .orElseThrow(
-                        () -> new ApiException(HttpStatus.NOT_FOUND, "KultainenGp-instanssia ei löytynyt id:llä " + kultainenGpId));
-
-        kultainenRepo.delete(kultainenGp);
+        kultainenRepo.findById(kultainenGpId).ifPresent(kultainenRepo::delete);
     }
 }

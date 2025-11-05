@@ -2,6 +2,7 @@ package k25.kaatokerho.web;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,10 +19,12 @@ import jakarta.validation.Valid;
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.KeilahalliRepository;
+import k25.kaatokerho.domain.KultainenGp;
 import k25.kaatokerho.domain.dto.PaivitaGpDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 import k25.kaatokerho.service.api.GpApiService;
-import k25.kaatokerho.service.KuppiksenKunkkuService
+import k25.kaatokerho.service.api.KultainenGpApiService;
+import k25.kaatokerho.service.KuppiksenKunkkuService;
 
 @RestController
 @RequestMapping("/api/gp")
@@ -31,14 +34,17 @@ public class GpController {
     private final GpApiService lisaaGpService;
     private final KeilahalliRepository keilahalliRepository;
     private final KuppiksenKunkkuService kuppiksenKunkkuService;
+    private final KultainenGpApiService kultainenGpApiService;
 
     public GpController(GpRepository gpRepository, GpApiService lisaaGpService,
                             KeilahalliRepository keilahalliRepository,
-                            KuppiksenKunkkuService kuppiksenKunkkuService) {
+                            KuppiksenKunkkuService kuppiksenKunkkuService,
+                            KultainenGpApiService kultainenGpApiService) {
         this.gpRepository = gpRepository;
         this.lisaaGpService = lisaaGpService;
         this.keilahalliRepository = keilahalliRepository;
         this.kuppiksenKunkkuService = kuppiksenKunkkuService;
+        this.kultainenGpApiService = kultainenGpApiService;
     }
 
     @GetMapping
@@ -85,6 +91,7 @@ public class GpController {
         if (gpOpt.isPresent()) {
             gpRepository.delete(gpOpt.get());
             kuppiksenKunkkuService.poistaKkMerkinnatGpsta(id);
+            kultainenGpApiService.deleteKultainenGp(id);
             return ResponseEntity.noContent().build();
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "GP:tä id:llä " + id + " ei löytynyt");
