@@ -35,7 +35,7 @@ public class KuppiksenKunkkuApiService {
     }
 
     public KuppiksenKunkkuDTO getByGp(Long gpId) {
-        KuppiksenKunkku kk = kkRepo.findByGp_Id(gpId).orElseThrow();
+        KuppiksenKunkku kk = kkRepo.findByGp_GpId(gpId).orElseThrow();
         return toDto(kk);
     }
 
