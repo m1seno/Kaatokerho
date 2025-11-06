@@ -74,8 +74,10 @@ public class TulosApiService {
         var prevOpt = kuppiksenKunkkuRepository
                 .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(gp.getKausi(), gp.getJarjestysnumero());
 
+        // Vyötieto
+        boolean vyoUnohtui = Boolean.TRUE.equals(dto.getVyoUnohtui());
         // Päivitä kuppiksen kunkku
-        kuppiksenKunkkuService.kasitteleKuppiksenKunkku(gp, prevOpt, vyoUnohtui);
+        kuppiksenKunkkuService.kasitteleKuppiksenKunkku(gp, prevOpt.orElse(null), vyoUnohtui);
 
         // Päivitä kausitilastot tämän GP:n perusteella (tämä käynnistää pistelaskut)
         keilaajaKausiService.paivitaKeilaajaKausi(gp);
