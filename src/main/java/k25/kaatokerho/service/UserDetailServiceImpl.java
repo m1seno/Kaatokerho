@@ -24,7 +24,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String kayttajanimi) throws UsernameNotFoundException {
 
         Keilaaja currentUser = repository.findByKayttajanimi(kayttajanimi)
-             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Käyttäjää ei löytynyt: " + kayttajanimi));
+             .orElseThrow(() -> new UsernameNotFoundException("Käyttäjää ei löytynyt käyttäjänimellä: " + kayttajanimi));
 
         // Jos on admin, annetaan ROLE_ADMIN, muuten ROLE_USER
         String role = currentUser.getAdmin() ? "ROLE_ADMIN" : "ROLE_USER";

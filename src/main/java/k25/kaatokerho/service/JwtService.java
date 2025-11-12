@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtService {
@@ -26,7 +27,7 @@ public class JwtService {
     // Luo ja palauttaa allekirjoitusavaimen
     private Key getSigningKey() {
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
-        return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -42,6 +43,7 @@ public class JwtService {
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
+                .setAllowedClockSkewSeconds(30) // pieni kelloheitto ok
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -56,6 +58,7 @@ public class JwtService {
     private boolean isTokenExpired(String token) {
         Date expiration = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
+                .setAllowedClockSkewSeconds(30) // pieni kelloheitto ok
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
