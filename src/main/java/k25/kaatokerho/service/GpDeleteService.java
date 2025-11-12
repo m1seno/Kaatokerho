@@ -1,0 +1,50 @@
+package k25.kaatokerho.service;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import k25.kaatokerho.domain.GP;
+import k25.kaatokerho.domain.GpRepository;
+import k25.kaatokerho.domain.TulosRepository;
+import k25.kaatokerho.exception.ApiException;
+import k25.kaatokerho.service.api.KultainenGpApiService;
+
+@Service
+public class GpDeleteService {
+
+    private final GpRepository gpRepository;
+    private final TulosRepository tulosRepository;
+    private final KuppiksenKunkkuService kuppisService;
+    private final KultainenGpApiService kultainenService;
+    private final KeilaajaKausiService kausiService;
+
+    public GpDeleteService(GpRepository gpRepository,
+                             TulosRepository tulosRepository,
+                             KuppiksenKunkkuService kuppisService,
+                             KultainenGpApiService kultainenService,
+                             KeilaajaKausiService kausiService) {
+        this.gpRepository = gpRepository;
+        this.tulosRepository = tulosRepository;
+        this.kuppisService = kuppisService;
+        this.kultainenService = kultainenService;
+        this.kausiService = kausiService;
+    }
+
+    @Transactional
+    public void deleteGpCompletely(Long gpId) {
+        GP gp = gpRepository.findById(gpId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
+
+        // 1) Riippuvuuksien siivous
+        tulosRepository.deleteByGp_GpId(gpId);
+        kuppisService.poistaKkMerkinnatGpsta(gpId);
+        kultainenService.deleteKultainenGpIfExists(gpId); // idempotentti: ei löydy -> heittää 404 tai no-op, tee mieluusti no-op
+
+        // 2) Poista varsinainen GP
+        gpRepository.delete(gp);
+
+        // 3) Rakenna sarjataulukko uudestaan
+        kausiService.paivitaKaikkiKeilaajaKausiTiedot();
+    }
+}

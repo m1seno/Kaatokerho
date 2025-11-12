@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Kausi;
@@ -105,27 +106,33 @@ public class KultainenGpApiService {
     }
 
     // Hakee tietyn keilaajan kausitilastot tietyltä kaudelta
-    public List <ResponseKultainenGpDTO> getKeilaajanKausiKGP(Long keilaajaId, Long kausiId) {
+    public List<ResponseKultainenGpDTO> getKeilaajanKausiKGP(Long keilaajaId, Long kausiId) {
         Keilaaja keilaaja = keilaajaRepo.findById(keilaajaId)
-            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
+                .orElseThrow(
+                        () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
         Kausi kausi = kausiRepo.findById(kausiId)
-            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt ID:llä " + kausiId));
 
-            List<KultainenGp> kgpLista = kultainenRepo.findByKeilaaja_KeilaajaIdAndGp_Kausi_KausiId(keilaajaId, kausiId);
+        List<KultainenGp> kgpLista = kultainenRepo.findByKeilaaja_KeilaajaIdAndGp_Kausi_KausiId(keilaajaId, kausiId);
 
         if (kgpLista.isEmpty()) {
             throw new ApiException(HttpStatus.NOT_FOUND,
-                    "Kaudelta " + kausi.getNimi() + " ei löydy tilastoja henkilöltä " + keilaaja.getEtunimi() + " " + keilaaja.getSukunimi());
+                    "Kaudelta " + kausi.getNimi() + " ei löydy tilastoja henkilöltä " + keilaaja.getEtunimi() + " "
+                            + keilaaja.getSukunimi());
         }
-        
-            return kgpLista.stream()
-            .map(this::mapToDto)
-            .toList();
+
+        return kgpLista.stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
     // Poista KultainenGP-instanssi
-    public void deleteKultainenGp(Long kultainenGpId)  {
-        kultainenRepo.findById(kultainenGpId).ifPresent(kultainenRepo::delete);
+    @Transactional
+    public void deleteKultainenGpIfExists(Long gpId) {
+        List<KultainenGp> kultainenGps = kultainenRepo.findByGp_GpId(gpId);
+        if (!kultainenGps.isEmpty()) {
+            kultainenGps.forEach(kultainenRepo::delete);
+        }
     }
 }

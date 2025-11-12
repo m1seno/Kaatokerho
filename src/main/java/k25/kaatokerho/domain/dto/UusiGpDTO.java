@@ -16,7 +16,7 @@ public class UusiGpDTO {
     private Long keilahalliId;
 
     @NotNull
-    private boolean kultainenGp;
+    private Boolean kultainenGp;
 
     @NotNull
     private Long kausiId;
@@ -25,7 +25,7 @@ public class UusiGpDTO {
     }
 
     public UusiGpDTO(@NotNull Integer jarjestysnumero, @NotNull LocalDate pvm, @NotNull Long keilahalliId,
-            boolean kultainenGp, Long kausiId) {
+            Boolean kultainenGp, Long kausiId) {
         this.jarjestysnumero = jarjestysnumero;
         this.pvm = pvm;
         this.keilahalliId = keilahalliId;
@@ -57,11 +57,11 @@ public class UusiGpDTO {
         this.keilahalliId = keilahalliId;
     }
 
-    public boolean isKultainenGp() {
+    public Boolean isKultainenGp() {
         return kultainenGp;
     }
 
-    public void setKultainenGp(boolean kultainenGp) {
+    public void setKultainenGp(Boolean kultainenGp) {
         this.kultainenGp = kultainenGp;
     }
 
