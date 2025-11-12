@@ -2,12 +2,14 @@ package k25.kaatokerho.service.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaRepository;
 import k25.kaatokerho.domain.dto.ResponseKeilaajaDTO;
@@ -39,6 +41,7 @@ public class KeilaajaApiService {
     }
 
     // Haetaan yhden keilaajan tiedot
+    @Transactional
     public ResponseKeilaajaDTO getKeilaajaById(Long keilaajaId) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löydy id:llä " + keilaajaId));
@@ -47,6 +50,7 @@ public class KeilaajaApiService {
     }
 
     // Haetaan lista kaikista keilaajista
+    @Transactional
     public List<ResponseKeilaajaDTO> getAllKeilaajat() {
         List<Keilaaja> keilaajaLista = new ArrayList<>();
         keilaajaRepository.findAll().forEach(keilaajaLista::add);
@@ -57,6 +61,7 @@ public class KeilaajaApiService {
     }
 
     // Lisää uusi keilaaja
+    @Transactional
     public ResponseKeilaajaDTO addNewKeilaaja(UusiKeilaajaDTO dto) {
         String kayttajanimi = dto.getKayttajanimi() != null ? dto.getKayttajanimi().trim() : null;
 
@@ -71,29 +76,26 @@ public class KeilaajaApiService {
         keilaaja.setAktiivijasen(dto.getAktiivijasen());
         keilaaja.setAdmin(dto.getAdmin());
 
-        if (dto.getAdmin()) {
-            keilaaja.setKayttajanimi(kayttajanimi);
-            keilaaja.setSalasanaHash(passwordEncoder.encode(dto.getSalasana()));
-        } else {
-            keilaaja.setKayttajanimi(null);
-            keilaaja.setSalasanaHash(null);
-        }
+        keilaaja.setKayttajanimi(kayttajanimi);
+        keilaaja.setSalasanaHash(passwordEncoder.encode(dto.getSalasana()));
 
         return mapToDto(keilaajaRepository.save(keilaaja));
     }
 
     // Päivitä kaikki keilaajan tiedot paitsi salasana
+    @Transactional
     public ResponseKeilaajaDTO updateKeilaaja(Long keilaajaId, UusiKeilaajaDTO dto) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(
                         () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));
 
         String kayttajanimi = dto.getKayttajanimi() != null ? dto.getKayttajanimi().trim() : null;
+        if (kayttajanimi == null || kayttajanimi.isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Käyttäjänimi on pakollinen");
+        }
 
-        if (kayttajanimi != null &&
-                !kayttajanimi.equals(keilaaja.getKayttajanimi()) &&
+        if (!kayttajanimi.equals(keilaaja.getKayttajanimi()) &&
                 keilaajaRepository.findByKayttajanimi(kayttajanimi).isPresent()) {
-
             throw new ApiException(HttpStatus.BAD_REQUEST, "Käyttäjänimi " + kayttajanimi + " on jo käytössä.");
         }
 
@@ -101,17 +103,16 @@ public class KeilaajaApiService {
         keilaaja.setSukunimi(dto.getSukunimi());
         keilaaja.setSyntymapaiva(dto.getSyntymapaiva());
         keilaaja.setAktiivijasen(dto.getAktiivijasen());
-        keilaaja.setAdmin(dto.getAdmin());
+        keilaaja.setAdmin(dto.getAdmin()); // rooli voi muuttua
+        keilaaja.setKayttajanimi(kayttajanimi);
 
-        if (dto.getAdmin()) {
-            keilaaja.setKayttajanimi(kayttajanimi);
-        } else {
-            keilaaja.setKayttajanimi(null);
-        }
+        // HUOM: salasanaa EI vaihdeta täällä. Käytä updateSalasana endpointtia.
+
         return mapToDto(keilaajaRepository.save(keilaaja));
     }
 
     // Päivitä keilaajan salasana
+    @Transactional
     public void updateSalasana(Long keilaajaId, PaivitaSalasanaDTO dto) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(
@@ -125,6 +126,7 @@ public class KeilaajaApiService {
     }
 
     // Poista keilaaja
+    @Transactional
     public void deleteKeilaaja(Long keilaajaId) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(

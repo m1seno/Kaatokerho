@@ -31,9 +31,11 @@ public class UusiKeilaajaDTO {
     @NotNull(message = "Määritä, onko keilaajalla admin-oikeudet")
     private Boolean admin;
 
+    @NotEmpty(message = "Käyttäjänimi on pakollinen")
     @Size(max = 50)
     private String kayttajanimi;
 
+    @NotEmpty(message = "Salasana on pakollinen")
     @Size(min = 8, max = 60, message = "Uuden salasanan on oltava 8-60 merkkiä pitkä")
     private String salasana;
 }

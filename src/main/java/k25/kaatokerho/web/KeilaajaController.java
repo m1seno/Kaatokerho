@@ -22,7 +22,7 @@ import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.service.api.KeilaajaApiService;
 
 @RestController
-@RequestMapping("api/keilaaja")
+@RequestMapping("/api/keilaaja")
 public class KeilaajaController {
 
     private final KeilaajaApiService keilaajaService;
