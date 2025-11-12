@@ -13,7 +13,7 @@ public interface GpRepository extends JpaRepository<GP, Long> {
 
     Integer countByKausi(Kausi kausi);
 
-    List<GP> findByKausi_NimiOrderByJarjestysnumeroAsc(String seasonName);
+    List<GP> findByKausi_KausiIdOrderByJarjestysnumeroAsc(Long kausiId);
 
     Integer countByKausiAndOnKultainenGpTrue(Kausi kausi);
 }

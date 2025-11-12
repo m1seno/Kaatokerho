@@ -29,15 +29,15 @@ import k25.kaatokerho.service.GpDeleteService;
 public class GpController {
 
     private final GpRepository gpRepository;
-    private final GpApiService lisaaGpService;
+    private final GpApiService gpApiService;
     private final KeilahalliRepository keilahalliRepository;
     private final GpDeleteService gpDeletionService;
 
-    public GpController(GpRepository gpRepository, GpApiService lisaaGpService,
+    public GpController(GpRepository gpRepository, GpApiService gpApiService,
             KeilahalliRepository keilahalliRepository,
             GpDeleteService gpDeletionService) {
         this.gpRepository = gpRepository;
-        this.lisaaGpService = lisaaGpService;
+        this.gpApiService = gpApiService;
         this.keilahalliRepository = keilahalliRepository;
         this.gpDeletionService = gpDeletionService;
     }
@@ -49,6 +49,23 @@ public class GpController {
         return ResponseEntity.ok(gpLista);
     }
 
+    /** Hae tietyn kauden kaikki GP:t */
+    @GetMapping("/kausi/{kausiId}")
+    public ResponseEntity<List<GP>> haeGpKausella(@PathVariable Long kausiId) {
+        List<GP> lista = gpApiService.haeGpKausella(kausiId);
+        if (lista.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        return ResponseEntity.ok(lista);
+    }
+
+    /** Hae nykyisen (viimeisimmän) kauden kaikki GP:t */
+    @GetMapping("/kausi/current")
+    public ResponseEntity<List<GP>> haeNykyisenKaudenGp() {
+        List<GP> lista = gpApiService.haeNykyisenKaudenGp();
+        return ResponseEntity.ok(lista);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<GP> haeGp(@PathVariable Long id) {
         return gpRepository.findById(id)
@@ -56,43 +73,32 @@ public class GpController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/next")
-    public ResponseEntity<UusiGpDTO> seuraavaGpLuonnos() {
-        return ResponseEntity.ok(lisaaGpService.luoUusiGp());
-    }
-
     @PostMapping
     public ResponseEntity<GP> luoUusiGp(@Valid @RequestBody UusiGpDTO gpDTO) {
-        GP tallennettuGp = lisaaGpService.tallennaGpJaPalauta(gpDTO);
+        GP tallennettuGp = gpApiService.tallennaGpJaPalauta(gpDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(tallennettuGp);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<GP> paivitaGp(@PathVariable Long id, @Valid @RequestBody PaivitaGpDTO dto) {
-        GP gp = gpRepository.findById(id)
-                .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "GP:tä id:llä " + id + " ei löytynyt"));
+public ResponseEntity<GP> paivitaGp(@PathVariable Long id, @Valid @RequestBody PaivitaGpDTO dto) {
+    GP gp = gpRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "GP:tä id:llä " + id + " ei löytynyt"));
 
-        if (dto.getPvm() != null) {
-            gp.setPvm(dto.getPvm());
-        }
-        if (dto.getKeilahalliId() != null) {
-            keilahalliRepository.findById(dto.getKeilahalliId()).ifPresent(gp::setKeilahalli);
-        }
-        if (dto.isOnKultainenGp() != null) {
-            boolean uusiArvo = dto.isOnKultainenGp();
-            if (uusiArvo != Boolean.TRUE.equals(gp.isOnKultainenGp())) {
-                // siirrä kultaisuuden muutos serviceen, joka valvoo rajoitteet (max 2/kausi
-                // tms)
-                // esim:
-                // gp = gpApiService.paivitaKultaisuus(gp, uusiArvo);
-                gp.setOnKultainenGp(uusiArvo);
-            }
-        }
-
-        gpRepository.save(gp);
-        return ResponseEntity.ok(gp);
+    if (dto.getPvm() != null) {
+        gp.setPvm(dto.getPvm());
     }
+    if (dto.getKeilahalliId() != null) {
+        var keilahalli = keilahalliRepository.findById(dto.getKeilahalliId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Keilahallia ei löytynyt id:llä " + dto.getKeilahalliId()));
+        gp.setKeilahalli(keilahalli);
+    }
+    if (dto.getOnKultainenGp() != null) {
+        gp = gpApiService.paivitaKultaisuus(gp, dto.getOnKultainenGp());
+    }
+
+    gpRepository.save(gp);
+    return ResponseEntity.ok(gp);
+}
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> poistaGp(@PathVariable Long id) {

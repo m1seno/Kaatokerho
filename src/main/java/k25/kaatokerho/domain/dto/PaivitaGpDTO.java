@@ -32,7 +32,7 @@ public class PaivitaGpDTO {
         this.keilahalliId = keilahalliId;
     }
 
-    public Boolean isOnKultainenGp() {
+    public Boolean getOnKultainenGp() {
         return onKultainenGp;
     }
 

@@ -9,6 +9,7 @@ import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.TulosRepository;
 import k25.kaatokerho.exception.ApiException;
 import k25.kaatokerho.service.api.KultainenGpApiService;
+import k25.kaatokerho.domain.KausiRepository;
 
 @Service
 public class GpDeleteService {
@@ -18,17 +19,20 @@ public class GpDeleteService {
     private final KuppiksenKunkkuService kuppisService;
     private final KultainenGpApiService kultainenService;
     private final KeilaajaKausiService kausiService;
+    private final KausiRepository kausiRepository;
 
     public GpDeleteService(GpRepository gpRepository,
                              TulosRepository tulosRepository,
                              KuppiksenKunkkuService kuppisService,
                              KultainenGpApiService kultainenService,
-                             KeilaajaKausiService kausiService) {
+                             KeilaajaKausiService kausiService,
+                             KausiRepository kausiRepository) {
         this.gpRepository = gpRepository;
         this.tulosRepository = tulosRepository;
         this.kuppisService = kuppisService;
         this.kultainenService = kultainenService;
         this.kausiService = kausiService;
+        this.kausiRepository = kausiRepository;
     }
 
     @Transactional
@@ -43,6 +47,13 @@ public class GpDeleteService {
 
         // 2) Poista varsinainen GP
         gpRepository.delete(gp);
+
+        // 2b) Päivitä kauden gpMaara
+        var kausi = gp.getKausi();
+        if (kausi != null && kausi.getGpMaara() != null && kausi.getGpMaara() > 0) {
+            kausi.setGpMaara(kausi.getGpMaara() - 1);
+            kausiRepository.save(kausi);
+        }
 
         // 3) Rakenna sarjataulukko uudestaan
         kausiService.paivitaKaikkiKeilaajaKausiTiedot();
