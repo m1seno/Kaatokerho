@@ -1,16 +1,22 @@
 # Kaatokerho backend -Dokumentaatio
 
 ## API
-#### [Autentikointi](#autentikointi)
-#### [GP](#gp)
+#### [Autentikointi](#auth-endpointit)
+#### [GP](#gp-endpointit)
+#### [Kausi](#kausi-endpointit)
 
-### Autentikointi
+Yleistä
+
+	•	GET–pyynnöt: public (nykyisessä configissa)
+	•	POST / PATCH / DELETE: vaatii Authorization: Bearer <JWT> ja roolin ROLE_ADMIN
+	•	Content-Type: application/json; charset=utf-8
+
+### Auth-endpointit
 	•	Malli: stateless JWT (Bearer-token Authorization-headerissa)
 	•	Algoritmi: HS512 (salainen avain Base64-enkoodattuna)
 	•	Roolit: ROLE_ADMIN / ROLE_USER (sidottu Keilaaja.admin)
 
-#### Endpointit
-*POST /api/login*
+#### POST /api/login
 
 Kirjautuu sisään ja palauttaa JWT:n.
 
@@ -55,18 +61,11 @@ curl -sX POST http://localhost:8080/api/login \
  -H "Content-Type: application/json" \
  -d '{"kayttajanimi":"miika","salasana":"salainen"}'
 ```
+#### [🔗 Takaisin valikkoon](#api)
 
-### GP
-Yleistä
+### GP-endpointit
 
-	•	Base URL: /api/gp
-	•	Auth:
-	•	GET–pyynnöt: public (nykyisessä configissa)
-	•	POST / PATCH / DELETE: vaatii Authorization: Bearer <JWT> ja roolin ROLE_ADMIN
-	•	Content-Type: application/json; charset=utf-8
-
-#### Endpointit
-##### GET /api/gp
+#### GET /api/gp
 
 Palauttaa kaikki GP:t kaikki kausilta.
 
@@ -84,7 +83,7 @@ Response 200
 ]
 ```
 
-##### GET /api/gp/{id}
+#### GET /api/gp/{id}
 
 Hakee yksittäisen GP:n.
 
@@ -101,7 +100,7 @@ Response 200 – GP löytyi
   ```
 - Response 404 – Ei löytynyt
 
-##### GET /api/gp/kausi/{kausiId}
+#### GET /api/gp/kausi/{kausiId}
 
 Hakee kaikki annetun kauden GP:t nousevassa järjestyksessä kentän jarjestysnumero mukaan.
 
@@ -131,7 +130,7 @@ Response 200 OK
   }
 ]
 ```
-##### GET /api/gp/kausi/current
+#### GET /api/gp/kausi/current
 
 Hakee viimeisimmän kauden kaikki GP:t nousevassa järjestyksessä.
 
@@ -151,7 +150,7 @@ Response 200 OK
 Errors
 - 400 Not Found ("Ei aktiivista kautta.")
 
-##### POST /api/gp
+#### POST /api/gp
 
 Luo uuden GP:n.
 
@@ -188,7 +187,7 @@ Virheet:
 	•	404 Not Found – keilahallia ei löytynyt
 	•	409 Conflict – kultaisen määräraja/kauden gp-katto (suositeltava status; nyt tulee IllegalStateException)
 
-##### PATCH /api/gp/{id}
+#### PATCH /api/gp/{id}
 
 Päivittää vain annetut kentät: pvm, keilahalliId, onKultainenGp.
 
@@ -209,7 +208,7 @@ Response 200 – päivitetty GP
 
 404 – GP:tä ei löytynyt
 
-##### DELETE /api/gp/{id}
+#### DELETE /api/gp/{id}
 
 Poistaa GP:n turvallisesti:
 
@@ -224,3 +223,161 @@ Response 204 No Content
 
 404 – GP:tä ei löytynyt
 
+#### [🔗 Takaisin valikkoon](#api)
+
+### Kausi-endpointit
+
+#### GET /api/kausi
+Hakee kaikki tietokantaan tallennetut kaudet.
+
+Vastaus 200 OK
+```
+[
+  {
+    "kausiId": 1,
+    "nimi": "Kausi 2024–2025",
+    "gpMaara": 8,
+    "suunniteltuGpMaara": 13,
+    "osallistujamaara": 14
+  },
+  {
+    "kausiId": 2,
+    "nimi": "Kausi 2025–2026",
+    "gpMaara": 0,
+    "suunniteltuGpMaara": 13,
+    "osallistujamaara": 16
+  }
+]
+```
+Vastaus 404 (ei kausia)
+```
+{
+  "status": 404,
+  "message": "Yhtään kautta ei ole vielä tallennettu"
+}
+```
+#### GET /api/kausi/current
+Kuvaus:
+Hakee viimeisimmän kauden (suurin kausiId).
+
+Vastaus 200 OK
+```
+{
+  "kausiId": 3,
+  "nimi": "Kausi 2025–2026",
+  "gpMaara": 0,
+  "suunniteltuGpMaara": 13,
+  "osallistujamaara": 18
+}
+```
+Vastaus 404
+```
+{
+  "status": 404,
+  "message": "Yhtään kautta ei ole vielä tallennettu"
+}
+```
+#### GET /api/kausi/{id}
+
+Kuvaus:
+Hakee yksittäisen kauden tiedot sen id-tunnuksen perusteella.
+
+Parametrit
+- id (Long, required) – haettavan kauden tunniste
+
+Vastaus 200 OK
+```
+{
+  "kausiId": 2,
+  "nimi": "Kausi 2025–2026",
+  "gpMaara": 4,
+  "suunniteltuGpMaara": 10,
+  "osallistujamaara": 12
+}
+```
+Vastaus 404
+```
+{
+  "status": 404,
+  "message": "Kautta ei löytynyt ID:llä 999"
+}
+```
+#### POST /api/kausi
+
+Kuvaus:
+Luo uuden kauden. Käyttöoikeus: admin.
+
+Request Body
+```
+{
+  "nimi": "Kausi 2025–2026",
+  "suunniteltuGpMaara": 10,
+  "osallistujamaara": 14
+}
+```
+Vastaus 201 Created
+```
+{
+  "kausiId": 4,
+  "nimi": "Kausi 2025–2026",
+  "gpMaara": 0,
+  "suunniteltuGpMaara": 10,
+  "osallistujamaara": 14
+}
+```
+Vastaus 400 (duplikaatti)
+```
+{
+  "status": 400,
+  "message": "Kausi Kausi 2025–2026 on jo olemassa."
+}
+```
+#### PUT /api/kausi/{id}
+
+Kuvaus:
+Päivittää olemassa olevan kauden tiedot.
+Käyttöoikeus: admin.
+
+Parametrit
+- id (Long, required) – päivitettävän kauden tunniste
+
+Request Body
+```
+{
+  "nimi": "Kausi 2025–2026 ",
+  "suunniteltuGpMaara": 12,
+  "osallistujamaara": 15
+}
+```
+Vastaus 200 OK
+```
+{
+  "kausiId": 4,
+  "nimi": "Kausi 2025–2026",
+  "gpMaara": 0,
+  "suunniteltuGpMaara": 12,
+  "osallistujamaara": 15
+}
+```
+Vastaus 400 (nimi jo käytössä)
+```
+{
+  "status": 400,
+  "message": "Kausi Kausi 2025–2026 on jo olemassa."
+}
+```
+#### DELETE /api/kausi/{id}
+
+Kuvaus:
+Poistaa kauden pysyvästi tietokannasta. Käyttöoikeus: admin.
+
+Vastaus 204 No Content
+
+Vastaus 404
+```
+{
+  "status": 404,
+  "message": "Kautta ei löytynyt ID:llä 999"
+}
+```
+#### [🔗 Takaisin valikkoon](#api)
