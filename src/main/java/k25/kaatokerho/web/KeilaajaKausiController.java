@@ -46,15 +46,9 @@ public class KeilaajaKausiController {
 
     // Hakee tietyn keilaajan kausitilastot tietyltä kaudelta
     @GetMapping("/keilaaja/{keilaajaId}/kausi/{kausiId}")
-    public ResponseEntity<ResponseKeilaajaKausiDTO> getKeilaajanKausi(@PathVariable Long keilaajaId, Long kausiId) {
+    public ResponseEntity<ResponseKeilaajaKausiDTO> getKeilaajanKausi(@PathVariable Long keilaajaId,@PathVariable Long kausiId) {
         ResponseKeilaajaKausiDTO keilaajaKausi = keilaajaKausiApiService.getKeilaajanKausi(keilaajaId, kausiId);
         return ResponseEntity.ok(keilaajaKausi);
     }
 
-    // Poistaa KeilaajaKausi
-    @DeleteMapping("/{keilaajaKausiId}")
-    public ResponseEntity<Void> poistaKeilaajaKausi(@PathVariable Long keilaajaKausiId) {
-        keilaajaKausiApiService.deleteKeilaajaKausi(keilaajaKausiId);
-        return ResponseEntity.noContent().build();
-    }
 }

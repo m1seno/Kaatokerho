@@ -102,15 +102,4 @@ public class KeilaajaKausiApiService {
         return mapToDto(keilaajaKausi);
     }
 
-    // Poista KeilaajaKausi
-    public void deleteKeilaajaKausi(Long keilaajaKausiId)  {
-        KeilaajaKausi keilaajaKausi = kkRepo.findById(keilaajaKausiId)
-                    .orElseThrow(
-                        () -> new ApiException(HttpStatus.NOT_FOUND, "KeilaajaKausi-instanssia ei löytynyt id:llä " + keilaajaKausiId));
-
-        kkRepo.delete(keilaajaKausi);
-    }
-
-    
-
 }
