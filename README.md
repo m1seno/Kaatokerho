@@ -4,6 +4,7 @@
 #### [Autentikointi](#auth-endpointit)
 #### [GP](#gp-endpointit)
 #### [Kausi](#kausi-endpointit)
+#### [Keilaaja](#keilaaja-endpointit)
 
 Yleistä
 
@@ -381,3 +382,144 @@ Vastaus 404
 }
 ```
 #### [🔗 Takaisin valikkoon](#api)
+
+### Keilaaja-endpointit
+Base URL: /api/keilaaja
+
+Autentikointi: Bearer JWT
+
+#### GET /api/keilaaja
+
+Hakee kaikki keilaajat.
+
+Response 200
+```
+[
+  {
+    "keilaajaId": 1,
+    "etunimi": "Matti",
+    "sukunimi": "Meikäläinen",
+    "syntymapaiva": "1990-04-12",
+    "aktiivijasen": true,
+    "admin": false,
+    "kayttajanimi": MaMe
+  }
+]
+```
+#### GET /api/keilaaja/{id}
+
+Hakee keilaajan tunnisteella.
+
+Path param: id (Long)
+
+Response 200
+```
+{
+  "keilaajaId": 1,
+  "etunimi": "Matti",
+  "sukunimi": "Meikäläinen",
+  "syntymapaiva": "1990-04-12",
+  "aktiivijasen": true,
+  "admin": true,
+  "kayttajanimi": "matti"
+}
+```
+Response 404
+```
+{ "status": 404, "message": "Keilaajaa ei löydy id:llä 999" }
+```
+#### POST /api/keilaaja  (ADMIN)
+
+Luo uuden keilaajan.
+
+Request
+```
+{
+  "etunimi": "Matti",
+  "sukunimi": "Meikäläinen",
+  "syntymapaiva": "1990-04-12",
+  "aktiivijasen": true,
+  "admin": true,
+  "kayttajanimi": "matti",
+  "salasana": "Salasana123!"
+}
+```
+Response 201
+```
+{
+  "keilaajaId": 10,
+  "etunimi": "Matti",
+  "sukunimi": "Meikäläinen",
+  "syntymapaiva": "1990-04-12",
+  "aktiivijasen": true,
+  "admin": true,
+  "kayttajanimi": "matti"
+}
+```
+Response 400 (duplikaatti käyttäjänimi)
+```
+{ "status": 400, "message": "Käyttäjänimi matti on jo käytössä." }
+```
+#### PUT /api/keilaaja/{id}  (ADMIN)
+
+Päivittää keilaajan tiedot (ei sisällä salasanan vaihtoa).
+
+Request
+```
+{
+  "etunimi": "Matti",
+  "sukunimi": "Meikäläinen",
+  "syntymapaiva": "1990-04-12",
+  "aktiivijasen": true,
+  "admin": false,
+  "kayttajanimi": MaMeik
+}
+```
+Response 200
+```
+{
+  "keilaajaId": 10,
+  "etunimi": "Matti",
+  "sukunimi": "Meikäläinen",
+  "syntymapaiva": "1990-04-12",
+  "aktiivijasen": true,
+  "admin": false,
+  "kayttajanimi": MaMeik
+}
+```
+#### PUT /api/keilaaja/{id}/salasana
+
+Vaihda keilaajan salasana.
+Nykylogiikalla vaatii adminin (vaihda tämä!!)
+
+Request
+```
+{
+  "vanhaSalasana": "Salasana123!",
+  "uusiSalasana": "UusiVahvaSalasana456!"
+}
+```
+Response 200
+```
+{ "message": "Salasana päivitetty onnistuneesti!" }
+```
+Response 400 (väärä vanha)
+```
+{ "status": 400, "message": "Väärä vanha salasana" }
+```
+Response 404
+```
+{ "status": 404, "message": "Keilaajaa ei löytynyt ID:llä 10" }
+```
+#### DELETE /api/keilaaja/{id}  (ADMIN)
+
+Poistaa keilaajan.
+
+Response 204 (ei sisältöä)
+
+Response 404
+```
+{ "status": 404, "message": "Keilaajaa ei löytynyt ID:llä 999" }
+```
+#### [🔗 Takaisin valikkoon](#api)
+
