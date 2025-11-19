@@ -8,11 +8,16 @@ import lombok.Data;
 public class ResponseKultainenGpDTO {
 
     private Long kultainenGpId;
-
+    
     private Long keilaajaId;
     private String keilaajaNimi;
-
+    
     private Long gpId;
+    private Integer jarjestysnumero;
+
+    private Long kausiId;
+    private String kausiNimi;
 
     private Double lisapisteet;
+    
 }

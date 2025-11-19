@@ -7,6 +7,11 @@
 #### [Keilaaja](#keilaaja-endpointit)
 #### [KeilaajaKausi](#keilaajakausi-endpointit)
 #### [Keilahalli](#keilahalli-endpointit)
+#### [Kultainen GP](#kultainengp-endpointit)
+#### [Kuppiksen Kunkku](#kuppiksenkunkku-endpointit)
+#### [Tulos](#tulos-endpointit)
+#### [Sarjataulukko](#sarjataulukko-endpointit)
+#### [Kalenteri](#kalenteri-endpointit)
 
 
 Yleistä
@@ -716,4 +721,156 @@ Virhevastaus
 	•	404 NOT_FOUND – jos hallia ei löydy
 
 #### [🔗 Takaisin valikkoon](#api)
+
+### KultainenGP-endpointit
+
+#### GET /api/kultainengp
+
+Hakee kaikki KultainenGp-instanssit järjestelmästä.
+
+Vastaus 200 OK
+```
+[
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 12,
+    "keilaajaNimi": "Matti Meikäläinen",
+    "gpId": 5,
+    "gpJarjestysnumero": 3,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": 2.0
+  }
+]
+```
+Jos rivejä ei ole, palauttaa tyhjän listan [].
+
+#### GET /api/kultainengp/gp/{gpId}
+
+Hakee tietyn GP:n kaikki KultainenGp-rivit.
+
+Polkuparametrit
+- gpId – GP:n id
+
+Onnistunut vastaus 200 OK
+```
+[
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 12,
+    "keilaajaNimi": "Matti Meikäläinen",
+    "gpId": 5,
+    "gpJarjestysnumero": 3,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": 2.0
+  },
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 4,
+    "keilaajaNimi": "Kalle Keilaaja",
+    "gpId": 5,
+    "gpJarjestysnumero": 3,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": -1.0
+  }
+]
+```
+
+Virhevastaus
+- 404 NOT_FOUND – jos:
+- GP:tä ei löydy ("Gp:tä ei löytynyt id:llä X") tai
+- Kultaisia pisteitä ei ole tälle GP:lle ("Tilastoja ei löydy GP:n id:llä X")
+
+#### GET /api/kultainengp/kausi/{kausiId}
+
+Hakee kauden kaikki kultaiset pisteet (kaikki GP:t ja keilaajat kyseisessä kaudessa).
+
+Polkuparametrit
+-	kausiId – kauden id
+
+Onnistunut vastaus 200 OK
+```
+[
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 12,
+    "keilaajaNimi": "Matti Meikäläinen",
+    "gpId": 5,
+    "gpJarjestysnumero": 3,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": 2.0
+  },
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 4,
+    "keilaajaNimi": "Kalle Keilaaja",
+    "gpId": 5,
+    "gpJarjestysnumero": 3,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": -1.0
+  }
+]
+```
+
+GET /api/kultainengp/keilaaja/{keilaajaId}
+
+Hakee keilaajan kaikki Kultainen GP -pisteet kaikilta kausilta
+
+Parametrit:
+	•	keilaajaId
+
+Onnistunut vastaus 200 OK:
+```
+[
+  {
+    "kultainenGpId": 12,
+    "keilaajaId": 4,
+    "keilaajaNimi": "Pekka Pouta",
+    "gpId": 20,
+    "gpJarjestysnumero": 4,
+    "kausiId": 8,
+    "kausiNimi": "2024–2025",
+    "lisapisteet": 2.0
+  }
+]
+```
+#### GET /api/kultainengp/keilaaja/{keilaajaId}/kausi/{kausiId}
+
+Hakee keilaajan Kultainen GP -suoritukset tietyltä kaudelta
+
+Parametrit:
+	•	keilaajaId
+	•	kausiId
+
+Vastaus (200 OK):
+```
+[
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 4,
+    "keilaajaNimi": "Kalle Keilaaja",
+    "gpId": 5,
+    "gpJarjestysnumero": 3,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": 2.0
+  },
+  {
+    "kultainenGpId": 1,
+    "keilaajaId": 4,
+    "keilaajaNimi": "Kalle Keilaaja",
+    "gpId": 14,
+    "gpJarjestysnumero": 12,
+    "kausiId": 7,
+    "kausiNimi": "2025–2026",
+    "lisapisteet": -1.0
+  }
+]
+```
+#### [🔗 Takaisin valikkoon](#api)
+
 

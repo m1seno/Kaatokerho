@@ -2,11 +2,13 @@ package k25.kaatokerho.service.api;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import k25.kaatokerho.domain.*;
 import k25.kaatokerho.domain.dto.KuppiksenKunkkuStatsDTO;
+import k25.kaatokerho.exception.ApiException;
 import k25.kaatokerho.domain.dto.KuppiksenKunkkuDTO;
 
 @Service
@@ -30,12 +32,18 @@ public class KuppiksenKunkkuApiService {
     public KuppiksenKunkkuDTO getCurrentChampion(String seasonName) {
         KuppiksenKunkku kk = kkRepo
                 .findTopByGp_Kausi_NimiOrderByGp_JarjestysnumeroDesc(seasonName)
-                .orElseThrow();
+                .orElseThrow(() -> new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    "Kuppiksen Kunkkua ei löytynyt kaudelta " + seasonName
+            ));
         return toDto(kk);
     }
 
     public KuppiksenKunkkuDTO getByGp(Long gpId) {
-        KuppiksenKunkku kk = kkRepo.findByGp_GpId(gpId).orElseThrow();
+        KuppiksenKunkku kk = kkRepo.findByGp_GpId(gpId).orElseThrow(() -> new ApiException(
+            HttpStatus.NOT_FOUND,
+            "Kuppiksen Kunkkua ei löytynyt GP:lle id:llä " + gpId
+    ));
         return toDto(kk);
     }
 

@@ -36,11 +36,20 @@ public class KultainenGpApiService {
     }
 
     private ResponseKultainenGpDTO mapToDto(KultainenGp kultainenGp) {
+        GP gp = kultainenGp.getGp();
+        Kausi kausi = gp.getKausi();
+    
         return ResponseKultainenGpDTO.builder()
                 .kultainenGpId(kultainenGp.getKultainenGpId())
                 .keilaajaId(kultainenGp.getKeilaaja().getKeilaajaId())
-                .keilaajaNimi(kultainenGp.getKeilaaja().getEtunimi() + " " + kultainenGp.getKeilaaja().getSukunimi())
-                .gpId(kultainenGp.getGp().getGpId())
+                .keilaajaNimi(
+                    kultainenGp.getKeilaaja().getEtunimi() + " " +
+                    kultainenGp.getKeilaaja().getSukunimi()
+                )
+                .gpId(gp.getGpId())
+                .jarjestysnumero(gp.getJarjestysnumero())
+                .kausiId(kausi.getKausiId())
+                .kausiNimi(kausi.getNimi())
                 .lisapisteet(kultainenGp.getLisapisteet())
                 .build();
     }
