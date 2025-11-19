@@ -5,6 +5,8 @@
 #### [GP](#gp-endpointit)
 #### [Kausi](#kausi-endpointit)
 #### [Keilaaja](#keilaaja-endpointit)
+#### [KeilaajaKausi](#keilaajakausi-endpointit)
+
 
 Yleistä
 
@@ -520,6 +522,84 @@ Response 204 (ei sisältöä)
 Response 404
 ```
 { "status": 404, "message": "Keilaajaa ei löytynyt ID:llä 999" }
+```
+#### [🔗 Takaisin valikkoon](#api)
+
+### KeilaajaKausi-endpointit
+#### GET /api/keilaajakausi
+
+Hakee kaikki keilaajakausi-instanssit kaikkien kausien ja keilaajien osalta.
+
+Vastaus 200 OK
+```
+[
+  {
+    "keilaajaKausiId": 12,
+    "keilaajaId": 3,
+    "keilaajaNimi": "Matti Meikäläinen",
+    "kausiId": 1,
+    "kausiNimi": "Kausi 2025",
+    "parasSarja": 221,
+    "huonoinSarja": 135,
+    "kaudenPisteet": 45.0,
+    "voittoja": 1,
+    "osallistumisia": 3
+  }
+]
+```
+#### GET /api/keilaajakausi/kausi/{kausiId}
+
+Hakee tietyn kauden kaikkien keilaajien tilastot.
+Käytetään esimerkiksi sarjataulukon näyttämiseen.
+
+Parametrit
+- kausiId – long
+
+Vastaus 200 OK
+
+Lista ResponseKeilaajaKausiDTO-olioita.
+
+#### GET /api/keilaajakausi/keilaaja/{keilaajaId}
+
+Hakee keilaajan kaikki kausitilastot.
+
+Parametrit
+- keilaajaId – long
+
+Vastaus 200 OK
+
+Lista keilaajan kausitilastoista.
+GET /api/keilaajakausi/keilaaja/{keilaajaId}/kausi/{kausiId}
+
+Hakee yhden keilaajan tilaston yhdeltä kaudelta.
+
+Parametrit
+	•	keilaajaId
+	•	kausiId
+
+Vastaus 200 OK
+#### GET /api/keilaajakausi/keilaaja/{keilaajaId}/kausi/{kausiId}
+
+Hakee yhden keilaajan tilaston yhdeltä kaudelta.
+
+Parametrit
+- keilaajaId
+- kausiId
+
+Vastaus 200 OK
+```
+{
+  "keilaajaKausiId": 12,
+  "keilaajaId": 3,
+  "keilaajaNimi": "Matti Meikäläinen",
+  "kausiId": 1,
+  "kausiNimi": "Kausi 2025",
+  "parasSarja": 221,
+  "huonoinSarja": 135,
+  "kaudenPisteet": 45.0,
+  "voittoja": 1,
+  "osallistumisia": 3
+}
 ```
 #### [🔗 Takaisin valikkoon](#api)
 
