@@ -5,18 +5,22 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import k25.kaatokerho.domain.dto.KkHaastajalistaResponseDTO;
 import k25.kaatokerho.domain.dto.KuppiksenKunkkuDTO;
 import k25.kaatokerho.domain.dto.KuppiksenKunkkuStatsDTO;
 import k25.kaatokerho.service.api.KuppiksenKunkkuApiService;
+import k25.kaatokerho.service.KuppiksenKunkkuService;
 
 @RestController
 @RequestMapping("/api/kk")
 public class KuppiksenKunkkuController {
 
     private final KuppiksenKunkkuApiService apiService;
+    private final KuppiksenKunkkuService kkService;
 
-    public KuppiksenKunkkuController(KuppiksenKunkkuApiService apiService) {
+    public KuppiksenKunkkuController(KuppiksenKunkkuApiService apiService, KuppiksenKunkkuService kkService) {
         this.apiService = apiService;
+        this.kkService = kkService;
     }
 
     // 1) Kauden historia aikajärjestyksessä (yleisin käyttö)
@@ -31,6 +35,12 @@ public class KuppiksenKunkkuController {
     public ResponseEntity<KuppiksenKunkkuDTO> getCurrentChampion(
             @RequestParam(name = "season", required = true) String seasonName) {
         return ResponseEntity.ok(apiService.getCurrentChampion(seasonName));
+    }
+
+    // KuppiksenKunkun haastajalista
+    @GetMapping("/haastajalista/latest")
+    public ResponseEntity<KkHaastajalistaResponseDTO> getNextHaastajat() {
+        return ResponseEntity.ok(kkService.getLatestHaastajalista());
     }
 
     // 3) KK-merkintä tietylle GP:lle

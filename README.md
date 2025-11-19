@@ -933,9 +933,47 @@ KuppiksenKunkkuDTO
 Virheet
 - 404: Ei löydy yhtään KK-merkintää kaudelta
 
-#### GET /api/kk/gp/{gpId}
+#### GET /api/kk/haastajalista/latest
 
-📄 Kuvaus
+Haastajalista kuvaa seuraavan GP:n haastajajärjestyksen, joka muodostetaan automaattisesti, kun edellisen GP:n tulokset on syötetty ja KuppiksenKunkkuService.kasitteleKuppiksenKunkku(...) on ajettu.
+
+Lista:
+- perustuu edellisen GP:n tuloksiin
+- ei sisällä puolustajaa – vain haastajat
+- jokaisella haastajalla on myös:
+	- sarja1 = parempi sarja edellisestä GP:stä
+	- sarja2 = huonompi sarja edellisestä GP:stä
+
+Haastajalista pidetään muistissa palvelimen ajon aikana in-memory mapissa haastajalistaByGp, eikä sitä tallenneta tietokantaan.
+
+Vastaus 200 OK:
+```
+{
+  "gpId": 42,
+  "gpNo": 7,
+  "pvm": "2025-03-15",
+  "haastajat": [
+    {
+      "keilaajaId": 5,
+      "nimi": "Kalle Kaataja",
+      "sarja1": 201,
+      "sarja2": 143
+    },
+    {
+      "keilaajaId": 8,
+      "nimi": "Pasi Paikkaaja",
+      "sarja1": 189,
+      "sarja2": 163
+    }
+  ]
+}
+```
+
+Vastaus 404 Not Found:
+- haastajalistaa ei ole vielä muodostettu yhdellekään GP:lle
+- GP:tä ei löydy ID:llä (jos data on päässyt epäkonsistenttiin tilaan)
+
+#### GET /api/kk/gp/{gpId}
 
 Hakee yksittäisen GP:n Kuppiksen Kunkku -merkinnän.
 
@@ -980,3 +1018,4 @@ KuppiksenKunkkuStatsDTO
 
 ❌ Virheet
 	•	404: Jos kauden historia on tyhjä
+
