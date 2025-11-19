@@ -58,9 +58,9 @@ public class KultainenGpController {
     }
 
     // Poistaa KultaisenGp-instanssin
-    @DeleteMapping("/{kultainenGpId}")
-    public ResponseEntity<Void> poistaKultainenGp(@PathVariable Long kultainenGpId) {
-        kultainenService.deleteKultainenGpIfExists(kultainenGpId);
-        return ResponseEntity.noContent().build();
-    }
+    // @DeleteMapping("/{kultainenGpId}")
+    // public ResponseEntity<Void> poistaKultainenGp(@PathVariable Long GpId) {
+    //     kultainenService.deleteKultainenGpIfExists(kultainenGpId);
+    //     return ResponseEntity.noContent().build();
+    // }
 }

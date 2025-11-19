@@ -90,7 +90,7 @@ public class KultainenGpApiService {
     // Hakee keilaajakohtaiset KGP-instanssit
     public List<ResponseKultainenGpDTO> getKeilaajanKGP(Long keilaajaId) {
         Keilaaja keilaaja = keilaajaRepo.findById(keilaajaId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löytynyt Id:llä " + keilaajaId));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt Id:llä " + keilaajaId));
 
         List<KultainenGp> kgpLista = kultainenRepo.findByKeilaaja_KeilaajaId(keilaajaId);
 

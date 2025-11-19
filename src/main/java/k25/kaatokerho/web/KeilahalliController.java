@@ -30,7 +30,7 @@ public class KeilahalliController {
 
     // Lista kaikista keilahalleista
     @GetMapping
-    public ResponseEntity<List<ResponseKeilahalliDTO>> haeKaikkiKaudet() {
+    public ResponseEntity<List<ResponseKeilahalliDTO>> haeKaikkiKeilahallit() {
         return ResponseEntity.ok(keilahalliService.getAllKeilahallit());
     }
 

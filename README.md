@@ -6,6 +6,7 @@
 #### [Kausi](#kausi-endpointit)
 #### [Keilaaja](#keilaaja-endpointit)
 #### [KeilaajaKausi](#keilaajakausi-endpointit)
+#### [Keilahalli](#keilahalli-endpointit)
 
 
 Yleistä
@@ -601,5 +602,118 @@ Vastaus 200 OK
   "osallistumisia": 3
 }
 ```
+#### [🔗 Takaisin valikkoon](#api)
+
+### Keilahalli-endpointit
+#### GET /api/keilahalli
+
+Hakee listan kaikista keilahalleista.
+
+Vastaus 200 OK
+```
+[
+  {
+    "keilahalliId": 1,
+    "nimi": "Raision Keilahalli",
+    "kaupunki": "Raisio",
+    "valtio": "Suomi"
+  },
+  {
+    "keilahalliId": 2,
+    "nimi": "Kupittaan Keilahalli",
+    "kaupunki": "Turku",
+    "valtio": "Suomi"
+  }
+]
+```
+Jos halleja ei ole, palauttaa tyhjän listan [].
+#### GET /api/keilahalli/{id}
+
+Hakee yksittäisen keilahallin tiedot id:n perusteella.
+
+Polkuparametrit
+- id – keilahalliId (Long)
+
+Onnistunut vastaus 200 OK
+```
+{
+  "keilahalliId": 1,
+  "nimi": "Raision Keilahalli",
+  "kaupunki": "Raisio",
+  "valtio": "Suomi"
+}
+```
+Virhevastaus
+	•	404 NOT_FOUND – jos hallia ei löydy
+(Heitetään ApiException(HttpStatus.NOT_FOUND, "Keilahallia ei löydy id:llä X"))
+
+#### POST /api/keilahalli
+
+Luo uuden keilahallin.
+
+Request body (UusiKeilahalliDTO)
+```
+{
+  "nimi": "Raision Keilahalli",
+  "kaupunki": "Raisio",
+  "valtio": "Suomi"
+}
+```
+Validointi:
+- nimi – @NotEmpty
+- kaupunki – @NotEmpty
+- valtio – @NotEmpty
+
+Virheellisestä syötteestä palautuu 400 Bad Request Bean Validation -virheillä.
+
+Onnistunut vastaus 201 CREATED
+```
+{
+  "keilahalliId": 3,
+  "nimi": "Raision Keilahalli",
+  "kaupunki": "Raisio",
+  "valtio": "Suomi"
+}
+```
+#### PUT /api/keilahalli/{id}
+
+Päivittää olemassa olevan keilahallin kaikki kentät (nimi, kaupunki, valtio).
+
+Polkuparametrit
+- id – päivitettävän hallin id
+
+Request body (UusiKeilahalliDTO)
+```
+{
+  "nimi": "Uusi Nimi",
+  "kaupunki": "Uusi Kaupunki",
+  "valtio": "Suomi"
+}
+```
+Onnistunut vastaus 200 OK
+```
+{
+  "keilahalliId": 1,
+  "nimi": "Uusi Nimi",
+  "kaupunki": "Uusi Kaupunki",
+  "valtio": "Suomi"
+}
+```
+Virhevastaus
+	•	404 NOT_FOUND – jos hallia ei löydy
+
+#### DELETE /api/keilahalli/{id}
+
+Poistaa keilahallin.
+
+Polkuparametrit
+- id – poistettavan hallin id
+
+Onnistunut vastaus 204 NO CONTENT
+Ei response bodya.
+
+Virhevastaus
+	•	404 NOT_FOUND – jos hallia ei löydy
+
 #### [🔗 Takaisin valikkoon](#api)
 
