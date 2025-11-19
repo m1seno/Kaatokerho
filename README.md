@@ -873,4 +873,110 @@ Vastaus (200 OK):
 ```
 #### [🔗 Takaisin valikkoon](#api)
 
+### KuppiksenKunkku-endpointit
 
+KuppiksenKunkkuDTO
+```
+{
+  "id": 123,
+  "gpId": 55,
+  "gpNo": 3,
+  "pvm": "2025-01-02",
+  "puolustajaId": 4,
+  "puolustajaNimi": "Matti Meikäläinen",
+  "haastajaId": 8,
+  "haastajaNimi": "Kalle Keilaaja",
+  "voittajaId": 8,
+  "voittajaNimi": "Kalle Keilaaja",
+  "vyoUnohtui": false
+}
+```
+KuppiksenKunkkuStatsDTO
+```
+{
+  "season": "2024–2025",
+  "gpCount": 12,
+  "currentChampionId": 4,
+  "currentChampionName": "Matti Meikäläinen",
+  "uniqueChampions": 6,
+  "totalChallenges": 12
+}
+```
+
+Virheiden käsittely (päivitetty ApiException)
+
+Kaikki endpointit palauttavat ApiException-tapauksissa seuraavan rakenteen:
+
+#### GET /api/kk/history?season=KAUSI_NIMI
+
+Hakee kaiken Kuppiksen Kunkku -historian annettulta kaudelta aikajärjestyksessä.
+
+Polkuparametrit:
+- Parametri: kauden nimi (esim: "2025-2026")
+- Tyyppi = string 
+
+Vastaus 200 OK
+
+Lista KuppiksenKunkkuDTO-olioita järjestettynä GP-numeroittain.
+
+Virheet
+- 404: “Kuppiksen Kunkkua ei löytynyt kaudelta X”
+
+#### GET /api/kk/current?season=KAUSI_NIMI
+
+Hakee nykyisen kunkun annetulta kaudelta (kauden viimeisin merkintä).
+
+Vastaus 200 OK
+
+KuppiksenKunkkuDTO
+
+Virheet
+- 404: Ei löydy yhtään KK-merkintää kaudelta
+
+#### GET /api/kk/gp/{gpId}
+
+📄 Kuvaus
+
+Hakee yksittäisen GP:n Kuppiksen Kunkku -merkinnän.
+
+Polkuparametrit:
+- Parametri: gpId
+- Tyyppi: Long
+
+Vastaus 200 OK
+
+KuppiksenKunkkuDTO
+
+Virheet
+- 404: Jos GP:lle ei ole KK-merkintää
+
+#### GET /api/kk/player/{keilaajaId}
+
+Hakee pelaajakohtaisen historian kaikilta kausilta tai valitulta kaudelta.
+
+Polkuparametrit:
+- Parametri: keilaajaId, kauden nimi (Jos annetaan → rajataan vain kyseiseen kauteen
+)
+- Long, String
+
+Vastaus 200 OK
+
+KuppiksenKunkkuDTO
+
+Virheet
+- 404: Pelaajalla ei ole merkintöjä
+
+#### GET /api/kk/stats?season=KAUSI_NIMI
+
+Hakee kauden tilastot:
+- GP-määrä
+- Nykyinen mestari
+- Uniikkien mestareiden määrä
+- Haasteiden määrä
+
+🔁 Vastaus 200 OK
+
+KuppiksenKunkkuStatsDTO
+
+❌ Virheet
+	•	404: Jos kauden historia on tyhjä
