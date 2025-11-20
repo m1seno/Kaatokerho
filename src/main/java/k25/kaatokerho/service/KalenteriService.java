@@ -3,52 +3,66 @@ package k25.kaatokerho.service;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
+import k25.kaatokerho.domain.Kausi;
+import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.Tulos;
 import k25.kaatokerho.domain.dto.KalenteriDTO;
+import k25.kaatokerho.exception.ApiException;
 
 @Service
 public class KalenteriService {
 
     private final GpRepository gpRepository;
+    private final KausiRepository kausiRepository;
 
-    public KalenteriService(GpRepository gpRepository) {
+    public KalenteriService(GpRepository gpRepository, KausiRepository kausiRepository) {
         this.gpRepository = gpRepository;
+        this.kausiRepository = kausiRepository;
     }
 
-    public List<KalenteriDTO> GpTiedot() {
-        List<GP> gpLista = (List<GP>) gpRepository.findAll();
+    /** Kuluvan kauden GP-kalenteri voittajineen. */
+    public List<KalenteriDTO> gpTiedotNykyinenKausi() {
+        Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
+        if (kausi == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
+        }
 
-        // Palauttaa GP-listan kutsujalle, jossa jokaiselle GP:lle on laskettu voittaja,
-        // voittotulos ja keskiarvo
+        List<GP> gpLista = gpRepository.findByKausi_KausiIdOrderByJarjestysnumeroAsc(kausi.getKausiId());
+
         return gpLista.stream().map(gp -> {
             List<Tulos> osallistujat = gp.getTulokset().stream()
-                    .filter(Tulos::getOsallistui)
+                    .filter(t -> Boolean.TRUE.equals(t.getOsallistui()))
                     .toList();
 
-            // Selvitetään voittaja ja voittotulos
             Tulos parasTulos = osallistujat.stream()
                     .max(Comparator.comparingInt(t -> t.getSarja1() + t.getSarja2()))
                     .orElse(null);
 
-            String voittajaEtunimi = parasTulos != null ? parasTulos.getKeilaaja().getEtunimi() : "-";
-            String voittajaSukunimi = parasTulos != null ? parasTulos.getKeilaaja().getSukunimi() : "-";
-            String voittajaNimi = parasTulos != null ? voittajaEtunimi + " " + voittajaSukunimi : "-";
-            Integer voittotulos = parasTulos != null ? (parasTulos.getSarja1() + parasTulos.getSarja2()) : null;
+            String voittajaNimi = "-";
+            Integer voittotulos = null;
 
-            // Kertoo mitä yksittäiselle GP:lle on tapahtunut
+            if (parasTulos != null) {
+                voittajaNimi = parasTulos.getKeilaaja().getEtunimi() + " " +
+                               parasTulos.getKeilaaja().getSukunimi();
+                voittotulos = parasTulos.getSarja1() + parasTulos.getSarja2();
+            }
+
             return new KalenteriDTO(
                     gp.getJarjestysnumero(),
                     gp.getPvm(),
                     gp.getKeilahalli().getNimi(),
                     voittajaNimi,
-                    voittotulos);
+                    voittotulos
+            );
         }).toList();
     }
 
+    /** Voittotulosten keskiarvo annetulle listalle. */
     public double laskeKeskiarvo(List<KalenteriDTO> dtoLista) {
         return dtoLista.stream()
                 .filter(dto -> dto.getVoittotulos() != null)

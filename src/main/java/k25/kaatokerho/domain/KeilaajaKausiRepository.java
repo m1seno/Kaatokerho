@@ -10,4 +10,5 @@ public interface KeilaajaKausiRepository extends CrudRepository<KeilaajaKausi, L
     Optional<KeilaajaKausi> findByKeilaajaAndKausi(Keilaaja keilaaja, Kausi kausi);
     List<KeilaajaKausi> findByKausi_KausiId(Long kausiId);
     List<KeilaajaKausi> findByKeilaaja_KeilaajaId(Long keilaajaId);
+    List<KeilaajaKausi> findByKausi(Kausi kausi);
 }

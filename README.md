@@ -1021,9 +1021,121 @@ Virheet
 
 ### Tulos-endpointit
 
-POST /api/tulokset
+TulosResponseDTO
+```
+{
+  "tulosId": 123,
+  "gpId": 55,
+  "keilaajaId": 7,
+  "keilaajaEtunimi": "Matti",
+  "keilaajaSukunimi": "Meikäläinen",
+  "sarja1": 201,
+  "sarja2": 143,
+  "osallistui": true
+}
+```
+LisaaTuloksetDTO
+```
+{
+  "gpId": 55,
+  "vyoUnohtui": false,
+  "tulokset": [
+    {
+      "keilaajaId": 7,
+      "sarja1": 201,
+      "sarja2": 143
+    },
+    {
+      "keilaajaId": 12,
+      "sarja1": 180,
+      "sarja2": 150
+    }
+  ]
+}
+```
+Virheiden käsittely (ApiException)
 
-Lisää yhden GP:n kaikki tulokset kerralla.
-Poistaa ensin vanhat tulokset (idempotentti).
+Kaikki Tulos-endpointit palauttavat virheet muodossa:
+```
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Tuloksia ei löytynyt GP:lle 55",
+  "timestamp": "2025-01-01T12:00:00"
+}
+```
+
+#### POST /api/tulokset
+
+Lisää kaikki yhden GP:n tulokset kerralla.
+Idempotentti:
+- tallentaa gp:n tulokset
+- päivittää KuppiksenKunkku-ketjun ja Kultainen GP:n
+- päivittää KeilaajaKausi-tilastot
 
 Request body
+
+(LisaaTuloksetDTO)
+
+Vastaus 200 OK
+
+Lista TulosResponseDTO-olioita.
+
+Virheet
+- 404: GP:tä ei löytynyt
+- 404: Keilaajaa ei löytynyt
+- 400: DTO-validoinnit epäonnistuivat
+- 409: Täydellinen tasapeli Kuppiksen kunkku-ottelussa → UI:n pitää valita voittaja
+
+#### GET /api/tulokset/gp/{gpId}
+
+Hakee kaikki tulokset yhdelle GP:lle.
+
+Vastaus 200 OK
+
+Lista TulosResponseDTO-olioita.
+
+Virheet
+- 404: GP:tä ei löytynyt
+- 404: GP:llä ei ole tuloksia
+
+#### GET /api/tulokset/keilaaja/{keilaajaId}
+
+Hakee keilaajan kaikki tulokset kaikilta GP:iltä.
+
+Vastaus 200 OK
+
+Lista TulosResponseDTO-olioita.
+
+Virheet
+- 404: Keilaajaa ei löydy
+- 404: Keilaajalla ei ole yhtään tulosta
+
+#### GET /api/tulokset/keilaaja/{keilaajaId}/kausi/{kausiId}
+
+Hakee keilaajan tulokset vain yhdeltä kaudelta.
+
+Vastaus 200 OK
+
+Lista TulosResponseDTO-olioita.
+
+Virheet
+- 404: Keilaajaa ei löydy
+- 404: Tältä kaudelta ei löydy tuloksia
+
+#### DELETE /api/tulokset/gp/{gpId}
+
+Poistaa kaikki tietyn GP:n tulokset ja:
+1.	Poistaa GP:hen liittyvät Kultainen GP -merkinnät
+2.	Poistaa GP:hen liittyvät Kuppiksen Kunkku -merkinnät
+3.	Uudelleenrakentaa kyseisen kauden KuppiksenKunkku-ketjun
+4.	Uudelleenlaskee kauden KeilaajaKausi-tilastot (sarjataulukko)
+
+
+Vastaus 204 No Content
+
+Virheet
+- 404: GP:tä ei löytynyt
+
+#### [🔗 Takaisin valikkoon](#api)
+
