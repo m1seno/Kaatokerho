@@ -1139,3 +1139,247 @@ Virheet
 
 #### [🔗 Takaisin valikkoon](#api)
 
+### Sarjataulukko-endpointit
+
+SarjataulukkoDTO
+```
+{
+  "sija": 1,
+  "nimi": "Matti Meikäläinen",
+  "gpMaara": 10,
+  "pisteet": 123.5,
+  "pisteetPerGp": 12.35,
+  "gpVoitot": 3,
+  "gpTulokset": [354, 402, null, 389, 377, 410, 390, 401, 395, 380],
+  "yhteensa": 3508,
+  "kaGp": 350.8,
+  "kaSarja": 175.4
+}
+```
+Virheiden käsittely (ApiException)
+
+Kaikki endpointit palauttavat virhetilanteissa saman rakenteen:
+```
+{
+  "timestamp": "2025-03-15T12:34:56.789+02:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Selittävä virheviesti...",
+  "path": "/api/sarjataulukko/current"
+}
+```
+#### GET /api/sarjataulukko/current
+
+Hakee kuluvan kauden sarjataulukon.
+“Kuluvan kauden” logiikka perustuu viimeisimpään kauteen (esim. KausiRepository.findTopByOrderByKausiIdDesc()).
+
+Vastaus 200 OK
+
+Body:
+Lista SarjataulukkoDTO-olioita, valmiiksi pisteiden mukaan laskevasti järjestettynä (sija 1, 2, 3, …).
+
+```
+[
+  {
+    "sija": 1,
+    "nimi": "Pasi Paikkaaja",
+    "gpMaara": 10,
+    "pisteet": 123.5,
+    "pisteetPerGp": 12.35,
+    "gpVoitot": 3,
+    "gpTulokset": [354, 402, null, 389, 377, 410, 390, 401, 395, 380],
+    "yhteensa": 3508,
+    "kaGp": 350.8,
+    "kaSarja": 175.4
+  },
+  {
+    "sija": 2,
+    "nimi": "Kalle Keilaaja",
+    "gpMaara": 9,
+    "pisteet": 110.0,
+    "pisteetPerGp": 12.22,
+    "gpVoitot": 2,
+    "gpTulokset": [340, 398, 372, null, 381, 399, 388, 392, 376],
+    "yhteensa": 3046,
+    "kaGp": 338.44,
+    "kaSarja": 169.22
+  }
+]
+```
+Virheet
+- 404 Not Found – jos:
+- kuluvalla kaudella ei ole vielä yhtään KeilaajaKausi-riviä
+  - (esim. kauteen ei ole lisätty yhtään GP:tä/tulosta)
+
+#### GET /api/sarjataulukko/kausi/{kausiId}
+
+Hakee sarjataulukon nimenomaiselle kaudelle kausiId-parametrin perusteella.
+
+Polkuparametri
+- kausiId (Long) – haettavan kauden ID
+
+Vastaus 200 OK
+- lista SarjataulukkoDTO-olioita tälle kaudelle
+
+Virheet
+- 404 Not Found:
+  - Kautta ei löydy ID:llä
+  - Kaudelle ei löydy sarjataulukkoa / KeilaajaKausi-rivejä
+
+#### GET /api/sarjataulukko/current/gp-numerot
+
+Hakee kuluvan kauden GP-järjestysnumerot listana.
+Tämä on hyödyllinen esim. frontissa:
+	•	taulukon sarakeotsikoissa
+	•	dropdownissa: “valitse GP”
+	•	graafien X-akselin arvoina
+
+Vastaus 200 OK
+
+Body:
+Lista järjestysnumeroita nousevassa järjestyksessä:
+```
+[1, 2, 3, 4, 5, 6, 7]
+```
+
+Virheet
+- 404 Not Found – jos:
+	-	kuluvalla kaudella ei ole yhtään GP:tä
+
+#### [🔗 Takaisin valikkoon](#api)
+
+### Kalenteri-endpointit
+KalenteriDTO
+
+Kilpailukalenterissa yksi rivi per GP näyttää tältä:
+```
+{
+  "gpNo": 3,
+  "pvm": "2025-01-20",
+  "keilahalli": "Kupittaa Bowling",
+  "voittajaNimi": "Matti Meikäläinen",
+  "voittotulos": 412
+}
+```
+Virheiden käsittely (ApiException)
+
+Sama malli kuin muualla:
+```
+{
+  "timestamp": "2025-03-15T12:34:56.789+02:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Selittävä virheviesti...",
+  "path": "/api/kalenteri/current"
+}
+```
+#### GET /api/kalenteri/current
+
+Hakee kuluvan kauden kilpailukalenterin GP-listan.
+Kuluvan kauden logiikka jälleen: uusin kausi (findTopByOrderByKausiIdDesc()), ja vain kyseisen kauden GP:t.
+
+Vastaus 200 OK
+
+Body:
+Lista KalenteriDTO-olioita, järjestettynä GP-järjestysnumeron mukaan nousevasti.
+
+Esimerkki:
+```
+[
+  {
+    "gpNo": 1,
+    "pvm": "2025-09-10",
+    "keilahalli": "Kupittaan Keilahalli",
+    "voittajaNimi": "Keijo Kaataja",
+    "voittotulos": 401
+  },
+  {
+    "gpNo": 2,
+    "pvm": "2025-09-24",
+    "keilahalli": "Aninkaisten Keilahalli",
+    "voittajaNimi": "Risto Ränni",
+    "voittotulos": 341
+  },
+  {
+    "gpNo": 3,
+    "pvm": "2025-10-08",
+    "keilahalli": "TURKU Keilahalli",
+    "voittajaNimi": "-",
+    "voittotulos": null
+  }
+]
+```
+GP, jolla ei vielä ole tuloksia → voittajaNimi = "-", voittotulos = null
+
+Virheet
+- 404 Not Found – jos:
+	- kuluvalla kaudella ei ole yhtään GP:tä
+
+#### GET /api/kalenteri/kausi/{kausiId}
+
+Hakee minkä tahansa kauden kalenterin:
+
+Polkuparametri
+	•	kausiId (Long) – haettavan kauden ID
+
+Vastaus 200 OK
+	•	Lista KalenteriDTO-olioita kyseisen kauden GP:istä
+
+Virheet
+	•	404 Not Found:
+	•	Kautta ei löydy ID:llä
+	•	Kaudelta ei löydy ainuttakaan GP:tä
+
+#### GET /api/kalenteri/current/average-win
+
+Laskee kuluvan kauden GP-voittotulosten keskiarvon.
+
+Jos yksikään GP ei ole vielä tulostettu (kaikki voittotulos == null) → palautetaan 0.0.
+
+Vastaus 200 OK
+Body on pelkkä numero (JSON double):
+```
+341.35
+```
+Virheet
+- 404 Not Found
+- jos yhtään kautta ei ole vielä tallennettu
+(eli findTopByOrderByKausiIdDesc() palauttaa null → ApiException)
+Esimerkkivastaus:
+```
+{
+  "timestamp": "2025-03-15T12:34:56.789+02:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Yhtään kautta ei ole vielä tallennettu",
+  "path": "/api/kalenteri/current/average-win"
+}
+```
+
+#### GET /api/kalenteri/kausi/{kausiId}/average-win
+
+Laskee valitun kauden GP-voittotulosten keskiarvon.
+
+Polkuparametri
+	•	kausiId (Long) – kauden tunniste
+
+Vastaus 200 OK
+Body:
+```
+321.33
+```
+Virheet
+	•	404 Not Found – jos:
+	•	Kautta ei löydy annetulla kausiId-arvolla.
+Esimerkkivastaus:
+```
+{
+  "timestamp": "2025-03-15T12:34:56.789+02:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Kautta ei löydy: 123",
+  "path": "/api/kalenteri/kausi/123/average-win"
+}
+```
+
+#### [🔗 Takaisin valikkoon](#api)

@@ -26,11 +26,7 @@ public class KalenteriService {
     }
 
     /** Kuluvan kauden GP-kalenteri voittajineen. */
-    public List<KalenteriDTO> gpTiedotNykyinenKausi() {
-        Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
-        if (kausi == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
-        }
+    public List<KalenteriDTO> rakennaKalenteri(Kausi kausi) {
 
         List<GP> gpLista = gpRepository.findByKausi_KausiIdOrderByJarjestysnumeroAsc(kausi.getKausiId());
 
@@ -48,7 +44,7 @@ public class KalenteriService {
 
             if (parasTulos != null) {
                 voittajaNimi = parasTulos.getKeilaaja().getEtunimi() + " " +
-                               parasTulos.getKeilaaja().getSukunimi();
+                        parasTulos.getKeilaaja().getSukunimi();
                 voittotulos = parasTulos.getSarja1() + parasTulos.getSarja2();
             }
 
@@ -57,9 +53,24 @@ public class KalenteriService {
                     gp.getPvm(),
                     gp.getKeilahalli().getNimi(),
                     voittajaNimi,
-                    voittotulos
-            );
+                    voittotulos);
         }).toList();
+    }
+
+    // Hakee kuluvan kauden GP-kalenterin
+    public List<KalenteriDTO> kuluvanKaudenKalenteri() {
+        Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
+        if (kausi == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
+        }
+        return rakennaKalenteri(kausi);
+    }
+
+    // Hakee tietyn kauden GP-kalenterin
+    public List<KalenteriDTO> tietynKaudenKalenteri(Long kausiId) {
+        Kausi kausi = kausiRepository.findById(kausiId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Kautta ei löydy: " + kausiId));
+        return rakennaKalenteri(kausi);
     }
 
     /** Voittotulosten keskiarvo annetulle listalle. */
