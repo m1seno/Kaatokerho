@@ -1012,10 +1012,18 @@ Hakee kauden tilastot:
 - Uniikkien mestareiden määrä
 - Haasteiden määrä
 
-🔁 Vastaus 200 OK
+Vastaus 200 OK
 
 KuppiksenKunkkuStatsDTO
 
-❌ Virheet
+Virheet
 	•	404: Jos kauden historia on tyhjä
 
+### Tulos-endpointit
+
+POST /api/tulokset
+
+Lisää yhden GP:n kaikki tulokset kerralla.
+Poistaa ensin vanhat tulokset (idempotentti).
+
+Request body

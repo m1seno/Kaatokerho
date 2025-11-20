@@ -26,6 +26,7 @@ public class TulosApiService {
     private final GpRepository gpRepository;
     private final KeilaajaKausiService keilaajaKausiService;
     private final KuppiksenKunkkuService kuppiksenKunkkuService;
+    private final KultainenGpApiService kultainenService;
     private final KuppiksenKunkkuRepository kuppiksenKunkkuRepository;
 
     public TulosApiService(TulosRepository tulosRepository,
@@ -33,12 +34,14 @@ public class TulosApiService {
             GpRepository gpRepository,
             KeilaajaKausiService keilaajaKausiService,
             KuppiksenKunkkuService kuppiksenKunkkuService,
+            KultainenGpApiService kultainenService,
             KuppiksenKunkkuRepository kuppiksenKunkkuRepository) {
         this.tulosRepository = tulosRepository;
         this.keilaajaRepository = keilaajaRepository;
         this.gpRepository = gpRepository;
         this.keilaajaKausiService = keilaajaKausiService;
         this.kuppiksenKunkkuService = kuppiksenKunkkuService;
+        this.kultainenService = kultainenService;
         this.kuppiksenKunkkuRepository = kuppiksenKunkkuRepository;
     }
 
@@ -47,9 +50,10 @@ public class TulosApiService {
         GP gp = gpRepository.findById(dto.getGpId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + dto.getGpId()));
 
-        // Idempotentti: pudotetaan ensin vanhat tämän GP:n tulokset, ettei synny
-        // duplikaatteja
-        tulosRepository.deleteByGp_GpId(gp.getGpId());
+        if (!tulosRepository.findByGp_GpId(gp.getGpId()).isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Tulokset on jo syötetty tälle GP:lle. Poista ensin vanhat tulokset, jos haluat korjata niitä.");
+        }
 
         // Tallenna uudet
         for (LisaaTuloksetDTO.TulosForm tf : dto.getTulokset()) {
@@ -69,7 +73,8 @@ public class TulosApiService {
 
         // Hae edellinen KK-merkintä
         var prevOpt = kuppiksenKunkkuRepository
-                .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(gp.getKausi(), gp.getJarjestysnumero());
+                .findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(gp.getKausi(),
+                        gp.getJarjestysnumero());
 
         // Vyötieto
         boolean vyoUnohtui = Boolean.TRUE.equals(dto.getVyoUnohtui());
@@ -101,6 +106,8 @@ public class TulosApiService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
 
         tulosRepository.deleteByGp_GpId(gp.getGpId());
+        kuppiksenKunkkuService.poistaKkMerkinnatGpsta(gpId);
+        kultainenService.deleteKultainenGpIfExists(gpId); // idempotentti: ei löydy -> heittää 404 tai no-op, tee mieluusti no-op
         // HUOM: jos poistat tulokset, kausitilasto pitää laskea uudelleen kaikista
         // aiemmista GP:stä
         keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
