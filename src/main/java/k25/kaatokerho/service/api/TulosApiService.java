@@ -17,6 +17,7 @@ import k25.kaatokerho.exception.ApiException;
 import k25.kaatokerho.service.KeilaajaKausiService;
 import k25.kaatokerho.service.KuppiksenKunkkuService;
 import k25.kaatokerho.domain.KuppiksenKunkkuRepository;
+import k25.kaatokerho.service.KuppiksenKunkkuRebuildService;
 
 @Service
 public class TulosApiService {
@@ -28,6 +29,7 @@ public class TulosApiService {
     private final KuppiksenKunkkuService kuppiksenKunkkuService;
     private final KultainenGpApiService kultainenService;
     private final KuppiksenKunkkuRepository kuppiksenKunkkuRepository;
+    private final KuppiksenKunkkuRebuildService kuppisRebuildService;
 
     public TulosApiService(TulosRepository tulosRepository,
             KeilaajaRepository keilaajaRepository,
@@ -35,7 +37,8 @@ public class TulosApiService {
             KeilaajaKausiService keilaajaKausiService,
             KuppiksenKunkkuService kuppiksenKunkkuService,
             KultainenGpApiService kultainenService,
-            KuppiksenKunkkuRepository kuppiksenKunkkuRepository) {
+            KuppiksenKunkkuRepository kuppiksenKunkkuRepository,
+            KuppiksenKunkkuRebuildService kuppisRebuildService) {
         this.tulosRepository = tulosRepository;
         this.keilaajaRepository = keilaajaRepository;
         this.gpRepository = gpRepository;
@@ -43,10 +46,11 @@ public class TulosApiService {
         this.kuppiksenKunkkuService = kuppiksenKunkkuService;
         this.kultainenService = kultainenService;
         this.kuppiksenKunkkuRepository = kuppiksenKunkkuRepository;
+        this.kuppisRebuildService = kuppisRebuildService;
     }
 
     @Transactional
-    public List<TulosResponseDTO> LisaaTaiKorvaaGpTulokset(LisaaTuloksetDTO dto) {
+    public List<TulosResponseDTO> LisaaGpTulokset(LisaaTuloksetDTO dto) {
         GP gp = gpRepository.findById(dto.getGpId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + dto.getGpId()));
 
@@ -105,11 +109,16 @@ public class TulosApiService {
         GP gp = gpRepository.findById(gpId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
 
+        // Poista GP:n tulokset
         tulosRepository.deleteByGp_GpId(gp.getGpId());
-        kuppiksenKunkkuService.poistaKkMerkinnatGpsta(gpId);
-        kultainenService.deleteKultainenGpIfExists(gpId); // idempotentti: ei löydy -> heittää 404 tai no-op, tee mieluusti no-op
-        // HUOM: jos poistat tulokset, kausitilasto pitää laskea uudelleen kaikista
-        // aiemmista GP:stä
+
+        // Rakenna Kuppiksen Kunkku uudestaan tälle kaudelle
+        kuppisRebuildService.rebuildForGp(gpId);
+
+        // Poista KultainenGP-tiedot tältä GP:ltä (no-op, jos ei ollut KGP:tä)
+        kultainenService.deleteKultainenGpIfExists(gpId);
+
+        // Rakenna kausitilastot uusiksi KAIKISTA tuloksista
         keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
     }
 
