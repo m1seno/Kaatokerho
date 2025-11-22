@@ -90,7 +90,8 @@ public class GpApiService {
 
     @Transactional
     public GP paivitaKultaisuus(GP gp, boolean uusiArvo) {
-        if (uusiArvo == Boolean.TRUE.equals(gp.isOnKultainenGp())) return gp; // ei muutosta
+        if (gp.isOnKultainenGp() == uusiArvo)
+            return gp; // ei muutosta
 
         if (uusiArvo) {
             int kultaisia = gpRepository.countByKausiAndOnKultainenGpTrue(gp.getKausi());
@@ -99,7 +100,7 @@ public class GpApiService {
             }
         }
         gp.setOnKultainenGp(uusiArvo);
-        return gpRepository.save(gp);
+        return gp;
     }
 
 }

@@ -166,10 +166,11 @@ Luo uuden GP:n.
 Request body (UusiGpDTO):
 ```
 {
-  "pvm": "2025-10-20",
+  "jarjestysnumero": 11,
+  "pvm": "2025-04-05",
   "keilahalliId": 3,
   "kultainenGp": true,
-  "kausiId": 7
+  "kausiId": 1
 }
 ```
 Säännöt:
@@ -182,17 +183,28 @@ Säännöt:
 Response 201
 ```
 {
-  "gpId": 12,
-  "jarjestysnumero": 6,
-  "pvm": "2025-10-20",
-  "onKultainenGp": true,
-  "keilahalli": { "keilahalliId": 3, "nimi": "Kupittaa" },
-  "kausi": { "kausiId": 7, "nimi": "2025-2026" }
+    "gpId": 11,
+    "kausi": {
+        "kausiId": 1,
+        "nimi": "2024-2025",
+        "gpMaara": 11,
+        "suunniteltuGpMaara": 13,
+        "osallistujamaara": 18
+    },
+    "keilahalli": {
+        "keilahalliId": 3,
+        "nimi": "Kupittaan Keilahalli",
+        "kaupunki": "Turku",
+        "valtio": "Suomi"
+    },
+    "pvm": "2025-04-05",
+    "jarjestysnumero": 11,
+    "onKultainenGp": true
 }
 ```
 Virheet:
 
-	•	400 Bad Request – validointivirheet (pvm, keilahalliId, kultainenGp puuttuu/väärä)
+	•	400 Bad Request – validointivirheet (jarjestysnumero, pvm, keilahalliId, kultainenGp puuttuu/väärä)
 	•	404 Not Found – keilahallia ei löytynyt
 	•	409 Conflict – kultaisen määräraja/kauden gp-katto (suositeltava status; nyt tulee IllegalStateException)
 
