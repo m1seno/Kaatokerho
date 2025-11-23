@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.KeilahalliRepository;
+import k25.kaatokerho.domain.dto.NextGpDTO;
 import k25.kaatokerho.domain.dto.PaivitaGpDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
 import k25.kaatokerho.service.api.GpApiService;
@@ -47,6 +48,12 @@ public class GpController {
         List<GP> gpLista = gpRepository.findAll();
 
         return ResponseEntity.ok(gpLista);
+    }
+
+    /** Seuraava keilaamaton GP nykyiseltä kaudelta. */
+    @GetMapping("/next")
+    public ResponseEntity<NextGpDTO> haeSeuraavaKeilaamatonGp() {
+        return ResponseEntity.ok(gpApiService.haeSeuraavaKeilaamatonGpNykyinenKausi());
     }
 
     /** Hae tietyn kauden kaikki GP:t */

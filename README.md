@@ -139,6 +139,36 @@ Response 200 OK
   }
 ]
 ```
+
+#### GET /api/gp/next
+Palauttaa kuluvan kauden seuraavan GP:n, jolle ei ole vielä syötetty yhtään tulosta (Tulos-riviä).
+
+Vastaus 200 OK
+Kun kuluvalla kaudella löytyy vähintään yksi GP, jolla ei ole tuloksia:
+```
+{
+  "gpId": 42,
+  "jarjestysnumero": 7,
+  "pvm": "2025-03-15",
+  "kausiId": 3,
+  "kausiNimi": "2025–2026",
+  "keilahalliId": 5,
+  "keilahalliNimi": "Kupittaan Keilahalli",
+  "onKultainenGp": true
+}
+```
+
+Virheiden käsittely (ApiException)
+Kaikki virhetilanteet palautetaan yhtenäisessä muodossa, esim.:
+```
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "Kaudelta 2025–2026 ei löydy keilaamattomia GP:itä.",
+  "timestamp": "2025-01-01T12:34:56"
+}
+```
+
 #### GET /api/gp/kausi/current
 
 Hakee viimeisimmän kauden kaikki GP:t nousevassa järjestyksessä.

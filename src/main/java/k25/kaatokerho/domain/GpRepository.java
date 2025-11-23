@@ -18,4 +18,7 @@ public interface GpRepository extends JpaRepository<GP, Long> {
     Integer countByKausiAndOnKultainenGpTrue(Kausi kausi);
 
     List<GP> findByKausi(Kausi kausi);
+
+    // Seuraavat GP:t kaudelta, joilla EI ole yhtään tulosta
+    List<GP> findByKausi_KausiIdAndTuloksetIsEmptyOrderByJarjestysnumeroAsc(Long kausiId);
 }

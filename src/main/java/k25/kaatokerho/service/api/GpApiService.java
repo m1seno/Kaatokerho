@@ -13,7 +13,9 @@ import k25.kaatokerho.domain.Kausi;
 import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.Keilahalli;
 import k25.kaatokerho.domain.KeilahalliRepository;
+import k25.kaatokerho.domain.dto.NextGpDTO;
 import k25.kaatokerho.domain.dto.UusiGpDTO;
+import k25.kaatokerho.exception.ApiException;
 
 @Service
 public class GpApiService {
@@ -32,6 +34,36 @@ public class GpApiService {
     @Transactional
     public List<GP> haeGpKausella(Long kausiId) {
         return gpRepository.findByKausi_KausiIdOrderByJarjestysnumeroAsc(kausiId);
+    }
+
+    @Transactional
+    public NextGpDTO haeSeuraavaKeilaamatonGpNykyinenKausi() {
+        // 1) nykyinen kausi
+        Kausi kausi = kausiRepository.findTopByOrderByKausiIdDesc();
+        if (kausi == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Yhtään kautta ei ole vielä tallennettu");
+        }
+
+        // 2) etsi kauden GP:t, joilla ei ole tuloksia
+        List<GP> keilaamattomat = gpRepository
+                .findByKausi_KausiIdAndTuloksetIsEmptyOrderByJarjestysnumeroAsc(kausi.getKausiId());
+
+        GP next = keilaamattomat.stream()
+                .findFirst()
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
+                        "Kaudelta " + kausi.getNimi() + " ei löydy keilaamattomia GP:itä."));
+
+        // 3) mapataan DTO:ksi
+        return NextGpDTO.builder()
+                .gpId(next.getGpId())
+                .jarjestysnumero(next.getJarjestysnumero())
+                .pvm(next.getPvm())
+                .kausiId(kausi.getKausiId())
+                .kausiNimi(kausi.getNimi())
+                .keilahalliId(next.getKeilahalli().getKeilahalliId())
+                .keilahalliNimi(next.getKeilahalli().getNimi())
+                .onKultainenGp(next.isOnKultainenGp())
+                .build();
     }
 
     @Transactional
