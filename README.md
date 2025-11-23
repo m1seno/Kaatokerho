@@ -1157,6 +1157,7 @@ SarjataulukkoDTO
 ```
 {
   "sija": 1,
+  "keilaajaId": 1,
   "nimi": "Matti Meikäläinen",
   "gpMaara": 10,
   "pisteet": 123.5,
@@ -1194,6 +1195,7 @@ Lista SarjataulukkoDTO-olioita, valmiiksi pisteiden mukaan laskevasti järjestet
 [
   {
     "sija": 1,
+    "keilaajaId": 2,
     "nimi": "Pasi Paikkaaja",
     "gpMaara": 10,
     "pisteet": 123.5,
@@ -1206,6 +1208,7 @@ Lista SarjataulukkoDTO-olioita, valmiiksi pisteiden mukaan laskevasti järjestet
   },
   {
     "sija": 2,
+    "keilaajaId": 3,
     "nimi": "Kalle Keilaaja",
     "gpMaara": 9,
     "pisteet": 110.0,
