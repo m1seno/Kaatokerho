@@ -47,6 +47,7 @@ public class SarjataulukkoService {
                 return jarjestetyt.stream()
                                 .map(keilaaja -> {
                                         int sija = sijaLaskuri.getAndIncrement();
+                                        Long keilaajaId = keilaaja.getKeilaaja().getKeilaajaId();
                                         String nimi = keilaaja.getKeilaaja().getEtunimi() + " " +
                                                         keilaaja.getKeilaaja().getSukunimi();
                                         int gpMaara = keilaaja.getOsallistumisia();
@@ -80,7 +81,7 @@ public class SarjataulukkoService {
                                         double kaSarja = kaGp / 2.0;
 
                                         return new SarjataulukkoDTO(
-                                                        sija, nimi, gpMaara, pisteet, pisteetPerGp,
+                                                        sija, keilaajaId, nimi, gpMaara, pisteet, pisteetPerGp,
                                                         gpVoitot, gpTulokset, yhteensa, kaGp, kaSarja);
                                 })
                                 .toList();

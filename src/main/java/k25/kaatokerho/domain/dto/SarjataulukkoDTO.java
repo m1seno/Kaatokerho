@@ -5,6 +5,7 @@ import java.util.List;
 public class SarjataulukkoDTO {
 
     private int sija;
+    private Long keilaajaId;
     private String nimi;
     private int gpMaara;
     private double pisteet;
@@ -15,9 +16,10 @@ public class SarjataulukkoDTO {
     private double kaGp;
     private double kaSarja;
 
-    public SarjataulukkoDTO(int sija, String nimi, int gpMaara, double pisteet, double pisteetPerGp, int gpVoitot,
+    public SarjataulukkoDTO(int sija, Long keilaajaId, String nimi, int gpMaara, double pisteet, double pisteetPerGp, int gpVoitot,
             List<Integer> gpTulokset, int yhteensa, double kaGp, double kaSarja) {
         this.sija = sija;
+        this.keilaajaId = keilaajaId;
         this.nimi = nimi;
         this.gpMaara = gpMaara;
         this.pisteet = pisteet;
@@ -35,6 +37,10 @@ public class SarjataulukkoDTO {
 
     public void setSija(int sija) {
         this.sija = sija;
+    }
+
+    public Long getKeilaajaId() {
+        return keilaajaId;
     }
 
     public String getNimi() {
