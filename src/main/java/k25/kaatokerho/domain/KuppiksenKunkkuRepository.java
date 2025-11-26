@@ -18,6 +18,8 @@ public interface KuppiksenKunkkuRepository extends CrudRepository<KuppiksenKunkk
         Optional<KuppiksenKunkku> findTopByGp_KausiAndGp_JarjestysnumeroLessThanOrderByGp_JarjestysnumeroDesc(
                         Kausi kausi, int jarjestysnumero);
 
+        Optional<KuppiksenKunkku> findTopByOrderByKuppiksenKunkkuIdDesc();
+
         long deleteByGp_GpId(Long gpId);
 
         // Pelaajasuodatus millä tahansa roolilla (puolustaja/haastaja/voittaja)

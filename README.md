@@ -1299,6 +1299,7 @@ KalenteriDTO
 Kilpailukalenterissa yksi rivi per GP näyttää tältä:
 ```
 {
+  "gpId": 11,
   "gpNo": 3,
   "pvm": "2025-01-20",
   "keilahalli": "Kupittaa Bowling",
@@ -1332,6 +1333,7 @@ Esimerkki:
 ```
 [
   {
+    "gpId": 11,
     "gpNo": 1,
     "pvm": "2025-09-10",
     "keilahalli": "Kupittaan Keilahalli",
@@ -1339,6 +1341,7 @@ Esimerkki:
     "voittotulos": 401
   },
   {
+    "gpId": 12,
     "gpNo": 2,
     "pvm": "2025-09-24",
     "keilahalli": "Aninkaisten Keilahalli",
@@ -1346,6 +1349,7 @@ Esimerkki:
     "voittotulos": 341
   },
   {
+    "gpId": 13,
     "gpNo": 3,
     "pvm": "2025-10-08",
     "keilahalli": "TURKU Keilahalli",

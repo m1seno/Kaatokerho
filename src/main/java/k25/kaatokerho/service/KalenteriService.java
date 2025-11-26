@@ -39,7 +39,7 @@ public class KalenteriService {
                     .max(Comparator.comparingInt(t -> t.getSarja1() + t.getSarja2()))
                     .orElse(null);
 
-            String voittajaNimi = "-";
+            String voittajaNimi = null;
             Integer voittotulos = null;
 
             if (parasTulos != null) {
@@ -49,6 +49,7 @@ public class KalenteriService {
             }
 
             return new KalenteriDTO(
+                    gp.getGpId(),
                     gp.getJarjestysnumero(),
                     gp.getPvm(),
                     gp.getKeilahalli().getNimi(),

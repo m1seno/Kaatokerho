@@ -15,6 +15,7 @@ import k25.kaatokerho.domain.KuppiksenKunkku;
 import k25.kaatokerho.domain.KuppiksenKunkkuRepository;
 import k25.kaatokerho.domain.Tulos;
 import k25.kaatokerho.domain.TulosRepository;
+import k25.kaatokerho.domain.KausiRepository;
 import k25.kaatokerho.domain.dto.KkHaastajaDTO;
 import k25.kaatokerho.domain.dto.KkHaastajalistaResponseDTO;
 import k25.kaatokerho.exception.ApiException;
@@ -43,6 +44,7 @@ public class KuppiksenKunkkuService {
     private final TulosRepository tulosRepo;
     private final KeilaajaKausiRepository kkSeasonRepo;
     private final GpRepository gpRepo;
+    private final KausiRepository kausiRepo;
 
     // Haastajalista muistissa GP:tä kohti (ei DB:hen)
     private final Map<Long, List<Keilaaja>> haastajalistaByGp = new HashMap<>();
@@ -50,11 +52,13 @@ public class KuppiksenKunkkuService {
     public KuppiksenKunkkuService(KuppiksenKunkkuRepository kkRepo,
             TulosRepository tulosRepo,
             KeilaajaKausiRepository kkSeasonRepo,
-            GpRepository gpRepo) {
+            GpRepository gpRepo,
+            KausiRepository kausiRepo) {
         this.kkRepo = kkRepo;
         this.tulosRepo = tulosRepo;
         this.kkSeasonRepo = kkSeasonRepo;
         this.gpRepo = gpRepo;
+        this.kausiRepo = kausiRepo;
     }
 
     @Transactional
@@ -134,29 +138,45 @@ public class KuppiksenKunkkuService {
     @Transactional(readOnly = true)
     public KkHaastajalistaResponseDTO getLatestHaastajalista() {
 
-        if (haastajalistaByGp.isEmpty()) {
-            throw new ApiException(HttpStatus.NOT_FOUND,
-                    "Haastajalistaa ei ole vielä muodostettu yhdellekään GP:lle.");
+        // 1) Viimeisin KK-merkintä
+        KuppiksenKunkku viimeisinKk = kkRepo.findTopByOrderByKuppiksenKunkkuIdDesc()
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        "Kuppiksen Kunkkua ei ole vielä pelattu."));
+
+        GP edellinenGp = viimeisinKk.getGp(); // esim. GP 10
+
+        // 2) Puolustaja SEURAAVAAN GP:hen
+        Keilaaja puolustajaSeuraavaan = viimeisinKk.getVoittaja() != null
+                ? viimeisinKk.getVoittaja()
+                : viimeisinKk.getPuolustaja();
+
+        // 3) Haetaan edellisen GP:n tulokset
+        List<Tulos> tuloksetEdellisesta = tulosRepo.findByGp(edellinenGp);
+        if (tuloksetEdellisesta.isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Viimeisimmällä GP:llä (" + edellinenGp.getJarjestysnumero()
+                            + ") ei ole tuloksia – haastajalistaa ei voi muodostaa.");
         }
 
-        Long latestGpId = haastajalistaByGp.keySet().stream()
-                .max(Long::compareTo)
-                .orElseThrow();
+        // 4) Muodostetaan haastajalista seuraavaan GP:hen edellisistä tuloksista
+        List<Keilaaja> haastajalistaForNextGp = muodostaHaastajalistaTuloksista(tuloksetEdellisesta,
+                puolustajaSeuraavaan);
 
-        GP gp = gpRepo.findById(latestGpId)
-                .orElseThrow(() -> new ApiException(
-                        HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + latestGpId));
+        // 5) Haetaan tai luodaan SEURAAVA GP (esim. GP 11)
+        GP nextGp = haeSeuraavaGpTai404(edellinenGp); // katso helper alempana
 
-        List<Keilaaja> haastajalistaForThisGp = haastajalistaByGp.getOrDefault(latestGpId, List.of());
+        // Talletetaan muistiin (jos haluat edelleen käyttää map:ia)
+        haastajalistaByGp.put(nextGp.getGpId(), haastajalistaForNextGp);
 
-        // Haetaan Tulos-rivit sarjoja varten
-        List<Tulos> tulokset = tulosRepo.findByGp(gp);
-        Map<Long, Tulos> tulosMap = tulokset.stream()
+        // 6) Rakennetaan DTO, jossa sarjat = edellisen GP:n tulokset (GP 10),
+        // mutta gpId/gpNo/pvm = seuraavan GP:n tiedot (GP 11).
+        Map<Long, Tulos> tulosMap = tuloksetEdellisesta.stream()
                 .collect(Collectors.toMap(
                         t -> t.getKeilaaja().getKeilaajaId(),
                         t -> t));
 
-        List<KkHaastajaDTO> haastajatDto = haastajalistaForThisGp.stream()
+        List<KkHaastajaDTO> haastajatDto = haastajalistaForNextGp.stream()
                 .map(k -> {
                     Tulos t = tulosMap.get(k.getKeilaajaId());
 
@@ -176,17 +196,29 @@ public class KuppiksenKunkkuService {
                             .sarja2(s2)
                             .build();
                 })
-                .collect(Collectors.toList()); // käytetään Collectors.toList() eikä .toList()
+                .collect(Collectors.toList());
 
         return KkHaastajalistaResponseDTO.builder()
-                .gpId(gp.getGpId())
-                .gpNo(gp.getJarjestysnumero())
-                .pvm(gp.getPvm())
-                .haastajat(haastajatDto) // nyt tyyppi täsmää
+                .gpId(nextGp.getGpId()) // esim. 11
+                .gpNo(nextGp.getJarjestysnumero()) // 11
+                .pvm(nextGp.getPvm()) // GP 11:n pvm (jos asetettu)
+                .haastajat(haastajatDto) // ranking GP 10 tulosten perusteella
                 .build();
     }
 
     // ---------- apurit ----------
+
+    private GP haeSeuraavaGpTai404(GP edellinenGp) {
+        var kausi = edellinenGp.getKausi();
+        int seuraavaNumero = edellinenGp.getJarjestysnumero() + 1;
+
+        return gpRepo.findByKausiAndJarjestysnumero(kausi, seuraavaNumero)
+            .orElseThrow(() -> new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    "Haastajalistaa ei voida muodostaa, koska seuraavaa GP:tä ("
+                            + seuraavaNumero + ") ei ole luotu."));
+
+    }
 
     /**
      * Yleismuotoinen rakentaja: tee ranking annetusta tuloslistasta.

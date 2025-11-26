@@ -21,4 +21,8 @@ public interface GpRepository extends JpaRepository<GP, Long> {
 
     // Seuraavat GP:t kaudelta, joilla EI ole yhtään tulosta
     List<GP> findByKausi_KausiIdAndTuloksetIsEmptyOrderByJarjestysnumeroAsc(Long kausiId);
+
+    Optional<GP> findByKausiAndJarjestysnumero(Kausi kausi, Integer jarjestysnumero);
+
+    List<GP> findByKausiOrderByJarjestysnumeroAsc(Kausi kausi);
 }
