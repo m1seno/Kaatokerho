@@ -16,6 +16,7 @@ import k25.kaatokerho.domain.dto.ResponseKeilaajaDTO;
 import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.exception.ApiException;
+import k25.kaatokerho.domain.dto.PaivitaKeilaajaDTO;
 
 @Service
 public class KeilaajaApiService {
@@ -84,7 +85,7 @@ public class KeilaajaApiService {
 
     // Päivitä kaikki keilaajan tiedot paitsi salasana
     @Transactional
-    public ResponseKeilaajaDTO updateKeilaaja(Long keilaajaId, UusiKeilaajaDTO dto) {
+    public ResponseKeilaajaDTO updateKeilaaja(Long keilaajaId, PaivitaKeilaajaDTO dto) {
         Keilaaja keilaaja = keilaajaRepository.findById(keilaajaId)
                 .orElseThrow(
                         () -> new ApiException(HttpStatus.NOT_FOUND, "Keilaajaa ei löytynyt ID:llä " + keilaajaId));

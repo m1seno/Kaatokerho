@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import k25.kaatokerho.domain.dto.ResponseKeilaajaDTO;
+import k25.kaatokerho.domain.dto.PaivitaKeilaajaDTO;
 import k25.kaatokerho.domain.dto.PaivitaSalasanaDTO;
 import k25.kaatokerho.domain.dto.UusiKeilaajaDTO;
 import k25.kaatokerho.service.api.KeilaajaApiService;
@@ -52,7 +53,7 @@ public class KeilaajaController {
 
     // Muokkaa keilaajaa
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseKeilaajaDTO> editKeilaaja(@PathVariable Long id, @Valid @RequestBody UusiKeilaajaDTO dto) {
+    public ResponseEntity<ResponseKeilaajaDTO> editKeilaaja(@PathVariable Long id, @Valid @RequestBody PaivitaKeilaajaDTO dto) {
         ResponseKeilaajaDTO updatedKeilaaja = keilaajaService.updateKeilaaja(id, dto);
         return ResponseEntity.ok(updatedKeilaaja);
     }
