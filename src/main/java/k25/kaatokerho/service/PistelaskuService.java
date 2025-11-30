@@ -5,47 +5,48 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.Tulos;
+import k25.kaatokerho.domain.TulosRepository;
 
 @Service
 public class PistelaskuService {
 
+    private final TulosRepository tulosRepository;
+
+    public PistelaskuService(TulosRepository tulosRepository) {
+        this.tulosRepository = tulosRepository;
+    }
+
+    @Transactional(readOnly = true)
     public Map<Long, Double> laskeSijoitus(GP gp) {
 
         // Tallennetaan keilaajien pisteet
-        Map<Long, Double> keilaajaPisteet = new HashMap<>(); // Luo uusi HashMap tuloksille
+        Map<Long, Double> keilaajaPisteet = new HashMap<>();
 
-        // Asetetaan keilaajien tulokset suuruusjärjestykseen
-        List<Tulos> tulokset = gp.getTulokset().stream()
+        // 🔹 Haetaan tulokset suoraan repositorysta, ei gp.getTulokset()
+        List<Tulos> tulokset = tulosRepository.findByGp(gp).stream()
                 .filter(Tulos::getOsallistui) // Vain osallistuneet
                 .sorted((t1, t2) -> {
-                    int summa1 = t1.getSarja1() + t1.getSarja2();
-                    int summa2 = t2.getSarja1() + t2.getSarja2();
+                    int summa1 = turvallinenSumma(t1);
+                    int summa2 = turvallinenSumma(t2);
                     return Integer.compare(summa2, summa1); // Laskeva järjestys
                 })
                 .toList();
-
-        /*
-         * While-silmukka käy läpi kaikkien keilaajien tulokset ja huolehtii siitä,
-         * että tasatuloksessa pisteet jaetaan (esim. (8+7)/2 = 7.5).
-         * Samalla tarkistetaan, että jos keilaajia on 10 tai vähemmän,
-         * viimeiseksi jäänyt ei saa pisteitä (kerhossa ei jaeta ilmaisia lounaita).
-         * ChatGPT:n tekemä logiikka.
-         */
 
         int osallistujia = tulokset.size();
         int i = 0;
 
         while (i < osallistujia) {
-            int nykyinenSumma = tulokset.get(i).getSarja1() + tulokset.get(i).getSarja2();
+            int nykyinenSumma = turvallinenSumma(tulokset.get(i));
             int alkuIndeksi = i;
 
             // Selvitetään montako keilaajaa jakaa saman tuloksen
             while (i + 1 < osallistujia &&
-                    (tulokset.get(i + 1).getSarja1() + tulokset.get(i + 1).getSarja2()) == nykyinenSumma) {
+                    turvallinenSumma(tulokset.get(i + 1)) == nykyinenSumma) {
                 i++;
             }
 
@@ -85,6 +86,13 @@ public class PistelaskuService {
         return keilaajaPisteet;
     }
 
+    // Turvallinen summa null-arvojen varalta (vaikka osallistui=true:lla ei pitäisi olla nulleja)
+    private int turvallinenSumma(Tulos t) {
+        int s1 = t.getSarja1() != null ? t.getSarja1() : 0;
+        int s2 = t.getSarja2() != null ? t.getSarja2() : 0;
+        return s1 + s2;
+    }
+
     // Annetaan pisteet sijoituksen mukaan
     public static double laskeSijoituspisteet(int sijoitus) {
         return switch (sijoitus) {
@@ -99,6 +107,6 @@ public class PistelaskuService {
             case 9 -> 2;
             case 10 -> 1;
             default -> 0;
-        }; // Jos sijoitus on yli 10, ei saa pisteitä
+        };
     }
 }

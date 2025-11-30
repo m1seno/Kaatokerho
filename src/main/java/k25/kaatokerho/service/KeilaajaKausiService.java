@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import k25.kaatokerho.domain.GP;
 import k25.kaatokerho.domain.GpRepository;
 import k25.kaatokerho.domain.Kausi;
@@ -11,6 +12,7 @@ import k25.kaatokerho.domain.Keilaaja;
 import k25.kaatokerho.domain.KeilaajaKausi;
 import k25.kaatokerho.domain.KeilaajaKausiRepository;
 import k25.kaatokerho.domain.Tulos;
+import k25.kaatokerho.domain.TulosRepository;
 
 @Service
 public class KeilaajaKausiService {
@@ -19,18 +21,22 @@ public class KeilaajaKausiService {
     private final PistelaskuService pistelaskuService;
     private final KultainenGpService kultainenGpService;
     private final GpRepository gpRepository;
+    private final TulosRepository tulosRepository;
 
     public KeilaajaKausiService(
             KeilaajaKausiRepository keilaajaKausiRepository,
             PistelaskuService pistelaskuService,
             KultainenGpService kultainenGpService,
-            GpRepository gpRepository) {
+            GpRepository gpRepository,
+            TulosRepository tulosRepository) {
         this.keilaajaKausiRepository = keilaajaKausiRepository;
         this.pistelaskuService = pistelaskuService;
         this.kultainenGpService = kultainenGpService;
         this.gpRepository = gpRepository;
+        this.tulosRepository = tulosRepository;
     }
 
+    @Transactional
     public void paivitaKeilaajaKausi(GP gp) {
         // Kutsutaan pistelaskua
         Map<Long, Double> tuloslista = pistelaskuService.laskeSijoitus(gp);
@@ -44,7 +50,8 @@ public class KeilaajaKausiService {
         double parasPiste = tuloslista.values().stream().mapToDouble(Double::doubleValue).max().orElse(0);
 
         // Haetaan tulosten tiedot
-        List<Tulos> tulokset = gp.getTulokset();
+        List<Tulos> tulokset = tulosRepository.findByGp(gp);
+
         for (Tulos tulos : tulokset) {
             Integer sarja1 = tulos.getSarja1();
             Integer sarja2 = tulos.getSarja2();
@@ -103,15 +110,19 @@ public class KeilaajaKausiService {
                 });
     }
 
+    @Transactional
     public void paivitaKaikkiKeilaajaKausiTiedot() {
-        List<GP> kaikkiGp = (List<GP>) gpRepository.findAll();
+        try {
+            List<GP> kaikkiGp = (List<GP>) gpRepository.findAll();
 
-        // Poistetaan kaikki keilaajakaudet
-        keilaajaKausiRepository.deleteAll();
+            keilaajaKausiRepository.deleteAll();
 
-        // Luodaan uudet tilastot pohjautuen jäljellä oleviin GP:ihin
-        for (GP gp : kaikkiGp) {
-            paivitaKeilaajaKausi(gp);
+            for (GP gp : kaikkiGp) {
+                paivitaKeilaajaKausi(gp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // 🔥 TÄMÄ tulostaa koko stack tracen konsoliin
+            throw e; // heitetään edelleen, jotta näet myös Springin 500/erroin
         }
     }
 }

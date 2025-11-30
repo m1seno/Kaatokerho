@@ -105,22 +105,29 @@ public class TulosApiService {
     }
 
     @Transactional
-    public void poistaTuloksetGp(Long gpId) {
-        GP gp = gpRepository.findById(gpId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
+public void poistaTuloksetGp(Long gpId) {
+    GP gp = gpRepository.findById(gpId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
 
-        // Poista GP:n tulokset
-        tulosRepository.deleteByGp_GpId(gp.getGpId());
+    // Otetaan kausiId talteen
+    var kausi = gp.getKausi();
+    Long kausiId = (kausi != null ? kausi.getKausiId() : null);
 
-        // Rakenna Kuppiksen Kunkku uudestaan tälle kaudelle
-        kuppisRebuildService.rebuildForGp(gpId);
+    // 1) Poista GP:n tulokset
+    tulosRepository.deleteByGp_GpId(gpId);
 
-        // Poista KultainenGP-tiedot tältä GP:ltä (no-op, jos ei ollut KGP:tä)
-        kultainenService.deleteKultainenGpIfExists(gpId);
+    // 2) Poista KultainenGP-tiedot tältä GP:ltä
+    // (tähän voi jättää nykyisen palvelun, kunhan se EI heitä turhaa 404:ää)
+    kultainenService.deleteKultainenGpIfExists(gpId);
 
-        // Rakenna kausitilastot uusiksi KAIKISTA tuloksista
-        keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
+    // 3) Rakenna Kuppiksen Kunkku -ketju uudestaan KOKO kaudelle
+    if (kausiId != null) {
+        kuppisRebuildService.rebuildSeason(kausiId);
     }
+
+    // 4) Rakenna kausitilastot uusiksi kaikista tuloksista
+    keilaajaKausiService.paivitaKaikkiKeilaajaKausiTiedot();
+}
 
     @Transactional(readOnly = true)
     public List<TulosResponseDTO> haeKeilaajanTulokset(Long keilaajaId) {

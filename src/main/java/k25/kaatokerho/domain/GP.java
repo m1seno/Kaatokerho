@@ -125,7 +125,7 @@ public class GP {
         return kuppiksenKunkku;
     }
 
-    public void setKuppiksenKunkut(KuppiksenKunkku kuppiksenKunkku) {
+    public void setKuppiksenKunkku(KuppiksenKunkku kuppiksenKunkku) {
         this.kuppiksenKunkku = kuppiksenKunkku;
     }
 

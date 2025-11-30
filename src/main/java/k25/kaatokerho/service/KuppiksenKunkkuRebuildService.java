@@ -32,41 +32,26 @@ public class KuppiksenKunkkuRebuildService {
     }
 
     /**
-     * Rebuildaa sen kauden KuppiksenKunkku-ketjun, johon annettu GP kuuluu.
-     */
-    @Transactional
-    public void rebuildForGp(Long gpId) {
-        GP gp = gpRepository.findById(gpId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "GP:tä ei löytynyt ID:llä " + gpId));
-
-        Kausi kausi = gp.getKausi();
-        if (kausi == null || kausi.getKausiId() == null) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "GP:llä ei ole kausitietoa.");
-        }
-
-        rebuildSeason(kausi.getKausiId());
-    }
-
-    /**
      * Rebuildaa yksittäisen kauden koko KK-ketjun.
      * Käytetään sekä tulosten poistossa että GP:n poiston jälkeen.
      */
     @Transactional
     public void rebuildSeason(Long kausiId) {
 
-        // 1) Hae kauden nykyiset KK-rivit ja ota talteen vyoUnohtui per GP
-        List<KuppiksenKunkku> vanhat = kkRepository.findByGp_Kausi_KausiId(kausiId);
+        // 1) Lue talteen vyoUnohtui per gpId ENNEN kuin poistat rivit
+        List<KuppiksenKunkku> vanhat = kkRepository.findBySeasonId(kausiId);
 
         Map<Long, Boolean> vyoByGpId = vanhat.stream()
                 .filter(kk -> kk.getGp() != null && kk.getGp().getGpId() != null)
                 .collect(Collectors.toMap(
                         kk -> kk.getGp().getGpId(),
                         kk -> Boolean.TRUE.equals(kk.isVyoUnohtui()),
-                        (a, b) -> a // yhdistää mahdolliset duplikaatit
-                ));
+                        (a, b) -> a));
 
-        // 2) Poista vain tämän kauden KK-rivit
-        kkRepository.deleteAll(vanhat);
+        // 2) Poista kauden KK-rivit varmasti yhdellä JPQL-deletellä
+        int deleted = kkRepository.deleteBySeasonId(kausiId);
+        kkRepository.flush();
+        System.out.println("Poistettiin " + deleted + " KK-riviä kaudelta " + kausiId);
 
         // 3) Hae kauden GP:t järjestyksessä
         List<GP> gpList = gpRepository.findByKausi_KausiIdOrderByJarjestysnumeroAsc(kausiId);
@@ -78,16 +63,13 @@ public class KuppiksenKunkkuRebuildService {
 
         for (GP gp : gpList) {
             Long gpId = gp.getGpId();
-            if (gpId == null) {
+            if (gpId == null)
                 continue;
-            }
 
             boolean vyoUnohtui = Boolean.TRUE.equals(vyoByGpId.get(gpId));
 
-            // Luo tai jätä luomatta KK-rivi tämän GP:n tulosten perusteella
             kuppisService.kasitteleKuppiksenKunkku(gp, edellinen, vyoUnohtui);
 
-            // Päivitä "edellinen" vain jos tälle GP:lle syntyi KK-merkintä
             edellinen = kkRepository.findByGp_GpId(gpId).orElse(edellinen);
         }
     }

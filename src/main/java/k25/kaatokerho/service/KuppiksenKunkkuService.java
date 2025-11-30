@@ -63,6 +63,7 @@ public class KuppiksenKunkkuService {
 
     @Transactional
     public void kasitteleKuppiksenKunkku(GP gp, KuppiksenKunkku edellinen, boolean vyoUnohtui) {
+        try{
         // Osallistujat (vain paikalla olleet NYKYISESSÄ GP:ssä) — haetaan repositorysta
         List<Tulos> osallistuneet = tulosRepo.findByGp(gp).stream()
                 .filter(Tulos::getOsallistui)
@@ -132,6 +133,10 @@ public class KuppiksenKunkkuService {
 
         // 5) +1 piste voittajalle
         lisaaYksiPisteSarjataulukkoon(voittaja, gp);
+        } catch (Exception e) {
+            e.printStackTrace(); // 🔥 TÄMÄ tulostaa koko stack tracen konsoliin
+            throw e; // heitetään edelleen, jotta näet myös Springin 500/erroin
+        }
 
     }
 
